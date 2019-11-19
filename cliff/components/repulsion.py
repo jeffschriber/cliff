@@ -44,8 +44,6 @@ class Repulsion:
         self.sys_comb = sys
         self.adens.predict_mol(self.sys_comb)
         # Load variables from config file
-        self.scale_rep = self.systems[0].Config.getfloat(
-                    "repulsion","scale_rep")
         # Atom types defined
         if v1:
             self.ele_ad = ['H','C','O','N','S']
@@ -124,30 +122,30 @@ class Repulsion:
         else:
             return self.atom_in_system[i] is not self.atom_in_system[j]
 
-    def slater_isa(self, ele_i, coord_i, v_i, typ_i, bnd_i,
-            ele_j, coord_j, v_j, typ_j, bnd_j):
-        """Compute repulsion based on Slater-ISA method
-        (Van Vleet et al., arXiv 1606.00734)"""
-        vec = self.cell.pbc_distance(coord_i, coord_j)
-        rij = np.linalg.norm(vec)
-        bij = 1./ np.sqrt(v_i * v_j)
-        bijrij = constants.a2b * bij * rij
-        c1i,c2i = utils.cosangle_two_atoms_inter(ele_i,coord_i,bnd_i,ele_j,coord_j,bnd_j,vec)
-        c1j,c2j = utils.cosangle_two_atoms_inter(ele_j,coord_j,bnd_j,ele_i,coord_j,bnd_j,-vec)
-        cthet1 = c1i*c1j
-        cthet2 = max(c2i,c2j)
-        bmr = (1+bijrij+1/3.*bijrij**2)*np.exp(-bijrij)
-        # Default interaction
-        bm  = np.pi/bij**3 * bmr
-        # Hbond
-        if typ_i in ["HN","HO", "HS"] and ele_j in ["O","N","S"] \
-            or typ_j in ["HN","HO","HS"] and ele_i in ["O","N","S"]:
-            bm = np.pi/(2*bij**4)*bmr*max(c1i,c1j)*bijrij
-        elif typ_i in ["HN","HO","HS"] and typ_j in ["HN","HO","HS"]:
-            bm = np.pi/(15*bij**5)*((bijrij**3+6*bijrij**2+15*bijrij+15)*cthet2
-                                       -(bijrij**2+3*bijrij+3)*bijrij**2*cthet1) \
-                                       *np.exp(-bijrij)
-        return self.scale_rep[ele_i]*self.scale_rep[ele_j] * bm
+    #def slater_isa(self, ele_i, coord_i, v_i, typ_i, bnd_i,
+    #        ele_j, coord_j, v_j, typ_j, bnd_j):
+    #    """Compute repulsion based on Slater-ISA method
+    #    (Van Vleet et al., arXiv 1606.00734)"""
+    #    vec = self.cell.pbc_distance(coord_i, coord_j)
+    #    rij = np.linalg.norm(vec)
+    #    bij = 1./ np.sqrt(v_i * v_j)
+    #    bijrij = constants.a2b * bij * rij
+    #    c1i,c2i = utils.cosangle_two_atoms_inter(ele_i,coord_i,bnd_i,ele_j,coord_j,bnd_j,vec)
+    #    c1j,c2j = utils.cosangle_two_atoms_inter(ele_j,coord_j,bnd_j,ele_i,coord_j,bnd_j,-vec)
+    #    cthet1 = c1i*c1j
+    #    cthet2 = max(c2i,c2j)
+    #    bmr = (1+bijrij+1/3.*bijrij**2)*np.exp(-bijrij)
+    #    # Default interaction
+    #    bm  = np.pi/bij**3 * bmr
+    #    # Hbond
+    #    if typ_i in ["HN","HO", "HS"] and ele_j in ["O","N","S"] \
+    #        or typ_j in ["HN","HO","HS"] and ele_i in ["O","N","S"]:
+    #        bm = np.pi/(2*bij**4)*bmr*max(c1i,c1j)*bijrij
+    #    elif typ_i in ["HN","HO","HS"] and typ_j in ["HN","HO","HS"]:
+    #        bm = np.pi/(15*bij**5)*((bijrij**3+6*bijrij**2+15*bijrij+15)*cthet2
+    #                                   -(bijrij**2+3*bijrij+3)*bijrij**2*cthet1) \
+    #                                   *np.exp(-bijrij)
+    #    return self.scale_rep[ele_i]*self.scale_rep[ele_j] * bm
 
     def slater_mbis_v1(self, coord_i, N_i, v_i, typ_i, coord_j, N_j, v_j, typ_j):
         "Repulsion model as described in Vandenbrande et al., JCTC, 13 (2017)"

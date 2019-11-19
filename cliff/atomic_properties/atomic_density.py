@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 class AtomicDensity:
     'AtomicDensity class. Predicts atomic populations and valence widths.'
 
-    def __init__(self, _calculator):
-        self.calculator = _calculator
+    def __init__(self, options):
         self.descr_train = []
         self.target_train = []
         # With environment
@@ -32,25 +31,21 @@ class AtomicDensity:
         self.alpha_train = None
         self.alpha_env_train = None
         logger.setLevel(self.calculator.get_logger_level())
-        self.max_neighbors = self.calculator.Config.getint(
-            "atomicdensity","max_neighbors")
-        self.max_neighbors_env = self.calculator.Config.getint(
-            "atomicdensity","max_neighbors_env")
-        self.krr_sigma = self.calculator.Config.getfloat(
-            "atomicdensity","krr_sigma")
-        self.krr_lambda = self.calculator.Config.getfloat(
-            "atomicdensity","krr_lambda")
-        self.krr_sigma_env = self.calculator.Config.getfloat(
-            "atomicdensity","krr_sigma_env")
-        self.krr_gamma_env = self.calculator.Config.getfloat(
-            "atomicdensity","krr_gamma_env")
+        self.max_neighbors = options.get_atomicdensity_max_neighbors()
+        self.max_neighbors_env = options.get_atomicdensity_max_neighbors_env()
+        self.krr_sigma = options.get_atomicdensity_krr_sigma()
+        self.krr_lambda = options.get_atomicdensity_krr_lambda()
+        self.krr_sigma_env = options.get_atomicdensity_krr_sigma_env()
+        self.krr_gamma_env = options.get_atomicdensity_krr_gamma_env()
+        self.training_file = options.get_atomicdensity_training()
+        self.training_env_file = options.get_atomicdensity_training_env()
+        self.use_ref_density = options.get_atomicdensity_ref_adens()
+        self.refpath = options.get_atomicdensity_ref_path()
 
     def load_ml(self):
-        training_file = self.calculator.Config.get(
-            "atomicdensity","training")
         logger.info(
-            "Reading atomic-density training from %s" % training_file)
-        if self.calculator.Config.get("atomicdensity","ref_atd") == 'True':
+            "Reading atomic-density training from %s" % self.training_file)
+        if self.use_ref_density == 'True':
             return
         
         with open(training_file, 'rb') as f:
@@ -75,10 +70,9 @@ class AtomicDensity:
     def predict_mol(self, _system):
         '''Predict coefficients given  descriptors.'''
 
-        if self.calculator.Config.get("atomicdensity","ref_atd") == 'True':
-            refpath = self.calculator.Config.get("atomicdensity","ref_path")
+        if self.use_ref_density == 'True':
             xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
-            reffile = refpath + xyz + '-atmdns.txt'
+            reffile = self.refpath + xyz + '-atmdns.txt'
 
             pops = []
             vws = []
@@ -114,11 +108,9 @@ class AtomicDensity:
         return None
 
     def load_ml_env(self):
-        training_file = self.calculator.Config.get(
-            "atomicdensity","training_env")
         logger.info(
             "Reading atomic-density refinement training from %s" % training_file)
-        with open(training_file, 'rb') as f:
+        with open(self.training_env_file, 'rb') as f:
             self.descr_env_train, self.baseline_env_train, \
                 self.alpha_env_train = pickle.load(f)
 

@@ -22,16 +22,14 @@ logger = logging.getLogger(__name__)
 class System(Calculator):
     'Common system class for molecular system'
 
-    def __init__(self, xyz=None, mps=None, log=False):
+    def __init__(self, xyz=None, log=False):
         Calculator.__init__(self, config_file = "config.ini")
         logger.setLevel(self.get_logger_level())
         # xyz and mps can't both be empty
-        if not (xyz or mps):
-            logger.error("Need either one xyz or mps file")
-            print("Need either one xyz or mps file")
+        if not xyz:
+            logger.error("Need an xyz file")
             exit(1)
         self.xyz = [xyz]
-        self.mps = mps
         # Coordinates
         self.coords = None
         # Number of atoms in the molecule
@@ -72,16 +70,12 @@ class System(Calculator):
         self.pairwise_vec = []
         self.pairwise_norm = []
         self.rot_mat = []
-        # molecular dipole found in the MPS file
-        self.mps_dipole = None
         # Atom types
         self.atom_types = None
         # List of bonds to each atom
         self.bonded_atoms = None
         if len(self.xyz) == 1:
             self.load_xyz()
-        elif mps:
-            self.load_mps()
 
     def __add__(self, sys):
         """Combine two systems"""
@@ -96,8 +90,6 @@ class System(Calculator):
     def __str__(self):
         if self.xyz:
             return self.xyz
-        elif self.mps:
-            return self.mps
         else:
             logger.error("No molecule name!")
             print("No molecule name!")
@@ -123,35 +115,6 @@ class System(Calculator):
         self.logger.debug('Loaded molecule %s with %s atoms.' \
             % (self.xyz, self.num_atoms))
         self.logger.debug('Elements %s' % ', '.join(self.elements))
-        return None
-
-    def load_mps(self):
-        """Load VOTCA-type MPS file. Only supports Rank 0."""
-        extract_file = utils.read_file(self.mps)
-        # Molecular dipole
-        mps_dipole_tmp = extract_file[1].rstrip().split('=')[3].split()
-        self.mps_dipole = np.array([float(ele)
-                    for _,ele in enumerate(mps_dipole_tmp)])
-        # Element and number of atoms
-        self.elements = [str(line.split()[0])
-                            for _,line in enumerate(extract_file)
-                            if "Rank 0" in line]
-        self.num_atoms = len(self.elements)
-        # Coordinates
-        iterable = (float(line.split()[j])
-                            for _,line in enumerate(extract_file)
-                            for j in range(1,4)
-                            if "Rank 0" in line)
-        self.coords = np.fromiter(iterable,
-                np.float).reshape(self.num_atoms, 3)
-        self.identify_atom_types()
-        # Charges
-        self.multipoles = [np.array([float(extract_file[i+1].split()[0]),
-                0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
-                    for i,line in enumerate(extract_file)
-                    if "Rank 0" in line]
-        logger.debug("Loaded molecule %s with %s atoms" % (self.mps,
-                self.num_atoms))
         return None
 
     def build_coulomb_matrices(self, max_neighbors, direction=None):

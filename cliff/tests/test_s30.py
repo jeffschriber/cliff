@@ -2,7 +2,7 @@
 
 # import relevant modules 
 import cliff
-from cliff.helpers.calculator import Calculator
+from cliff.helpers.options import Options 
 from cliff.helpers.cell import Cell
 from cliff.helpers.system import System
 from cliff.atomic_properties.hirshfeld import Hirshfeld
@@ -28,19 +28,19 @@ def get_energy(filename):
     #1. Initialize relevant variables
     
     #loads parameters contained on the config.init file
-    calc = Calculator() 
+    options = Options() 
     
     #defines cell parameters for grid computations
     cell = Cell.lattice_parameters(100., 100., 100.)
     
     #initializes Hirshfeld class
-    hirsh = Hirshfeld(calc) 
+    hirsh = Hirshfeld(options) 
     
     #load KRR model for Hirshfeld as specified in the config.init file
     hirsh.load_ml() 
     
     #load multipoles with aSLATM representation
-    mtp_ml  = MultipoleMLBSet(calc, descriptor="slatm") 
+    mtp_ml  = MultipoleMLBSet(options, descriptor="slatm") 
     
     #loads monomer geometries
     mols = []
