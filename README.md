@@ -2,7 +2,7 @@ CLIFF
 ==============================
 [//]: # (Badges)
 [![Travis Build Status](https://travis-ci.com/jeffschriber/CLIFF.svg?branch=master)](https://travis-ci.com/jeffschriber/CLIFF)
-[![codecov](https://codecov.io/gh/jeffschriber/CLIFF/branch/master/graph/badge.svg)](https://codecov.io/gh/jeffschriber/CLIFF/branch/master)
+[![codecov](https://codecov.io/gh/jeffschriber/CLIFF/branch/master/graph/badge.svg?token=vYYLLXHWhK)](https://codecov.io/gh/jeffschriber/CLIFF)
 
 Component-based Learned Intermolecular Force Field
 
