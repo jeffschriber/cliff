@@ -69,7 +69,7 @@ def get_energy(filename):
     
     #computes electrostatic, induction and exchange energies
     elst = mtp.mtp_energy()
-    indu = ind.polarization_energy()
+    indu = ind.polarization_energy(options)
     exch = rep.compute_repulsion("slater_mbis")
     
     #creat dimer
@@ -84,7 +84,7 @@ def get_energy(filename):
     for i, mol in enumerate([dimer] + mols):
         fac = 1.0 if i == 0 else -1.0
         #initialize Dispersion class 
-        mbd = Dispersion(mol, cell)
+        mbd = Dispersion(options, mol, cell)
         #compute C6 coefficients
         mbd.compute_csix()
         #compute anisotropic characteristic frequencies

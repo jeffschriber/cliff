@@ -71,7 +71,7 @@ class AtomicDensity:
     def predict_mol(self, _system):
         '''Predict coefficients given  descriptors.'''
 
-        if self.use_ref_density == 'True':
+        if self.use_ref_density:
             xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
             reffile = self.refpath + xyz + '-atmdns.txt'
 

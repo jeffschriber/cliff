@@ -17,8 +17,8 @@ class Dispersion(Polarizability):
     'Dispersion class. Computes many-body dispersion'
 
     def __init__(self, options, _system, cell):
-        Polarizability.__init__(self, _system)
-        logger.setLevel(self.system.get_logger_level())
+        Polarizability.__init__(self,options, _system)
+        logger.setLevel(options.get_logger_level())
         self.energy = 0.0
         self.cell = cell
 

@@ -7,8 +7,8 @@
 
 import numpy as np
 import math
-import cliff.helpers.constants
-import cliff.helpers.utils
+import cliff.helpers.constants as constants
+import cliff.helpers.utils as utils
 from cliff.helpers.system import System
 from cliff.helpers.cell import Cell
 from cliff.atomic_properties.hirshfeld import Hirshfeld
@@ -29,13 +29,13 @@ class Repulsion:
     def __init__(self,options, sys, cell, reps=None, v1=False):
         self.systems = [sys]
         self.atom_in_system = [0]*len(sys.elements)
-        logger.setLevel(self.systems[0].get_logger_level())
+        logger.setLevel(options.get_logger_level())
         # Need a unit cell for distance calculations
         self.cell = cell
         # energy
         self.energy = 0.0
         # Predict valence widths for sys
-        self.adens = AtomicDensity(Calculator())
+        self.adens = AtomicDensity(options)
         self.adens.load_ml()
         # self.adens.load_ml_env()
         self.adens.predict_mol(sys)
@@ -44,20 +44,14 @@ class Repulsion:
         self.adens.predict_mol(self.sys_comb)
         # Load variables from config file
         # Atom types defined
-        if v1:
-            self.ele_ad = ['H','C','O','N','S']
-        else:
-            #self.ele_ad = ['SS', 'SC','SO','SN','SH','CC','CO','CN','CH','OO','ON','OH','NN','NH','HH']
-            self.ele_ad = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
+
+
 
         # Be sure ordering is canonical
-        self.rep = {}
-        if reps == None:
-            for ele in self.ele_ad:
-                self.rep[ele] = self.systems[0].Config.getfloat("repulsion",
-                                    "rep["+ele+"]")
-        else:
-            for n, ele in enumerate(self.ele_ad):
+        self.rep = options.get_exchange_int_params()
+        if reps != None:
+            ele_ad = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
+            for n, ele in enumerate(ele_ad):
                 self.rep[ele] = reps[n]
 
     def add_system(self, sys):

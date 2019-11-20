@@ -28,7 +28,7 @@ class Options:
     def get_logger_level(self):
         # Return logger level
         try:
-            return self.Config.getint("output", "log_level")
+            return int(self.Config.getint("output", "log_level"))
         except:
             return 50    
 
@@ -43,7 +43,7 @@ class Options:
     def get_hirshfeld_max_neighbors(self):
         # Return maximum number of neighbors in Coulomb matrix
         try:
-            return self.Config.getint("hirshfeld","max_neighbors")
+            return int(self.Config.getint("hirshfeld","max_neighbors"))
         except:
             return 6
 
@@ -57,14 +57,14 @@ class Options:
     def get_hirshfeld_krr_sigma(self):
         # Return sigma parameter for machinelearning
         try:
-            return self.Config.getfloat("hirshfeld","krr_sigma")
+            return float(self.Config.getfloat("hirshfeld","krr_sigma"))
         except:
             return 1000.0
 
     def get_hirshfeld_krr_lambda(self):
         # Return sigma parameter for machinelearning
         try:
-            return self.Config.getfloat("hirshfeld","krr_lambda")
+            return float(self.Config.getfloat("hirshfeld","krr_lambda"))
         except:
             return 1e-9    
 
@@ -78,7 +78,7 @@ class Options:
     def get_hirshfeld_svr_C(self):
         # Return sigma parameter for machinelearning
         try:
-            return self.Config.getfloat("hirshfeld","svr_C")
+            return float(self.Config.getfloat("hirshfeld","svr_C"))
         except:
             return 1.0
 
@@ -95,7 +95,7 @@ class Options:
     def get_hirshfeld_svr_epsilon(self):
         # Return sigma parameter for machinelearning
         try:
-            return self.Config.getfloat("hirshfeld","svr_epsilon")
+            return float(self.Config.getfloat("hirshfeld","svr_epsilon"))
         except:
             return 0.05
 
@@ -118,14 +118,14 @@ class Options:
     def get_atomicdensity_max_neighbors(self):
         # Return location of training file
         try:
-            return self.Config.get("atomicdensity","max_neighbors")
+            return int(self.Config.getint("atomicdensity","max_neighbors"))
         except:
             return 12
 
     def get_atomicdensity_max_neighbors_env(self):
         # Return location of training file
         try:
-            return self.Config.get("atomicdensity","max_neighbors_env")
+            return int(self.Config.getint("atomicdensity","max_neighbors_env"))
         except:
             return 2
 
@@ -139,28 +139,28 @@ class Options:
     def get_atomicdensity_krr_sigma(self):
         # Return location of training file
         try:
-            return self.Config.get("atomicdensity","krr_sigma")
+            return float(self.Config.getfloat("atomicdensity","krr_sigma"))
         except:
             return 1000.0
 
     def get_atomicdensity_krr_lambda(self):
         # Return location of training file
         try:
-            return self.Config.get("atomicdensity","krr_lambda")
+            return float(self.Config.getfloat("atomicdensity","krr_lambda"))
         except:
             return 1e-9
 
     def get_atomicdensity_krr_sigma_env(self):
         # Return location of training file
         try:
-            return self.Config.get("atomicdensity","krr_sigma_env")
+            return float(self.Config.getfloat("atomicdensity","krr_sigma_env"))
         except:
             return 1000.0
 
     def get_atomicdensity_krr_gamma_env(self):
         # Return location of training file
         try:
-            return self.Config.get("atomicdensity","krr_gamma_env")
+            return float(self.Config.getfloat("atomicdensity","krr_gamma_env"))
         except:
             return 1000.0
 
@@ -180,7 +180,7 @@ class Options:
 
     def get_multipole_max_neighbors(self):
         try:
-            return self.Config.get("multipoles","max_neighbors")
+            return int(self.Config.getint("multipoles","max_neighbors"))
         except:
             return 12
 
@@ -198,25 +198,25 @@ class Options:
 
     def get_multipole_krr_sigma(self):
         try:
-            return self.Config.get("multipoles","krr_sigma")
+            return float(self.Config.getfloat("multipoles","krr_sigma"))
         except:
             return 10.0
 
     def get_multipole_krr_lambda(self):
         try:
-            return self.Config.get("multipoles","krr_lambda")
+            return float(self.Config.getfloat("multipoles","krr_lambda"))
         except:
             return 1e-3
     
     def get_multipole_krr_lambda(self):
         try:
-            return self.Config.get("multipoles","krr_lambda")
+            return float(self.Config.getfloat("multipoles","krr_lambda"))
         except:
             return 1e-3
 
     def get_multipole_krr_lambda(self):
         try:
-            return self.Config.get("multipoles","krr_lambda")
+            return float(self.Config.getfloat("multipoles","krr_lambda"))
         except:
             return 1e-3
 
@@ -277,7 +277,57 @@ class Options:
             ret = constants.elst_cp_exp            
             return ret
 
-    ###
+    ### Options for Induction
+    def get_induction_sr_params(self):
+        at_types = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
+            
+        ret = {}
+        try:
+            # Grab exponents from config if provided
+            for at in at_types:
+                ret[at] = self.Config.getfloat("induction", "sr["+at+"]")
+            return ret
+        except:
+            # Use the default ones           
+            ret = constants.indu_sr_params            
+            return ret
+    
+    def get_induction_smearing_coeff(self):
+        try:
+            return self.Config.getfloat("induction","smearing_coeff")
+        except:
+            return 0.5478502
+        
+    def get_induction_omega(self):
+        try:
+            return self.Config.getfloat("induction","omega")      
+        except:
+            return 0.75 
+    
+    def get_induction_conv(self):
+        try:
+            return self.Config.getfloat("induction","convergence_thrshld")      
+        except:
+            return 1e-5
+
+    ### Options for Exchange
+    def get_exchange_int_params(self):
+        at_types = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
+            
+        ret = {}
+        try:
+            # Grab exponents from config if provided
+            for at in at_types:
+                ret[at] = self.Config.getfloat("repulsion", "rep["+at+"]")
+            return ret
+        except:
+            # Use the default ones           
+            ret = constants.exch_int_params 
+            return ret
+
+    def get_pol_scs_cutoff(self):
+        return self.Config.getfloat(
+            "polarizability","scs_cutoff")
 
     def get_mbd_beta(self):
         # Return beta coefficient in MBD

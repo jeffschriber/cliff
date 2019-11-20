@@ -14,16 +14,17 @@ from cliff.helpers.cell import Cell
 from numpy import exp
 from copy import deepcopy
 import logging
-import cliff.helpers.constants
-import cliff.helpers.utils
+import cliff.helpers.constants as constants
+import cliff.helpers.utils as utils
 from numba import jit
 
 # Set logger
 logger = logging.getLogger(__name__)
 
-class InductionCalc:
+class InductionCalc(CPMultipoleCalc):
 
     def __init__(self, options, sys, cell, ind_sr=None, hirshfeld_pred="krr", v1=False):
+        CPMultipoleCalc.__init__(self,options,sys,cell)
         logger.setLevel(options.get_logger_level())
         self.cell = cell
         self.induced_dip = None
@@ -43,17 +44,16 @@ class InductionCalc:
         self.sys_comb = sys
         self.adens.predict_mol(self.sys_comb)
 
-        # Atom types for short-ranged induction
-        self.ele_ad = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
-        
-        self.ind_sr = {}
+        self.omega = options.get_induction_omega()
+        self.conv = options.get_induction_conv()        
+
+        self.ind_sr = options.get_induction_sr_params()
         if ind_sr != None:
-            for n,ele in enumerate(self.ele_ad):
+            ele_ad = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
+            for n,ele in enumerate(ele_ad):
                 self.ind_sr[ele] = ind_sr[n]
-        else:    
-            for ele in self.ele_ad:
-                self.ind_sr[ele] = self.systems[0].Config.getfloat("induction",
-                                                                   "sr["+ele+"]")
+
+        self.smearing_coeff = options.get_induction_smearing_coeff()
 
     def add_system(self, sys):
         CPMultipoleCalc.add_system(self, sys)
@@ -70,105 +70,11 @@ class InductionCalc:
                     s.valence_widths)
         return None
 
-    def polarization_energy_v1(self, stone_convention=False):
+    def polarization_energy(self,options, smearing_coeff=None, stone_convention=False):
         """Compute induction energy"""
         self.convert_mtps_to_cartesian(stone_convention)
         # Populate Hirshfeld ratios of combined systems
         # self.hirshfelds = ...
-        omega = self.systems[0].Config.getfloat("induction","omega")
-        # Setup list of atoms to sum over
-        atom_coord = [crd for sys in self.systems
-                            for _, crd in enumerate(sys.coords)]
-        atom_ele   = [ele for sys in self.systems
-                            for _, ele in enumerate(sys.elements)]
-        atom_typ   = [typ for sys in self.systems
-                            for _,typ in enumerate(sys.atom_types)]
-        populations = [p for _,p in enumerate(self.sys_comb.populations)]
-        valwidths   = [v/constants.a2b
-                       for _,v in enumerate(self.sys_comb.valence_widths)]
-        self.induced_dip = np.zeros((len(atom_ele),3))
-        # Atomic polarizabilities
-        atom_alpha_iso = [alpha for _, alpha in enumerate(
-                                Polarizability(self.sys_comb).get_pol_scaled())]
-        # Short-range contribution (minus sign because it's attractive)
-
-        self.energy_shortranged = -1.*sum([self.slater_mbis(
-            atom_coord[i], populations[i], valwidths[i], atom_typ[i],
-            atom_coord[j], populations[j], valwidths[j], atom_typ[j])
-                                       for i,_ in enumerate(atom_coord)
-                                       for j,_ in enumerate(atom_coord)
-                                       if self.different_mols(i,j) and i<j])
-        logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
-
-        # Intitial induced dipoles
-        smearing_coeff = self.systems[0].Config.getfloat(
-                            "induction","smearing_coeff")
-
-        for i,_ in enumerate(atom_ele):
-            self.induced_dip[i] = sum([atom_alpha_iso[i] *
-                        self.interaction_permanent_multipoles(atom_coord[i],
-                            atom_coord[j], atom_alpha_iso[i], atom_alpha_iso[j],
-                            smearing_coeff, self.mtps_cart[j])
-                            for j,_ in enumerate(atom_ele)
-                            if self.different_mols(i,j)])
-        logger.info("Initial induced dipoles [debye]:")
-        for i,_ in enumerate(atom_ele):
-            logger.info("Atom %d: %7.4f %7.4f %7.4f" % (i,
-                            self.induced_dip[i][0] * constants.au2debye,
-                            self.induced_dip[i][1] * constants.au2debye,
-                            self.induced_dip[i][2] * constants.au2debye))
-        # Self-consistent polarization
-        mu_next = deepcopy(self.induced_dip)
-        mu_prev = np.ones((len(atom_ele),3))
-        cvg_threshld = self.systems[0].Config.getfloat(
-                        "induction","convergence_thrshld")
-        diff_init = np.linalg.norm(mu_next-mu_prev)
-        counter = 0
-        while np.linalg.norm(mu_next-mu_prev) > cvg_threshld:
-            mu_prev = deepcopy(mu_next)
-            for i,_ in enumerate(atom_ele):
-                mu_next[i] = (1-omega)*mu_prev[i] + omega * (self.induced_dip[i] + sum(
-                                [atom_alpha_iso[i] *
-                                    product_smeared_ind_dip(atom_coord[i],
-                                        atom_coord[j], self.cell,
-                                        atom_alpha_iso[i], atom_alpha_iso[j],
-                                        smearing_coeff, mu_prev[j])
-                                    for j,_ in enumerate(atom_ele) if i != j]))
-            counter += 1
-            if np.linalg.norm(mu_next-mu_prev) > diff_init*10 or counter > 2000:
-                logger.error("Can't converge self-consistent equations. Exiting.")
-                exit(1)
-            if counter % 50 == 0 and omega > 0.2:
-                omega *= 0.8
-        self.induced_dip = np.zeros((len(atom_ele),13))
-        logger.info("Converged induced dipoles [debye]:")
-        for i,_ in enumerate(atom_ele):
-            logger.info("Atom %d: %7.4f %7.4f %7.4f" % (i,
-                            mu_next[i][0] * constants.au2debye,
-                            mu_next[i][1] * constants.au2debye,
-                            mu_next[i][2] * constants.au2debye))
-            self.induced_dip[i][1:4] = mu_next[i]
-
-        self.energy_polarization = 0.5 * constants.au2kcalmol * sum([np.dot(
-                    self.induced_dip[i].T,
-                    np.dot(interaction_tensor(atom_coord[i], atom_coord[j], self.cell),
-                        self.mtps_cart[j])) + np.dot(
-                        self.mtps_cart[i].T,
-                        np.dot(interaction_tensor(atom_coord[i], atom_coord[j], self.cell),
-                            self.induced_dip[j]))
-                            for i in range(    len(atom_ele))
-                            for j in range(i+1,len(atom_ele))
-                            if self.different_mols(i,j) and j>i])
-        logger.info("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
-        return self.energy_polarization + self.energy_shortranged
-
-
-    def polarization_energy(self, smearing_coeff=None, stone_convention=False):
-        """Compute induction energy"""
-        self.convert_mtps_to_cartesian(stone_convention)
-        # Populate Hirshfeld ratios of combined systems
-        # self.hirshfelds = ...
-        omega = self.systems[0].Config.getfloat("induction","omega")
         # Setup list of atoms to sum over
         atom_coord = [crd for sys in self.systems
                             for _, crd in enumerate(sys.coords)]
@@ -184,18 +90,13 @@ class InductionCalc:
         self.induced_dip = np.zeros((len(atom_ele),3))
         # Atomic polarizabilities
         atom_alpha_iso = [alpha for _, alpha in enumerate(
-                                Polarizability(self.sys_comb).get_pol_scaled())]
+                                Polarizability(options,self.sys_comb).get_pol_scaled())]
 
         # Short-range correction 
         self.energy_shortranged = 0.0 #-0.0480131753842 #comes from linear coefficient
 
         for i, c_i in enumerate(atom_coord):
             for j, c_j in enumerate(atom_coord):
-
-                if (atom_typ[i] not in self.ele_ad):
-                    print("Atom %s not parameterized!" % atom_typ[i]) 
-                if (atom_typ[j] not in self.ele_ad):
-                    print("Atom %s not parameterized!" % atom_typ[j]) 
 
                 if (self.different_mols(i,j) and i < j):
                     #print "HERE", atom_typ[i], atom_typ[j]
@@ -206,15 +107,14 @@ class InductionCalc:
                     self.energy_shortranged +=  self.ind_sr[atom_typ[i]] * self.ind_sr[atom_typ[j]] * fmbis #/ pair_count[pairs_key.index(pair)]
         logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
         # Intitial induced dipoles
-        if smearing_coeff == None:
-            smearing_coeff = self.systems[0].Config.getfloat(
-                                "induction","smearing_coeff")
+        if smearing_coeff != None:
+            self.smearing_coeff = smearing_coeff 
 
         for i,_ in enumerate(atom_ele):
             self.induced_dip[i] = sum([atom_alpha_iso[i] *
                         self.interaction_permanent_multipoles(atom_coord[i],
                             atom_coord[j], atom_alpha_iso[i], atom_alpha_iso[j],
-                            smearing_coeff, self.mtps_cart[j])
+                            self.smearing_coeff, self.mtps_cart[j])
                             for j,_ in enumerate(atom_ele)
                             if self.different_mols(i,j)])
         logger.info("Initial induced dipoles [debye]:")
@@ -226,26 +126,24 @@ class InductionCalc:
         # Self-consistent polarization
         mu_next = deepcopy(self.induced_dip)
         mu_prev = np.ones((len(atom_ele),3))
-        cvg_threshld = self.systems[0].Config.getfloat(
-                        "induction","convergence_thrshld")
         diff_init = np.linalg.norm(mu_next-mu_prev)
         counter = 0
-        while np.linalg.norm(mu_next-mu_prev) > cvg_threshld:
+        while np.linalg.norm(mu_next-mu_prev) > self.conv:
             mu_prev = deepcopy(mu_next)
             for i,_ in enumerate(atom_ele):
-                mu_next[i] = (1-omega)*mu_prev[i] + omega * (self.induced_dip[i] + sum(
+                mu_next[i] = (1-self.omega)*mu_prev[i] + self.omega * (self.induced_dip[i] + sum(
                                 [atom_alpha_iso[i] *
                                     product_smeared_ind_dip(atom_coord[i],
                                         atom_coord[j], self.cell,
                                         atom_alpha_iso[i], atom_alpha_iso[j],
-                                        smearing_coeff, mu_prev[j])
+                                        self.smearing_coeff, mu_prev[j])
                                     for j,_ in enumerate(atom_ele) if i != j]))
             counter += 1
             if np.linalg.norm(mu_next-mu_prev) > diff_init*10 or counter > 2000:
                 logger.error("Can't converge self-consistent equations. Exiting.")
                 exit(1)
-            if counter % 50 == 0 and omega > 0.2:
-                omega *= 0.8
+            if counter % 50 == 0 and self.omega > 0.2:
+                self.omega *= 0.8
         self.induced_dip = np.zeros((len(atom_ele),13))
         logger.info("Converged induced dipoles [debye]:")
         for i,_ in enumerate(atom_ele):
@@ -287,6 +185,7 @@ class InductionCalc:
         # Permanent charge contribution + monopole charge penetration
         charge = mtp_perm[0]
         vec = self.cell.pbc_distance(coord1, coord2) * constants.a2b
+
         interac += [interaction_tensor_first(vec, at_pol1,
                         at_pol2, smearing, i)*charge for i in range(3)]
         # Permanent dipole contribution

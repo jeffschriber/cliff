@@ -9,7 +9,7 @@ from cliff.helpers.system import System
 from cliff.atomic_properties.hirshfeld import Hirshfeld
 import logging
 import math
-import cliff.helpers.constants
+import cliff.helpers.constants as constants
 
 # Set logger
 logger = logging.getLogger(__name__)
@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 class Polarizability:
     'Polarizability class. Compute atomic and molecular polarizabilities.'
 
-    def __init__(self, sys):
+    def __init__(self, options, sys):
         self.system = sys
-        logger.setLevel(self.system.get_logger_level())
+        logger.setLevel(options.get_logger_level())
         self.num_atoms = self.system.num_atoms
         self.elements = self.system.elements
         self.csix_coeff = None
@@ -32,6 +32,7 @@ class Polarizability:
         self.pol_mol_iso = None
         self.pol_mol_vec = None
         self.pol_mol_fracaniso = None
+        self.scs_cutoff = options.get_pol_scs_cutoff()
 
     def compute_csix(self):
         'Compute C6 coefficients'
@@ -111,7 +112,6 @@ class Polarizability:
         c_mat = np.zeros(size)
         radius = self.system.get_mbd_radius()
         beta = self.system.get_mbd_beta()
-        scs_cutoff = self.system.Config.get("polarizability","scs_cutoff")
         for ati in range(self.num_atoms):
             for atj in range(self.num_atoms):
                 if ati is atj:
