@@ -33,6 +33,11 @@ def get_energy(filename):
     #loads parameters contained on the config.init file
     options = Options(testpath + 'config.ini') 
     
+    # set the path for reference parameters
+    options.set_hirshfeld_filepath(testpath + '/s30/hirshfeld_data/') 
+    options.set_atomicdensity_refpath(testpath + '/s30/multipoles_and_valence_parameters/') 
+    options.set_multipole_ref_path(testpath + '/s30/multipoles_and_valence_parameters/') 
+    
     #defines cell parameters for grid computations
     cell = Cell.lattice_parameters(100., 100., 100.)
     
