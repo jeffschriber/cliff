@@ -8,17 +8,17 @@ matrix:
     - os: osx
       language: generic
       env: PYTHON_VER=3.6
-    - os: osx
-      language: generic
-      env: PYTHON_VER=3.7
+#    - os: osx
+#      language: generic
+#      env: PYTHON_VER=3.7
 
 
     - os: linux
       language: generic  # No need to set Python version since its conda
       env: PYTHON_VER=3.6
-    - os: linux
-      language: generic
-      env: PYTHON_VER=3.7
+#    - os: linux
+#      language: generic
+#      env: PYTHON_VER=3.7
 
 
 before_install:
@@ -37,8 +37,11 @@ before_install:
 install:
 
     # qml
-  - sudo apt-get install -qq gcc gfortran libblas-dev liblapack-dev
-  - sudo apt-get install -qq gcc-4.8 gfortran-4.8
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qq gcc gfortran libblas-dev liblapack-dev; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qq gcc-4.8 gfortran-4.8; fi
+    # qml for os, may be overkill 
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install gcc; fi
 
     # Create test environment for package
   - python devtools/scripts/create_conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/test_env.yaml
