@@ -28,11 +28,17 @@ before_install:
   - ulimit -a
 
     # Install the Python environment
-  - sudo apt-get install gfortran libblas-dev liblapack-dev
   - source devtools/travis-ci/before_install.sh
   - python -V
 
+    # for qml
+  - sudo apt-get update -qq
+
 install:
+
+    # qml
+  - sudo apt-get install -qq gcc gfortran libblas-dev liblapack-dev
+  - sudo apt-get install -qq gcc-4.8 gfortran-4.8
 
     # Create test environment for package
   - python devtools/scripts/create_conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/test_env.yaml
