@@ -31,7 +31,7 @@ def get_energy(filename):
     #1. Initialize relevant variables
     
     #loads parameters contained on the config.init file
-    options = Options(testpath + 'config.ini') 
+    options = Options(testpath + 's30/config.ini') 
     
     # set the path for reference parameters
     options.set_hirshfeld_filepath(testpath + '/s30/hirshfeld_data/') 
@@ -119,7 +119,7 @@ for mol in mols:
     
 
 refs = {}
-with open(testpath + 's30_ref_noml.json','r') as f:
+with open(testpath + 's30/s30_ref_noml.json','r') as f:
     refs = json.load(f)
 
 def test_elst():

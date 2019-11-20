@@ -286,40 +286,6 @@ def find_orthogonal_vec(vec):
             aligned = False
     return np.cross(vec,vec_tmp)
 
-def build_bag_of_bonds(cartesian, atom_types, main_atom_id, bob_struct,
-    max_neighbors):
-    '''Build bag of bonds descriptor ordered by distance to mainAtomID'''
-    # First compute distance of all atoms to mainAtomID
-    N = len(cartesian)
-    dist_main = np.zeros(N)
-    for j in range(3):
-        diff2 = cartesian[main_atom_id,j] - cartesian[:,j]
-        diff2 **= 2
-        dist_main += diff2
-    reorder = np.argsort(dist_main)
-    cart_ord = np.zeros((N,3))
-    for i in range(N):
-        cart_ord[i,:] = cartesian[reorder[i],:]
-    atom_typ_ord = []
-    for i in range(N):
-        atom_typ_ord.append(atom_types[reorder[i]])
-    Z = extract_atomic_numbers(cartesian,atom_typ_ord)
-    # BoB descriptor
-    bob_desc = np.zeros(len(bob_struct)*max_neighbors)
-    bob_fill = np.zeros(len(bob_struct))
-    main_atom_type = atom_types[0]
-    for i in range(1,len(atom_typ_ord)):
-        for j in range(len(bob_struct)):
-            pair = bob_struct[j]
-            if (pair[0] == main_atom_type and pair[1] == atom_typ_ord[i]) or \
-                (pair[1] == main_atom_type and pair[0] == atom_typ_ord[i]):
-                fill = bob_fill[j]
-                if fill < max_neighbors:
-                    bob_desc[j*max_neighbors+fill] = Z[i]*Z[0]/np.linalg.norm(
-                        cart_ord[i,:] - cart_ord[0,:])
-                    bob_fill[j] += 1
-    return bob_desc,reorder
-
 def extract_atomic_numbers(cartesian,atom_types):
     '''Extract atomic number from name of atom type'''
     # Parse atom type, then read from dictionary

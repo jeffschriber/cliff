@@ -203,31 +203,14 @@ class MultipoleMLBSet:
                 # Weigh by ML error
                 mol_mu = sum([constants.ml_chg_correct_error[ele]
                                 for ele in _system.elements])
-                #mol_mu = sum([constants.atomic_weight[ele]
-                #                for ele in _system.elements])
-                #mol_mu = sum([constants.atomic_number[ele]
-                #                for ele in _system.elements])
-               # mol_mu = sum([constants.Z_val[ele]
-               #                 for ele in _system.elements])
                 abscharge = sum([abs(mtp[0]) for mtp in _system.mtp_expansion])
                 totalcharge = sum([mtp[0] for mtp in _system.mtp_expansion])
                 excess_chg = totalcharge - float(charge)
-               # for i,mtp in enumerate(_system.mtp_expansion):
-               #     print(_system.elements[i], mtp[0])
-               # print(totalcharge, abscharge)
-                #exit()
-                #print mol_mu, totalcharge, excess_chg
                 if mol_mu > 0.:
                     for i,mtp_i in enumerate(_system.mtp_expansion):
-                        #w_i = 1./constants.atomic_weight[_system.elements[i]]
-                        #w_i = 1./constants.atomic_number[_system.elements[i]]
-                        #w_i = 1./constants.Z_val[_system.elements[i]]
                         w_i = constants.ml_chg_correct_error[_system.elements[i]]
                         mtp_i[0] += -1.*excess_chg * (w_i/mol_mu)
-                        #mtp_i[0] += -1.*excess_chg * (abs(mtp_i[0])/abscharge)
-                        #print( i, -1.*excess_chg * (abs(mtp_i[0])/abscharge))
             # Compute multipoles from basis set expansion
-
             _system.expand_multipoles()
         logger.debug("Predicted multipole expansion for %s" % ( _system.xyz[0]))
         return None

@@ -149,16 +149,6 @@ class System:
             self.atom_reorder.append(reorder_atoms)
         return None
 
-    def build_bag_of_bonds(self, bob_struct, max_neighbors):
-        self.bag_of_bonds = []
-        for at in range(len(self.elements)):
-            bob, reorder = utils.build_bag_of_bonds(self.coords, self.elements, \
-                at, bob_struct, max_neighbors)
-            self.bag_of_bonds.append(bob)
-            if len(self.atom_reorder) < self.num_atoms:
-                self.atom_reorder.append(reorder)
-        return None
-
     def build_slatm(self, mbtypes, xyz=None):
         self.slatm = []
         # Need xyz
@@ -202,74 +192,6 @@ class System:
             self.pairwise_norm.append(pair_r_i)
             self.rot_mat.append(rot_i)
         return None
-
-  #  def compute_voronoi(self):
-  #      '''Estimates MTP coefficients from Voronoi for atom atom (ID) on a discrete
-  #      set of points.'''
-  #      self.voronoi_baseline = []
-  #      if self.Config.get("multipoles","voronoi") in \
-  #          ["on","yes","True","true"]:
-  #          a2b = constants.a2b
-  #          grid_max = self.Config.getfloat("multipoles","voronoi_grid_max")
-  #          grid_step = self.Config.getfloat("multipoles","voronoi_grid_step")
-  #          # Work in bohr
-  #          b_coords = self.coords*a2b
-  #          for i in range(len(self.elements)):
-  #              # Grid-point boundaries
-  #              xmin = b_coords[i][0] - grid_max
-  #              ymin = b_coords[i][1] - grid_max
-  #              zmin = b_coords[i][2] - grid_max
-  #              xmax = xmin + 2*grid_max
-  #              ymax = ymin + 2*grid_max
-  #              zmax = zmin + 2*grid_max
-  #              # Initialize vector of coefficients
-  #              v_coeffs = np.zeros(10)
-  #              x0 = xmin
-  #              weightar = []
-  #              while x0 < xmax:
-  #                  y0 = ymin
-  #                  while y0 < ymax:
-  #                      z0 = zmin
-  #                      while z0 < zmax:
-  #                          pos  = np.array([x0,y0,z0])
-  #                          rvec = np.array(pos-b_coords[i])
-  #                          n_a_free = np.ones(10)* \
-  #                              utils.atom_dens_free(b_coords[i], \
-  #                                  self.elements[i], pos, i)
-  #                          dist_term = np.array([1.,rvec[0],rvec[1],rvec[2],
-  #                              rvec[0]*rvec[0],rvec[0]*rvec[1],rvec[0]*rvec[2],
-  #                              rvec[1]*rvec[1],rvec[1]*rvec[2],rvec[2]*rvec[2]])
-  #                          fac = np.multiply(dist_term, n_a_free)
-  #                          # Voronoi
-  #                          closest_atm = i
-  #                          shortest_dis = 1000.0
-  #                          for atomj in range(self.num_atoms):
-  #                              atom_dis = np.linalg.norm(pos-b_coords[atomj])
-  #                              if atom_dis < shortest_dis:
-  #                                  closest_atm = atomj
-  #                                  shortest_dis = atom_dis
-  #                          if closest_atm == i:
-  #                              v_coeffs += fac
-  #                          # Update coordinates
-  #                          z0 += grid_step
-  #                      y0 += grid_step
-  #                  x0 += grid_step
-  #              # Convert to spherical coordinates
-  #              quad_cart = np.array([v_coeffs[4],v_coeffs[5],v_coeffs[6],
-  #                 0.,v_coeffs[7],v_coeffs[8],0.,0.,v_coeffs[9]]).reshape(3,3)
-  #              quad_sph  = utils.cart_to_spher(quad_cart)
-  #              self.voronoi_baseline.append([v_coeffs[0], \
-  #                  np.array([v_coeffs[1],v_coeffs[2],v_coeffs[3]]), \
-  #                  quad_sph])
-  #              logger.debug("Voronoi coeffs for atom %s (ID: %d):\n %s" % \
-  #                  (self.elements[i],i, \
-  #                  np.hstack([v_coeffs[0], \
-  #                  np.array([v_coeffs[1],v_coeffs[2],v_coeffs[3]]), \
-  #                  quad_sph])))
-  #      else:
-  #           for i in range(len(self.elements)):
-  #               self.voronoi_baseline.append([0., np.zeros(3), np.zeros(5)])
-  #      return None
 
     def compute_principal_axes(self):
         '''Project MTP coefficients (except for Q00) along each atom-atom vector.
@@ -320,56 +242,6 @@ class System:
             self.principal_axes.append(eigvecs.transpose())
             logger.debug("Principal axes for atom %s (ID: %d):\n %s" % \
                 (self.elements[i],i,self.principal_axes[i]))
-        return None
-
-    def load_mtp_from_hipart(self, txt, rotate=False):
-        """Load multipoles from hipart output text file"""
-        extract_file = utils.read_file(txt)
-        self.multipoles = [np.array([
-                        float(extract_file[i].split()[4]),
-                        float(extract_file[i].split()[6]),
-                        float(extract_file[i].split()[7]),
-                        float(extract_file[i].split()[5]),
-                        float(extract_file[i].split()[8]),
-                        float(extract_file[i].split()[9]),
-                        float(extract_file[i].split()[10]),
-                        float(extract_file[i].split()[11]),
-                        float(extract_file[i].split()[12])])
-                            for i in range(4,len(extract_file))]
-        if rotate is True:
-            self.compute_principal_axes()
-            self.multipoles = utils.rotate_mtps_back(
-                    self.multipoles, self.principal_axes)
-        return None
-
-    def load_mtp_from_poltype(self, txt):
-        """Load global multipoles from poltype output file"""
-        extract_file = utils.read_file(txt)
-        i_line = [i for i in range(len(extract_file)) if "Global" in extract_file[i]]
-        if len(i_line) == 0:
-            print("Can't find Global multipoles in ",txt)
-            exit(1)
-        i_line = i_line[0]
-        mtps = []
-        mtp_i = np.zeros(9)
-        while "Local" not in extract_file[i_line]:
-            line = extract_file[i_line].split()
-            if len(line) > 1:
-                if line[0] == 'Charge:':
-                    mtp_i[0] = float(line[1])
-                if line[0] == 'Dipole:':
-                    for j,k in zip([1,2,3],[1,2,3]):
-                        mtp_i[j] = float(line[k])
-                if line[0] == 'Quadrupole:':
-                    quad = np.zeros((3,3))
-                    for j1,j2,l,k in zip([0,1,1,2,2,2],[0,0,1,0,1,2],[0,1,1,2,2,2],[1,0,1,0,1,2]):
-                        quad[j1][j2] = float(extract_file[i_line+l].split()[k])
-                    quad = utils.symmetrize(quad)
-                    mtp_i[4:9] = utils.cart_to_spher(quad, stone_convention=True)
-                    mtps.append(mtp_i)
-                    mtp_i = np.zeros(9)
-            i_line += 1
-        self.multipoles = mtps
         return None
 
 
