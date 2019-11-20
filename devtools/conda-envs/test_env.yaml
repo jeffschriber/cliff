@@ -16,7 +16,6 @@ dependencies:
 
     # Pip-only installs
   - pip:
-    - gfortran
     - qml
     - codecov
 
