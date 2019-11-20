@@ -1,8 +1,6 @@
 name: test
 channels:
   - conda-forge
-before_install:
-  - sudo apt-get install gfortran libblas-dev liblapack-dev
 dependencies:
     # Base depends
   - python

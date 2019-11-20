@@ -28,6 +28,7 @@ before_install:
   - ulimit -a
 
     # Install the Python environment
+  - sudo apt-get install gfortran libblas-dev liblapack-dev
   - source devtools/travis-ci/before_install.sh
   - python -V
 
