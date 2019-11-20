@@ -16,5 +16,6 @@ dependencies:
 
     # Pip-only installs
   - pip:
+    - qml
     - codecov
 
