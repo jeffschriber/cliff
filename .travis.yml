@@ -37,11 +37,12 @@ before_install:
 install:
 
     # qml
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qq gcc gfortran libblas-dev liblapack-dev; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qq gcc-4.8 gfortran-4.8; fi
-    # qml for os, may be overkill 
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install gcc; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+    sudo apt-get install -qq gcc gfortran libblas-dev liblapack-dev; fi
+    sudo apt-get install -qq gcc-4.8 gfortran-4.8; else
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)";
+    brew install gcc; i
+    fi
 
     # Create test environment for package
   - python devtools/scripts/create_conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/test_env.yaml
