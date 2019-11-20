@@ -2,11 +2,10 @@
 #
 # Dispersion class. Compute many-body dispersion.
 #
-# Tristan Bereau (2017)
 
 from cliff.atomic_properties.polarizability import Polarizability, cutoff
 import numpy as np
-import cliff.helpers.constants
+import cliff.helpers.constants as constants
 import math
 import logging
 
@@ -21,6 +20,9 @@ class Dispersion(Polarizability):
         logger.setLevel(options.get_logger_level())
         self.energy = 0.0
         self.cell = cell
+        self.radius = options.get_mbd_radius()
+        self.beta = options.get_mbd_beta()
+        self.scs_cutoff = options.get_pol_scs_cutoff()
 
     def mbd_protocol(self, radius=None, beta=None, scs_cutoff=None):
         'Compute many-body dispersion and molecular polarizability'
@@ -30,13 +32,13 @@ class Dispersion(Polarizability):
 
         ele_list = ['H', 'C', 'O', 'N', 'S', 'Cl', 'F']
     
-        if radius is None:
-            radius = self.system.get_mbd_radius()
+        if radius != None:
+            self.radius = radius
+        if beta != None:
+            self.beta = beta
+        if scs_cutoff != None:
+            self.scs_cutoff = cutoff
 
-        if beta is None:
-            beta = self.system.get_mbd_beta()
-        if scs_cutoff is None:
-            scs_cutoff = self.system.Config.get("polarizability","scs_cutoff")
         #print("Using parameters: %f, %f, and %f" %(radius,beta,scs_cutoff))
         for ati in range(self.num_atoms):
             for atj in range(self.num_atoms):
@@ -55,9 +57,9 @@ class Dispersion(Polarizability):
                             # Kronecker delta between two coordinates
                             delta_ab = 1.0 if ri == rj else 0.0
                             # Compute effective width sigma
-                            sigma = radius * (self.radius_vdw(ati) + \
+                            sigma = self.radius * (self.radius_vdw(ati) + \
                                 self.radius_vdw(atj))
-                            frac = (rijn/sigma)**beta
+                            frac = (rijn/sigma)**self.beta
                             expf = math.exp(-frac)
                             int_mat[3*ati+ri,3*atj+rj] = \
                                 self.freq_scaled[ati] * \
@@ -65,9 +67,9 @@ class Dispersion(Polarizability):
                                 math.sqrt(self.pol_scaled[ati] * \
                                     self.pol_scaled[atj]) * (
                                     (-3.*rij[ri]*rij[rj] +rijn**2*delta_ab) \
-                                    /rijn**5 * cutoff(rijn, sigma, scs_cutoff) \
-                                    * (1 - expf - beta*frac*expf) + \
-                                    (beta*frac+1-beta)*beta*frac* \
+                                    /rijn**5 * cutoff(rijn, sigma, self.scs_cutoff) \
+                                    * (1 - expf - self.beta*frac*expf) + \
+                                    (self.beta*frac+1-self.beta)*self.beta*frac* \
                                     rij[ri]*rij[rj]/rijn**5*expf )
         # Compute eigenvalues
         eigvals,eigvecs = np.linalg.eigh(int_mat)
@@ -109,12 +111,10 @@ class Dispersion(Polarizability):
 
     def pairwise(self):
         self.energy = 0.
-        radius = self.system.get_mbd_radius()
-        scs_cutoff = self.system.Config.get("polarizability","scs_cutoff")
         for ati in range(self.num_atoms):
             for atj in range(self.num_atoms):
                 if ati != atj:
-                    sigma = radius * (self.radius_vdw(ati) + \
+                    sigma = self.radius * (self.radius_vdw(ati) + \
                                 self.radius_vdw(atj))
                     rij = self.cell.pbc_distance(self.system.coords[ati], \
                                 self.system.coords[atj])*constants.a2b
@@ -122,7 +122,7 @@ class Dispersion(Polarizability):
                     self.energy -= self.csix_coeff[ati]*self.csix_coeff[atj] / \
                         (self.pol_scaled[atj]/self.pol_scaled[ati] * self.csix_coeff[ati] +
                         self.pol_scaled[ati]/self.pol_scaled[atj] * self.csix_coeff[atj]) / \
-                        rijn**6 * cutoff(rijn, sigma, scs_cutoff)
+                        rijn**6 * cutoff(rijn, sigma, self.scs_cutoff)
         self.energy *= constants.au2kcalmol
         logger.info("pairwise energy: %7.4f kcal/mol" % self.energy)
         return None

@@ -33,6 +33,7 @@ class Polarizability:
         self.pol_mol_vec = None
         self.pol_mol_fracaniso = None
         self.scs_cutoff = options.get_pol_scs_cutoff()
+        self.exponent = options.get_pol_exponent() 
 
     def compute_csix(self):
         'Compute C6 coefficients'
@@ -68,7 +69,6 @@ class Polarizability:
         if self.pol_scaled is None:
             self.compute_csix()
         self.pol_scaled_vec = np.zeros((self.num_atoms,3))
-        exponent = self.system.get_pol_exponent()
         for i in range(self.num_atoms):
             rvdw_i = constants.rad_free[self.system.elements[i]]*constants.b2a
             anst_fac = np.array([0.,0.,0.])
@@ -81,7 +81,7 @@ class Polarizability:
                 # Sum of vdw radii between i and j
                 rvdw = rvdw_i + rvdw_j
                 k_fac = np.linalg.norm(vecij)/rvdw
-                anst_fac += exponent*(np.linalg.norm(vecij)/rvdw)*vecij/np.linalg.norm(vecij)
+                anst_fac += self.exponent*(np.linalg.norm(vecij)/rvdw)*vecij/np.linalg.norm(vecij)
                 anst_num += 1
             for k in range(3):
                 if anst_num[k] > 0:
