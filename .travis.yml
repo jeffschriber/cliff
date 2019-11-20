@@ -37,7 +37,7 @@ before_install:
 install:
 
     # qml
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
     sudo apt-get install -qq gcc gfortran libblas-dev liblapack-dev; fi
     sudo apt-get install -qq gcc-4.8 gfortran-4.8; else
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)";
