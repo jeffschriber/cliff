@@ -3,6 +3,7 @@
 
 import logging
 import cliff.helpers.utils as util
+import cliff.helpers.constants as constants
 import configparser
 
 class Options:
@@ -108,9 +109,11 @@ class Options:
 
     def get_atomicdensity_training_env(self):
         # Return location of training file
-        # no default
-        return self.Config.get(
-            "atomicdensity","training_env")
+        try:
+            return self.Config.get(
+                "atomicdensity","training_env")
+        except:
+            return False
 
     def get_atomicdensity_max_neighbors(self):
         # Return location of training file
@@ -241,6 +244,17 @@ class Options:
         #no default
         return self.Config.get("multipoles","ref_path")
 
+    def save_mtp_to_disk(self):
+        try:
+            val = self.Config.get("multipoles","save_to_disk")
+            if val in ["True","true","t","1"]:
+                return True
+        except:
+            return False
+    def get_multipole_save_path(self):
+        #no default
+        return self.Config.get("multipoles","mtp_save_path")
+
     ### Options for Electrostatics
     
     def get_elec_type(self):
@@ -249,7 +263,19 @@ class Options:
         except:
             return "damped_mtp"
     
-    
+    def get_damping_exponents(self):
+        at_types = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
+            
+        ret = {}
+        try:
+            # Grab exponents from config if provided
+            for at in at_types:
+                ret[at] = self.Config.getfloat("electrostatics", "exp["+at+"]")
+            return ret
+        except:
+            # Use the default ones           
+            ret = constants.elst_cp_exp            
+            return ret
 
     ###
 

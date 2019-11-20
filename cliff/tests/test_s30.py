@@ -47,7 +47,7 @@ def get_energy(filename):
     xyzs = [] 
     for xyz in filename:
         #computes descriptor for each monomer   
-        mols.append(System(xyz))
+        mols.append(System(options,xyz))
         xyzs.append(xyz)
     
     for mol,xyz in zip(mols,xyzs):
@@ -57,9 +57,9 @@ def get_energy(filename):
         hirsh.predict_mol(mol,"krr")
     
     #initializes relevant classes with monomer A
-    mtp = CPMultipoleCalc(mols[0], cell)
-    ind = InductionCalc(mols[0], cell)
-    rep = Repulsion(mols[0], cell)
+    mtp = CPMultipoleCalc(options,mols[0], cell)
+    ind = InductionCalc(options,mols[0], cell)
+    rep = Repulsion(options, mols[0], cell)
     
     #adds monomer B
     for mol in mols[1:]:

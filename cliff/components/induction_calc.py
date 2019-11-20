@@ -5,44 +5,37 @@
 # Tristan Bereau (2017)
 
 import numpy as np
-from system import System
-from multipole_calc import MultipoleCalc, interaction_tensor
-from calculator import Calculator
-from hirshfeld import Hirshfeld
-from polarizability import Polarizability
-from atomic_density import AtomicDensity
-from cell import Cell
+from cliff.helpers.system import System
+from cliff.components.cp_multipoles import CPMultipoleCalc, interaction_tensor
+from cliff.atomic_properties.hirshfeld import Hirshfeld
+from cliff.atomic_properties.polarizability import Polarizability
+from cliff.atomic_properties.atomic_density import AtomicDensity
+from cliff.helpers.cell import Cell
 from numpy import exp
 from copy import deepcopy
 import logging
-import constants
-import utils
+import cliff.helpers.constants
+import cliff.helpers.utils
 from numba import jit
 
 # Set logger
 logger = logging.getLogger(__name__)
 
-class InductionCalc(MultipoleCalc):
-    """
-    Induction_calc class computes induction interactions.
+class InductionCalc:
 
-    Derives from Multipole_calc, since it needs the multipoles.
-    """
-
-    def __init__(self, sys, cell, ind_sr=None, hirshfeld_pred="krr", v1=False):
-        MultipoleCalc.__init__(self, sys, cell)
-        logger.setLevel(sys.get_logger_level())
+    def __init__(self, options, sys, cell, ind_sr=None, hirshfeld_pred="krr", v1=False):
+        logger.setLevel(options.get_logger_level())
         self.cell = cell
         self.induced_dip = None
         self.energy_polarization = 0.0
         self.energy_shortranged = 0.0
         # Predict Hirshfeld ratios for sys
         self.hirshfeld_pred = hirshfeld_pred
-        self.hirsh = Hirshfeld(Calculator())
+        self.hirsh = Hirshfeld(options)
         self.hirsh.load_ml()
         self.hirsh.predict_mol(sys,self.hirshfeld_pred)
         # Predict valence widths for sys
-        self.adens = AtomicDensity(Calculator())
+        self.adens = AtomicDensity(options)
         self.adens.load_ml()
         # self.adens.load_ml_env()
         self.adens.predict_mol(sys)
@@ -63,7 +56,7 @@ class InductionCalc(MultipoleCalc):
                                                                    "sr["+ele+"]")
 
     def add_system(self, sys):
-        MultipoleCalc.add_system(self, sys)
+        CPMultipoleCalc.add_system(self, sys)
         self.hirsh.predict_mol(sys, self.hirshfeld_pred)
         self.sys_comb.hirshfeld_ratios = np.append(self.sys_comb.hirshfeld_ratios,
             sys.hirshfeld_ratios)

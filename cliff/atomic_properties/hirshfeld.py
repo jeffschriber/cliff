@@ -4,14 +4,14 @@
 #
 # Tristan Bereau (2017)
 
-from system import System
+from cliff.helpers.system import System
+import cliff.helpers.utils
 import scipy
 from scipy import stats
 from scipy.spatial.distance import pdist, cdist, squareform
 import logging
 import pickle
 import numpy as np
-import utils
 
 # Set logger
 logger = logging.getLogger(__name__)

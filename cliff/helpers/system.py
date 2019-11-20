@@ -6,10 +6,9 @@
 # Tristan Bereau (2017)
 
 import numpy as np
-import utils
+import cliff.helpers.utils as utils
 import logging
-from calculator import Calculator
-import constants
+import cliff.helpers.constants
 import os
 import copy
 import re
@@ -19,12 +18,11 @@ import configparser
 # Set logger
 logger = logging.getLogger(__name__)
 
-class System(Calculator):
+class System:
     'Common system class for molecular system'
 
-    def __init__(self, xyz=None, log=False):
-        Calculator.__init__(self, config_file = "config.ini")
-        logger.setLevel(self.get_logger_level())
+    def __init__(self, options, xyz=None, log=False):
+        logger.setLevel(options.get_logger_level())
         # xyz and mps can't both be empty
         if not xyz:
             logger.error("Need an xyz file")
@@ -76,6 +74,12 @@ class System(Calculator):
         self.bonded_atoms = None
         if len(self.xyz) == 1:
             self.load_xyz()
+    
+        self.mtp_to_disk = options.save_mtp_to_disk()
+
+        if self.mtp_to_disk:
+            self.mtp_save_path = options.get_multipole_save_path()
+
 
     def __add__(self, sys):
         """Combine two systems"""
@@ -112,9 +116,9 @@ class System(Calculator):
                         if i>1 and len(line.split())>4)
         self.hirshfeld_ref = np.fromiter(iterable,np.float)
         self.identify_atom_types()
-        self.logger.debug('Loaded molecule %s with %s atoms.' \
+        logger.debug('Loaded molecule %s with %s atoms.' \
             % (self.xyz, self.num_atoms))
-        self.logger.debug('Elements %s' % ', '.join(self.elements))
+        logger.debug('Elements %s' % ', '.join(self.elements))
         return None
 
     def build_coulomb_matrices(self, max_neighbors, direction=None):
@@ -199,73 +203,73 @@ class System(Calculator):
             self.rot_mat.append(rot_i)
         return None
 
-    def compute_voronoi(self):
-        '''Estimates MTP coefficients from Voronoi for atom atom (ID) on a discrete
-        set of points.'''
-        self.voronoi_baseline = []
-        if self.Config.get("multipoles","voronoi") in \
-            ["on","yes","True","true"]:
-            a2b = constants.a2b
-            grid_max = self.Config.getfloat("multipoles","voronoi_grid_max")
-            grid_step = self.Config.getfloat("multipoles","voronoi_grid_step")
-            # Work in bohr
-            b_coords = self.coords*a2b
-            for i in range(len(self.elements)):
-                # Grid-point boundaries
-                xmin = b_coords[i][0] - grid_max
-                ymin = b_coords[i][1] - grid_max
-                zmin = b_coords[i][2] - grid_max
-                xmax = xmin + 2*grid_max
-                ymax = ymin + 2*grid_max
-                zmax = zmin + 2*grid_max
-                # Initialize vector of coefficients
-                v_coeffs = np.zeros(10)
-                x0 = xmin
-                weightar = []
-                while x0 < xmax:
-                    y0 = ymin
-                    while y0 < ymax:
-                        z0 = zmin
-                        while z0 < zmax:
-                            pos  = np.array([x0,y0,z0])
-                            rvec = np.array(pos-b_coords[i])
-                            n_a_free = np.ones(10)* \
-                                utils.atom_dens_free(b_coords[i], \
-                                    self.elements[i], pos, i)
-                            dist_term = np.array([1.,rvec[0],rvec[1],rvec[2],
-                                rvec[0]*rvec[0],rvec[0]*rvec[1],rvec[0]*rvec[2],
-                                rvec[1]*rvec[1],rvec[1]*rvec[2],rvec[2]*rvec[2]])
-                            fac = np.multiply(dist_term, n_a_free)
-                            # Voronoi
-                            closest_atm = i
-                            shortest_dis = 1000.0
-                            for atomj in range(self.num_atoms):
-                                atom_dis = np.linalg.norm(pos-b_coords[atomj])
-                                if atom_dis < shortest_dis:
-                                    closest_atm = atomj
-                                    shortest_dis = atom_dis
-                            if closest_atm == i:
-                                v_coeffs += fac
-                            # Update coordinates
-                            z0 += grid_step
-                        y0 += grid_step
-                    x0 += grid_step
-                # Convert to spherical coordinates
-                quad_cart = np.array([v_coeffs[4],v_coeffs[5],v_coeffs[6],
-                   0.,v_coeffs[7],v_coeffs[8],0.,0.,v_coeffs[9]]).reshape(3,3)
-                quad_sph  = utils.cart_to_spher(quad_cart)
-                self.voronoi_baseline.append([v_coeffs[0], \
-                    np.array([v_coeffs[1],v_coeffs[2],v_coeffs[3]]), \
-                    quad_sph])
-                logger.debug("Voronoi coeffs for atom %s (ID: %d):\n %s" % \
-                    (self.elements[i],i, \
-                    np.hstack([v_coeffs[0], \
-                    np.array([v_coeffs[1],v_coeffs[2],v_coeffs[3]]), \
-                    quad_sph])))
-        else:
-             for i in range(len(self.elements)):
-                 self.voronoi_baseline.append([0., np.zeros(3), np.zeros(5)])
-        return None
+  #  def compute_voronoi(self):
+  #      '''Estimates MTP coefficients from Voronoi for atom atom (ID) on a discrete
+  #      set of points.'''
+  #      self.voronoi_baseline = []
+  #      if self.Config.get("multipoles","voronoi") in \
+  #          ["on","yes","True","true"]:
+  #          a2b = constants.a2b
+  #          grid_max = self.Config.getfloat("multipoles","voronoi_grid_max")
+  #          grid_step = self.Config.getfloat("multipoles","voronoi_grid_step")
+  #          # Work in bohr
+  #          b_coords = self.coords*a2b
+  #          for i in range(len(self.elements)):
+  #              # Grid-point boundaries
+  #              xmin = b_coords[i][0] - grid_max
+  #              ymin = b_coords[i][1] - grid_max
+  #              zmin = b_coords[i][2] - grid_max
+  #              xmax = xmin + 2*grid_max
+  #              ymax = ymin + 2*grid_max
+  #              zmax = zmin + 2*grid_max
+  #              # Initialize vector of coefficients
+  #              v_coeffs = np.zeros(10)
+  #              x0 = xmin
+  #              weightar = []
+  #              while x0 < xmax:
+  #                  y0 = ymin
+  #                  while y0 < ymax:
+  #                      z0 = zmin
+  #                      while z0 < zmax:
+  #                          pos  = np.array([x0,y0,z0])
+  #                          rvec = np.array(pos-b_coords[i])
+  #                          n_a_free = np.ones(10)* \
+  #                              utils.atom_dens_free(b_coords[i], \
+  #                                  self.elements[i], pos, i)
+  #                          dist_term = np.array([1.,rvec[0],rvec[1],rvec[2],
+  #                              rvec[0]*rvec[0],rvec[0]*rvec[1],rvec[0]*rvec[2],
+  #                              rvec[1]*rvec[1],rvec[1]*rvec[2],rvec[2]*rvec[2]])
+  #                          fac = np.multiply(dist_term, n_a_free)
+  #                          # Voronoi
+  #                          closest_atm = i
+  #                          shortest_dis = 1000.0
+  #                          for atomj in range(self.num_atoms):
+  #                              atom_dis = np.linalg.norm(pos-b_coords[atomj])
+  #                              if atom_dis < shortest_dis:
+  #                                  closest_atm = atomj
+  #                                  shortest_dis = atom_dis
+  #                          if closest_atm == i:
+  #                              v_coeffs += fac
+  #                          # Update coordinates
+  #                          z0 += grid_step
+  #                      y0 += grid_step
+  #                  x0 += grid_step
+  #              # Convert to spherical coordinates
+  #              quad_cart = np.array([v_coeffs[4],v_coeffs[5],v_coeffs[6],
+  #                 0.,v_coeffs[7],v_coeffs[8],0.,0.,v_coeffs[9]]).reshape(3,3)
+  #              quad_sph  = utils.cart_to_spher(quad_cart)
+  #              self.voronoi_baseline.append([v_coeffs[0], \
+  #                  np.array([v_coeffs[1],v_coeffs[2],v_coeffs[3]]), \
+  #                  quad_sph])
+  #              logger.debug("Voronoi coeffs for atom %s (ID: %d):\n %s" % \
+  #                  (self.elements[i],i, \
+  #                  np.hstack([v_coeffs[0], \
+  #                  np.array([v_coeffs[1],v_coeffs[2],v_coeffs[3]]), \
+  #                  quad_sph])))
+  #      else:
+  #           for i in range(len(self.elements)):
+  #               self.voronoi_baseline.append([0., np.zeros(3), np.zeros(5)])
+  #      return None
 
     def compute_principal_axes(self):
         '''Project MTP coefficients (except for Q00) along each atom-atom vector.
@@ -403,10 +407,9 @@ class System(Calculator):
                     self.multipoles[i][4+j] = quad[j]
         
         # print mtps to ref files
-        if self.Config.get('multipoles','save_to_disk'):
-            refpath = self.Config.get('multipoles','mtp_save_path') 
+        if self.mtp_to_disk:
             xyz = self.xyz[0].split('/')[-1].strip('.xyz')
-            reffile = refpath + xyz + '-mtp.txt'
+            reffile = slef.mtp_save_path + xyz + '-mtp.txt'
             print(reffile) 
             #if os.path.exists(reffile):
             #    return None

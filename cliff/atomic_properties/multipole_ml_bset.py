@@ -6,16 +6,16 @@
 # Tristan Bereau (2016)
 
 #from electrostatics import Electrostatics
-from system import System
+from cliff.helpers.system import System
 import scipy
 from scipy import stats
 from scipy.spatial.distance import pdist, cdist, squareform
 import numpy as np
 import logging
 import pickle
-import constants
+import cliff.helpers.constants as constants
+import cliff.helpers.utils as utils
 import math
-import utils
 import os
 import copy
 import time

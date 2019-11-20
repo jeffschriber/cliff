@@ -5,15 +5,14 @@
 # Tristan Bereau (2016)
 
 import numpy as np
-import utils
+import cliff.helpers.utils
+import cliff.helpers.constants
 import logging
-from calculator import Calculator
-import constants
 
 # Set logger
 logger = logging.getLogger(__name__)
 
-class Cell(Calculator):
+class Cell():
     'Cell geometry'
 
     def __init__(self, cellh):

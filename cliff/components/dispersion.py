@@ -4,9 +4,9 @@
 #
 # Tristan Bereau (2017)
 
-from polarizability import Polarizability, cutoff
+from cliff.atomic_properties.polarizability import Polarizability, cutoff
 import numpy as np
-import constants
+import cliff.helpers.constants
 import math
 import logging
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class Dispersion(Polarizability):
     'Dispersion class. Computes many-body dispersion'
 
-    def __init__(self, _system, cell):
+    def __init__(self, options, _system, cell):
         Polarizability.__init__(self, _system)
         logger.setLevel(self.system.get_logger_level())
         self.energy = 0.0

@@ -7,15 +7,14 @@
 
 import numpy as np
 import math
-from system import System
-from calculator import Calculator
-from hirshfeld import Hirshfeld
-from polarizability import Polarizability
-from atomic_density import AtomicDensity
-from cell import Cell
+import cliff.helpers.constants
+import cliff.helpers.utils
+from cliff.helpers.system import System
+from cliff.helpers.cell import Cell
+from cliff.atomic_properties.hirshfeld import Hirshfeld
+from cliff.atomic_properties.polarizability import Polarizability
+from cliff.atomic_properties.atomic_density import AtomicDensity
 import logging
-import constants
-import utils
 from numba import jit
 
 # Set logger
@@ -27,7 +26,7 @@ class Repulsion:
     Repulsion class. Compute repulsive interaction based on overlap integrals.
     '''
 
-    def __init__(self, sys, cell, reps=None, v1=False):
+    def __init__(self,options, sys, cell, reps=None, v1=False):
         self.systems = [sys]
         self.atom_in_system = [0]*len(sys.elements)
         logger.setLevel(self.systems[0].get_logger_level())

@@ -5,11 +5,11 @@
 # Tristan Bereau (2017)
 
 import numpy as np
-from system import System
-from hirshfeld import Hirshfeld
+from cliff.helpers.system import System
+from cliff.atomic_properties.hirshfeld import Hirshfeld
 import logging
 import math
-import constants
+import cliff.helpers.constants
 
 # Set logger
 logger = logging.getLogger(__name__)

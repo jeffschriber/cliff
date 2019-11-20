@@ -4,14 +4,14 @@
 #
 # Tristan Bereau (2016)
 
-from system import System
+from cliff.helpers.system import System
+import cliff.helpers.utils
 import scipy
 from scipy import stats
 from scipy.spatial.distance import pdist, cdist, squareform
 import logging
 import pickle
 import numpy as np
-import utils
 import operator
 
 # Set logger
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class AtomicDensity:
     'AtomicDensity class. Predicts atomic populations and valence widths.'
 
-    def __init__(self, options):
+    def __init__(self,options):
         self.descr_train = []
         self.target_train = []
         # With environment
@@ -30,7 +30,7 @@ class AtomicDensity:
         # kernel ridge regression
         self.alpha_train = None
         self.alpha_env_train = None
-        logger.setLevel(self.calculator.get_logger_level())
+        logger.setLevel(options.get_logger_level())
         self.max_neighbors = options.get_atomicdensity_max_neighbors()
         self.max_neighbors_env = options.get_atomicdensity_max_neighbors_env()
         self.krr_sigma = options.get_atomicdensity_krr_sigma()
@@ -40,15 +40,16 @@ class AtomicDensity:
         self.training_file = options.get_atomicdensity_training()
         self.training_env_file = options.get_atomicdensity_training_env()
         self.use_ref_density = options.get_atomicdensity_ref_adens()
-        self.refpath = options.get_atomicdensity_ref_path()
+        self.refpath = options.get_atomicdensity_refpath()
 
     def load_ml(self):
         logger.info(
             "Reading atomic-density training from %s" % self.training_file)
-        if self.use_ref_density == 'True':
+
+        if self.use_ref_density:
             return
         
-        with open(training_file, 'rb') as f:
+        with open(self.training_file, 'rb') as f:
             #self.descr_train, self.alpha_train = pickle.load(f)
             self.descr_train, self.alpha_train = pickle.load(f, encoding='latin1')
 

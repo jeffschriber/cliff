@@ -5,14 +5,13 @@
 
 
 import numpy as np
-from system import System
 from numpy import exp
-from calculator import Calculator
-from atomic_density import AtomicDensity
-from cell import Cell
 import logging
-import constants
-import utils
+from cliff.atomic_properties.atomic_density import AtomicDensity
+from cliff.helpers.cell import Cell
+from cliff.helpers.system import System
+import cliff.helpers.constants
+import cliff.helpers.utils
 
 # Set logger
 logger = logging.getLogger(__name__)
@@ -20,31 +19,21 @@ logger = logging.getLogger(__name__)
 class CPMultipoleCalc:
     'Mulitpole_calc class computes cp-corrected multipole electrostatics'
 
-    def __init__(self, sys, cell, smear1=None, smear2=None, exp=None):
+    def __init__(self, options,sys, cell, exp=None):
         self.systems = [sys]
         self.atom_in_system = [0]*len(sys.elements)
-        logger.setLevel(sys.get_logger_level())
+        logger.setLevel(options.get_logger_level())
         self.cell = cell
         self.mtps_cart = None
         self.mtps_cart_elec = None
         self.energy_elst = 0.0
         # Combined system for combined valence-width prediction
         self.sys_comb = sys
-        self.ele_ad = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
-        self.smear_1 = self.systems[0].Config.getfloat("chargepenetration","smear1")
-        self.smear_2 = self.systems[0].Config.getfloat("chargepenetration","smear2")
-        if smear1 != None:
-            self.smear_1 = smear1
-        if smear2 != None:
-            self.smear_2 = smear2
 
-
-        self.exp = {}
-        for ele in self.ele_ad:
-            self.exp[ele] = self.systems[0].Config.getfloat("chargepenetration", "exp["+ele+"]")
-            
+        self.exp = options.get_damping_exponents()
         if exp is not None:
-            for n,ele in enumerate(self.ele_ad):
+            ele_ad = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
+            for n,ele in enumerate(ele_ad):
                 self.exp[ele] = exp[n] 
             
 

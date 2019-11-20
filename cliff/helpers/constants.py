@@ -270,18 +270,23 @@ ml_chg_correct_error = {
     'F'  : 1.138 
 }
 
-## Damping parameters for CP-corrected
-## electrostatics
-# based on averages from Rackers 2017
-# could be refit
-#ml_elst_alpha = {
-#'H' : 3.3184, 
-#'C' : 3.3080,
-#'N' : 3.7855,
-#'O' : 4.0905,
-#'S' : 2.9680,
-#'Cl': 3.4749, 
-#'F' : 4.4675
-#}
-
-
+## Default damping parameters 
+##for CP-corrected electrostatics
+elst_cp_exp = {
+'Cl1' : 3.3002,
+'F1'  : 4.4217,
+'S1'  : 3.1779,
+'S2'  : 2.6895,
+'HS'  : 3.2298,
+'HC'  : 4.1696,
+'HN'  : 2.6589, 
+'HO'  : 3.1564,
+'C4'  : 3.0832,
+'C3'  : 3.0723,
+'C2'  : 3.2478,
+'N3'  : 4.2527, 
+'N2'  : 3.7247,
+'N1'  : 3.8178,
+'O1'  : 3.7885, 
+'O2'  : 3.9713
+}

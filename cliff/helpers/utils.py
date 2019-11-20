@@ -6,10 +6,10 @@
 
 import numpy as np
 import re
-import constants
 import logging
 import math
 import copy
+import cliff.helpers.constants as constants
 from numba import jit
 
 # Set logger
