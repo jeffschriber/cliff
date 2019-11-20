@@ -19,10 +19,10 @@ logger = logging.getLogger(__name__)
 class CPMultipoleCalc:
     'Mulitpole_calc class computes cp-corrected multipole electrostatics'
 
-    def __init__(self, options,sys, cell, exp=None):
+    def __init__(self, options,sys, cell):
         self.systems = [sys]
         self.atom_in_system = [0]*len(sys.elements)
-        logger.setLevel(options.get_logger_level())
+        logger.setLevel(options.logger_level)
         self.cell = cell
         self.mtps_cart = None
         self.mtps_cart_elec = None
@@ -35,13 +35,7 @@ class CPMultipoleCalc:
 
         # Combined system for combined valence-width prediction
         self.sys_comb = sys
-
-        self.exp = options.get_damping_exponents()
-        if exp is not None:
-            ele_ad = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
-            for n,ele in enumerate(ele_ad):
-                self.exp[ele] = exp[n] 
-            
+        self.exp = options.elst_damping_exponents
 
     def add_system(self, sys):
         self.systems.append(sys)

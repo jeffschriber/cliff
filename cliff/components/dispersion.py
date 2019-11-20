@@ -17,12 +17,12 @@ class Dispersion(Polarizability):
 
     def __init__(self, options, _system, cell):
         Polarizability.__init__(self,options, _system)
-        logger.setLevel(options.get_logger_level())
+        logger.setLevel(options.logger_level)
         self.energy = 0.0
         self.cell = cell
-        self.radius = options.get_mbd_radius()
-        self.beta = options.get_mbd_beta()
-        self.scs_cutoff = options.get_pol_scs_cutoff()
+        self.radius = options.disp_radius
+        self.beta = options.disp_beta
+        self.scs_cutoff = options.pol_scs_cutoff
 
     def mbd_protocol(self, radius=None, beta=None, scs_cutoff=None):
         'Compute many-body dispersion and molecular polarizability'

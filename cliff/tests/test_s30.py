@@ -22,13 +22,16 @@ from functools import reduce
 import configparser
 import operator
 
+import cliff.tests as t
+testpath = os.path.abspath(t.__file__).split('__init__')[0]
+
 def get_energy(filename):
     np.set_printoptions(precision=4, suppress=True, linewidth=100)
     
     #1. Initialize relevant variables
     
     #loads parameters contained on the config.init file
-    options = Options() 
+    options = Options(testpath + 'config.ini') 
     
     #defines cell parameters for grid computations
     cell = Cell.lattice_parameters(100., 100., 100.)
@@ -99,7 +102,7 @@ def get_energy(filename):
     
 filenames = {}
 current = {}
-mols = glob.glob('s30/xyzs/*monoA-unCP.xyz')
+mols = glob.glob(testpath + 's30/xyzs/*monoA-unCP.xyz')
 for mol in mols:
     monA = mol 
     monB = mol.strip("monoA-unCP.xyz") + "-monoB-unCP.xyz"
@@ -111,7 +114,7 @@ for mol in mols:
     
 
 refs = {}
-with open('s30_ref_noml.json','r') as f:
+with open(testpath + 's30_ref_noml.json','r') as f:
     refs = json.load(f)
 
 def test_elst():

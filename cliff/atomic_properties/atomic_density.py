@@ -30,17 +30,17 @@ class AtomicDensity:
         # kernel ridge regression
         self.alpha_train = None
         self.alpha_env_train = None
-        logger.setLevel(options.get_logger_level())
-        self.max_neighbors = options.get_atomicdensity_max_neighbors()
-        self.max_neighbors_env = options.get_atomicdensity_max_neighbors_env()
-        self.krr_sigma = options.get_atomicdensity_krr_sigma()
-        self.krr_lambda = options.get_atomicdensity_krr_lambda()
-        self.krr_sigma_env = options.get_atomicdensity_krr_sigma_env()
-        self.krr_gamma_env = options.get_atomicdensity_krr_gamma_env()
-        self.training_file = options.get_atomicdensity_training()
-        self.training_env_file = options.get_atomicdensity_training_env()
-        self.use_ref_density = options.get_atomicdensity_ref_adens()
-        self.refpath = options.get_atomicdensity_refpath()
+        logger.setLevel(options.logger_level)
+        self.max_neighbors     = options.atomicdensity_max_neighbors
+        self.max_neighbors_env = options.atomicdensity_max_neighbors_env
+        self.krr_sigma = options.atomicdensity_krr_sigma
+        self.krr_lambda = options.atomicdensity_krr_lambda
+        self.krr_sigma_env = options.atomicdensity_krr_sigma_env
+        self.krr_gamma_env = options.atomicdensity_krr_gamma_env
+        self.training_file = options.atomicdensity_training
+        self.training_env_file = options.atomicdensity_training_env
+        self.use_ref_density = options.atomicdensity_ref_adens
+        self.refpath = options.atomicdensity_refpath
 
     def load_ml(self):
         logger.info(

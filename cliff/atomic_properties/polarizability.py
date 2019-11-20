@@ -20,7 +20,7 @@ class Polarizability:
 
     def __init__(self, options, sys):
         self.system = sys
-        logger.setLevel(options.get_logger_level())
+        logger.setLevel(options.logger_level)
         self.num_atoms = self.system.num_atoms
         self.elements = self.system.elements
         self.csix_coeff = None
@@ -32,8 +32,8 @@ class Polarizability:
         self.pol_mol_iso = None
         self.pol_mol_vec = None
         self.pol_mol_fracaniso = None
-        self.scs_cutoff = options.get_pol_scs_cutoff()
-        self.exponent = options.get_pol_exponent() 
+        self.scs_cutoff = options.pol_scs_cutoff
+        self.exponent = options.pol_exponent
 
     def compute_csix(self):
         'Compute C6 coefficients'

@@ -22,7 +22,7 @@ class System:
     'Common system class for molecular system'
 
     def __init__(self, options, xyz=None, log=False):
-        logger.setLevel(options.get_logger_level())
+        logger.setLevel(options.logger_level)
         # xyz and mps can't both be empty
         if not xyz:
             logger.error("Need an xyz file")
@@ -75,10 +75,10 @@ class System:
         if len(self.xyz) == 1:
             self.load_xyz()
     
-        self.mtp_to_disk = options.save_mtp_to_disk()
+        self.mtp_to_disk = options.multipole_save_to_disk
 
         if self.mtp_to_disk:
-            self.mtp_save_path = options.get_multipole_save_path()
+            self.mtp_save_path = options.multipole_save_path
 
 
     def __add__(self, sys):

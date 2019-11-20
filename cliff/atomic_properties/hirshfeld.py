@@ -19,36 +19,36 @@ logger = logging.getLogger(__name__)
 class Hirshfeld:
     'Hirshfeld class. Predicts Hirshfeld ratios.'
 
-    def __init__(self, _calculator):
-        self.calculator = _calculator
+    def __init__(self, options):
         self.descr_train = []
         self.target_train = []
         # kernel ridge regression
         self.alpha_train = None
         # support vector regression
         self.clf = None
-        logger.setLevel(self.calculator.get_logger_level())
-        self.max_neighbors = self.calculator.get_hirshfeld_max_neighbors()
-        self.krr_kernel = self.calculator.get_hirshfeld_krr_kernel()
-        self.krr_sigma = self.calculator.get_hirshfeld_krr_sigma()
-        self.krr_lambda = self.calculator.get_hirshfeld_krr_lambda()
-        self.svr_kernel = self.calculator.get_hirshfeld_svr_kernel()
-        self.svr_C = self.calculator.get_hirshfeld_svr_C()
-        self.svr_epsilon = self.calculator.get_hirshfeld_svr_epsilon()
+        logger.setLevel(options.logger_level)
+        self.max_neighbors = options.hirsh_max_neighbors
+        self.krr_kernel = options.hirsh_krr_kernel
+        self.krr_sigma  = options.hirsh_krr_sigma
+        self.krr_lambda = options.hirsh_krr_lambda
+        self.svr_kernel = options.hirsh_svr_kernel
+        self.svr_C = options.hirsh_svr_C
+        self.svr_epsilon = options.hirsh_svr_epsilon
 
-        self.from_file = _calculator.get_hirshfeld_file_read()
-        self.filepath = _calculator.get_hirshfeld_filepath()
+        self.from_file = options.hirsh_file_read
+        self.filepath  = options.hirsh_filepath
+        
+        self.training_file = options.hirsh_training
 
 
     def load_ml(self):
 
-        if self.from_file == 'True':
+        if self.from_file:
             return
 
-        training_file = self.calculator.get_hirshfeld_training()
         logger.info(
-            "Reading Hirshfeld training from %s" % training_file)
-        with open(training_file, 'rb') as f:
+            "Reading Hirshfeld training from %s" % self.training_file)
+        with open(self.training_file, 'rb') as f:
             self.descr_train, self.alpha_train = pickle.load(f, encoding='bytes')
 
     def train_ml(self, ml_method):

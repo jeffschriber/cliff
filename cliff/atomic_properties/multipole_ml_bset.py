@@ -33,20 +33,20 @@ class MultipoleMLBSet:
     '''
 
     def __init__(self, options, descriptor="coulombmatrix"):
-        logger.setLevel(options.get_logger_level())
+        logger.setLevel(options.logger_level)
         self.multipoles = None
         self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[]}
         self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[]}
         # support vector regression
         self.clf = None
-        self.max_neighbors = options.get_multipole_max_neighbors()
+        self.max_neighbors = options.multipole_max_neighbors
         # alpha_train has size 1,3,9
         self.max_coeffs = [1, 3, 9]
         self.offset_mtp = [0, 1, 4]
         self.alpha_train = {'H':None, 'C':None, 'O':None, 'N':None, 'S':None, 'Cl':None, 'F':None}
-        self.kernel = options.get_multipole_kernel()
-        self.krr_sigma = options.get_multipole_krr_sigma()
-        self.krr_lambda = options.get_multipole_krr_lambda()
+        self.kernel     = options.multipole_kernel
+        self.krr_sigma  = options.multipole_krr_sigma
+        self.krr_lambda = options.multipole_krr_lambda
         # Normalization of the target data - mean and std for each MTP component
         self.norm_tgt_mean = {'H':np.zeros((3)),'C':np.zeros((3)),'O':np.zeros((3)), 'N':np.zeros((3)), 'S':np.zeros((3)), 'Cl':np.zeros((3)), 'F':np.zeros((3))}
         self.norm_tgt_std  = {'H':np.ones((3)), 'C':np.ones((3)), 'O':np.ones((3)), 'N':np.ones((3)), 'S':np.ones((3)), 'Cl':np.ones((1)), 'F':np.zeros((3))}
@@ -57,14 +57,14 @@ class MultipoleMLBSet:
         self.qml_mols = []
         self.qml_filter_ele = []
         self.mbtypes = None
-        self.ref_mtp = options.get_multipole_ref_mtp()
+        self.ref_mtp = options.multipole_ref_mtp
 
         self.ref_path = ""
         
         if self.ref_mtp:
-            self.ref_path = options.get_multipole_ref_path()
+            self.ref_path = options.multipole_ref_path
 
-        self.correct_charge = options.get_multipole_correct_charge()
+        self.correct_charge = options.multipole_correct_charge
 
     def load_ml(self, load_file=None):
         '''Load machine learning model'''

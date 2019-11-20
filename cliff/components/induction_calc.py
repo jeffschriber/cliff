@@ -25,7 +25,7 @@ class InductionCalc(CPMultipoleCalc):
 
     def __init__(self, options, sys, cell, ind_sr=None, hirshfeld_pred="krr", v1=False):
         CPMultipoleCalc.__init__(self,options,sys,cell)
-        logger.setLevel(options.get_logger_level())
+        logger.setLevel(options.logger_level)
         self.cell = cell
         self.induced_dip = None
         self.energy_polarization = 0.0
@@ -44,16 +44,10 @@ class InductionCalc(CPMultipoleCalc):
         self.sys_comb = sys
         self.adens.predict_mol(self.sys_comb)
 
-        self.omega = options.get_induction_omega()
-        self.conv = options.get_induction_conv()        
-
-        self.ind_sr = options.get_induction_sr_params()
-        if ind_sr != None:
-            ele_ad = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
-            for n,ele in enumerate(ele_ad):
-                self.ind_sr[ele] = ind_sr[n]
-
-        self.smearing_coeff = options.get_induction_smearing_coeff()
+        self.omega = options.indu_omega
+        self.conv  = options.indu_conv        
+        self.ind_sr = options.indu_sr_params
+        self.smearing_coeff = options.indu_smearing_coeff
 
     def add_system(self, sys):
         CPMultipoleCalc.add_system(self, sys)

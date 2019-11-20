@@ -29,7 +29,7 @@ class Repulsion:
     def __init__(self,options, sys, cell, reps=None, v1=False):
         self.systems = [sys]
         self.atom_in_system = [0]*len(sys.elements)
-        logger.setLevel(options.get_logger_level())
+        logger.setLevel(options.logger_level)
         # Need a unit cell for distance calculations
         self.cell = cell
         # energy
@@ -43,16 +43,8 @@ class Repulsion:
         self.sys_comb = sys
         self.adens.predict_mol(self.sys_comb)
         # Load variables from config file
-        # Atom types defined
 
-
-
-        # Be sure ordering is canonical
-        self.rep = options.get_exchange_int_params()
-        if reps != None:
-            ele_ad = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
-            for n, ele in enumerate(ele_ad):
-                self.rep[ele] = reps[n]
+        self.rep = options.exch_int_params
 
     def add_system(self, sys):
         self.systems.append(sys)
