@@ -32,16 +32,19 @@ before_install:
   - python -V
 
     # for qml
-  - sudo apt-get update -qq
+  - if [ ${TRAVIS_OS_NAME} == "linux" ]; then 
+    sudo apt-get update -qq; fi
 
 install:
 
     # qml
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-    sudo apt-get install -qq gcc gfortran libblas-dev liblapack-dev; fi
-    sudo apt-get install -qq gcc-4.8 gfortran-4.8; else
+  - if [ ${TRAVIS_OS_NAME} == "linux" ]; then
+    sudo apt-get install -qq gcc gfortran libblas-dev liblapack-dev; 
+    sudo apt-get install -qq gcc-4.8 gfortran-4.8;
+    fi
+  - if [ ${TRAVIS_OS_NAME} == "osx" ]; then 
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)";
-    brew install gcc; i
+    brew install gcc;
     fi
 
     # Create test environment for package
