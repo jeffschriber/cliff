@@ -2,7 +2,7 @@
 #
 # Multipoles_ml_bset class. Predict multipole parameters from ML.
 # No local axis system. Instead, basis set expansion along the pairwise vectors.
-#
+
 # Tristan Bereau (2016)
 
 #from electrostatics import Electrostatics
@@ -37,6 +37,7 @@ class MultipoleMLBSet:
         self.multipoles = None
         self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[]}
         self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[]}
+        self.max_neighbors = options.multipole_max_neighbors
         # support vector regression
         self.clf = None
         # alpha_train has size 1,3,9
