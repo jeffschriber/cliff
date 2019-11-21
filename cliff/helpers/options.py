@@ -22,7 +22,7 @@ class Options:
         # Load config file
         self.Config.read(config_file)
         # Logger level
-        self.logger_level = 6
+        self.logger_level = 50
         self.logger.setLevel(self.logger_level)
         util.set_logger_level(self.logger_level)
 
@@ -389,7 +389,7 @@ class Options:
         try:
             self.elst_type =  self.Config.get("electrostatics","type")
         except:
-            return "damped_mtp"
+            pass
         
         try:
             ret = {}
