@@ -94,9 +94,9 @@ class InductionCalc(CPMultipoleCalc):
 
                 if (self.different_mols(i,j) and i < j):
                     #print "HERE", atom_typ[i], atom_typ[j]
-                    fmbis = self.slater_mbis(
-                    atom_coord[i], populations[i], valwidths[i], atom_typ[i],
-                    atom_coord[j], populations[j], valwidths[j], atom_typ[j])
+                    fmbis = utils.slater_mbis(self.cell,
+                    atom_coord[i], populations[i], valwidths[i], self.ind_sr[atom_typ[i]],
+                    atom_coord[j], populations[j], valwidths[j], self.ind_sr[atom_typ[j]])
  
                     self.energy_shortranged +=  self.ind_sr[atom_typ[i]] * self.ind_sr[atom_typ[j]] * fmbis #/ pair_count[pairs_key.index(pair)]
         logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
@@ -194,51 +194,6 @@ class InductionCalc(CPMultipoleCalc):
                         for k in range(3)])
                         for i in range(3)]
         return interac
-
-    def slater_mbis_v1(self, coord_i, N_i, v_i, typ_i, coord_j, N_j, v_j, typ_j):
-        "Short-ranged induction model as described in Vandenbrande et al., JCTC, 13 (2017)"
-        vec = self.cell.pbc_distance(coord_i, coord_j)
-        rij = np.linalg.norm(vec)
-        prefactor = 1.
-        for typ in [typ_i, typ_j]:
-            prefactor *= self.ind_sr[typ] if typ in self.ind_sr.keys() \
-                                        else self.ind_sr[typ[0]]
-      
-        #print(typ_i, typ_j, rij, slater_mbis_funcform(rij, N_i, v_i, N_j, v_j))
-        return prefactor * slater_mbis_funcform(rij, N_i, v_i, N_j, v_j)
-
-    def slater_mbis(self, coord_i, N_i, v_i, typ_i, coord_j, N_j, v_j, typ_j):
-        "Short-ranged induction model as described in Vandenbrande et al., JCTC, 13 (2017)"
-        vec = self.cell.pbc_distance(coord_i, coord_j)
-        rij = np.linalg.norm(vec)
-        prefactor = 1.
-        for typ in [typ_i, typ_j]:
-            prefactor *= self.ind_sr[typ] if typ in self.ind_sr.keys() \
-                                        else self.ind_sr[typ[0]]
-
-        #print( typ_i, typ_j, rij, slater_mbis_funcform(rij, N_i, v_i, N_j, v_j))
-        return prefactor * slater_mbis_funcform(rij, N_i, v_i, N_j, v_j)
-
-@jit
-def slater_mbis_funcform(rij, N_i, v_i, N_j, v_j):
-    v_i2, v_j2 = v_i**2, v_j**2
-    if abs(v_i-v_j) > 1e-3:
-        # regular formula
-        g0ab = -4*v_i2*v_j2/(v_i2-v_j2)**3
-        g1ab = v_i/(v_i2-v_j2)**2
-        g0ba = -4*v_j2*v_i2/(v_j2-v_i2)**3
-        g1ba = v_j/(v_j2-v_i2)**2
-        return N_i*N_j/(8*np.pi*rij) * \
-                            ((g0ab+g1ab*rij)*np.exp(-rij/v_i) \
-                            + (g0ba+g1ba*rij)*np.exp(-rij/v_j))
-    else:
-        rv = rij/v_i
-        rv2, rv3, rv4 = rv**2, rv**3, rv**4
-        exprv = np.exp(-rv)
-        return N_i*N_j * \
-            (1./(192*np.pi*v_i**3) * (3+3*rv+rv2) * exprv \
-            + (v_j-v_i)/(384*v_i**4) * (-9-9*rv-2*rv2+rv3) * exprv \
-            + (v_j-v_i)**2/(3840*v_i**5) * (90+90*rv+5*rv2-25*rv3+3*rv4) * exprv)
 
 def product_smeared_ind_dip(coord1, coord2, cell, at_pol1, at_pol2,
     smearing, ind_dip):

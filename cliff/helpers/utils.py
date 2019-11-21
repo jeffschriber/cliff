@@ -509,3 +509,42 @@ def compare_two_atomic_envs(moli, molj, at_i, at_j, rk):
 
 def symmetrize(a):
     return a + a.T - np.diag(a.diagonal())
+
+def slater_mbis(cell, coord_i, N_i, v_i, U_i, coord_j, N_j, v_j, U_j):  
+    """
+    Returns overlap of two atoms scaled by global parameters
+
+    @params:
+
+    """
+    
+    # Get interatomic distance
+    vec = cell.pbc_distance(coord_i, coord_j)
+    rij = np.linalg.norm(vec)
+
+    # Call function externally to enable jit
+    return U_i * U_j * slater_mbis_funcform(rij, N_i, v_i, N_j, v_j) 
+
+@jit
+def slater_mbis_funcform(rij, N_i, v_i, N_j, v_j):
+    v_i2, v_j2 = v_i**2, v_j**2
+    if abs(v_i-v_j) > 1e-3:
+        # regular formula
+        g0ab = -4*v_i2*v_j2/(v_i2-v_j2)**3
+        g1ab = v_i/(v_i2-v_j2)**2
+        g0ba = -4*v_j2*v_i2/(v_j2-v_i2)**3
+        g1ba = v_j/(v_j2-v_i2)**2
+        return N_i*N_j/(8*np.pi*rij) * \
+                            ((g0ab+g1ab*rij)*np.exp(-rij/v_i) \
+                            + (g0ba+g1ba*rij)*np.exp(-rij/v_j))
+    else:
+        rv = rij/v_i
+        rv2, rv3, rv4 = rv**2, rv**3, rv**4
+        exprv = np.exp(-rv)
+        return N_i*N_j * \
+            (1./(192*np.pi*v_i**3) * (3+3*rv+rv2) * exprv \
+            + (v_j-v_i)/(384*v_i**4) * (-9-9*rv-2*rv2+rv3) * exprv \
+            + (v_j-v_i)**2/(3840*v_i**5) * (90+90*rv+5*rv2-25*rv3+3*rv4) * exprv)
+
+
+
