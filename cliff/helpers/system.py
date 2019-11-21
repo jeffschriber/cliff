@@ -38,8 +38,6 @@ class System:
         # Coulomb matrix
         self.coulomb_mat = None
         self.atom_reorder = None
-        # Coulomb matrix within environment
-        self.coulmat_env = None
         # Coulomb matrix and derivatives
         self.coulmat_grads = None
         # Bag of bonds
@@ -131,13 +129,6 @@ class System:
             self.atom_reorder.append(reorder_atoms)
         return None
 
-    def build_coulmat_env(self, sys_comb, max_neighbors):
-        self.coulmat_env = []
-        for at in range(len(self.elements)):
-            self.coulmat_env.append(utils.build_coulomb_matrix_env(self.coords, self.elements,
-                at, max_neighbors, sys_comb.coords, sys_comb.elements))
-        return None
-
     def build_coulomb_grads(self, max_neighbors):
         self.coulmat_grads = []
         self.atom_reorder = []
@@ -172,26 +163,6 @@ class System:
         self.multipoles_grads = np.zeros((self.num_atoms,10))
         return None
 
-    def initialize_atomic_environment(self):
-        '''Store pairwise vectors and rotation matrices for
-        atomic environment descriptor'''
-        self.pairwise_vec = []
-        self.pairwise_norm = []
-        self.rot_mat = []
-        z = np.array([0.,0.,1.])
-        for i in range(self.num_atoms):
-            pair_i = []
-            pair_r_i = []
-            rot_i = []
-            for j in range(self.num_atoms):
-                v = self.coords[j] - self.coords[i]
-                pair_i.append(v)
-                pair_r_i.append(np.linalg.norm(v))
-                rot_i.append(utils.ab_rotation(v, z))
-            self.pairwise_vec.append(pair_i)
-            self.pairwise_norm.append(pair_r_i)
-            self.rot_mat.append(rot_i)
-        return None
 
     def compute_principal_axes(self):
         '''Project MTP coefficients (except for Q00) along each atom-atom vector.

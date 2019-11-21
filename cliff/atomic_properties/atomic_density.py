@@ -23,23 +23,14 @@ class AtomicDensity:
     def __init__(self,options):
         self.descr_train = []
         self.target_train = []
-        # With environment
-        self.descr_env_train = []
-        self.target_env_train = []
-        self.baseline_env_train = []
         # kernel ridge regression
         self.alpha_train = None
-        self.alpha_env_train = None
         logger.setLevel(options.logger_level)
         self.max_neighbors     = options.atomicdensity_max_neighbors
-        self.max_neighbors_env = options.atomicdensity_max_neighbors_env
         self.krr_sigma = options.atomicdensity_krr_sigma
         self.krr_lambda = options.atomicdensity_krr_lambda
-        self.krr_sigma_env = options.atomicdensity_krr_sigma_env
-        self.krr_gamma_env = options.atomicdensity_krr_gamma_env
         self.training_file = options.atomicdensity_training
 
-        self.training_env_file = options.atomicdensity_training_env
         self.use_ref_density = options.atomicdensity_ref_adens
         self.refpath = options.atomicdensity_refpath
 
@@ -107,71 +98,4 @@ class AtomicDensity:
         self.target_train += [[a,v] for a,v in zip(populations,valwidths)]
         #print("Added file to training set: %s" % new_system)
         logger.info("Added file to training set: %s" % new_system)
-        return None
-
-    def load_ml_env(self):
-        logger.info(
-            "Reading atomic-density refinement training from %s" % training_file)
-        with open(self.training_env_file, 'rb') as f:
-            self.descr_env_train, self.baseline_env_train, \
-                self.alpha_env_train = pickle.load(f)
-
-    def train_ml_env(self):
-        '''Train machine learning model embedded in environment.'''
-        size_training = len(self.target_env_train)
-        if len(self.descr_env_train) == 0:
-            print("No molecule in the training set.")
-            logger.error("No molecule in the training set.")
-            exit(1)
-        logger.info("building kernel matrix of size (%d,%d); %7.4f Gbytes" \
-            % (size_training, size_training, 8*size_training**2/1e9))
-        pairwise_dists = squareform(pdist(self.descr_env_train, 'cityblock'))
-        # Baseline predictions require nonzero self.alpha_train
-        if self.alpha_train is None:
-            raise ValueError("Can't learn refinement without baseline prediction")
-        baseline_dists = squareform(pdist(self.baseline_env_train, 'cityblock'))
-        kmat = scipy.exp(- pairwise_dists / self.krr_sigma_env
-                        - baseline_dists / self.krr_gamma_env)
-        kmat += self.krr_lambda*np.identity(len(self.target_env_train))
-        self.alpha_env_train = np.linalg.solve(kmat,self.target_env_train)
-        logger.info("training finished.")
-        return None
-
-    def predict_mol_env(self, _system, _env):
-        '''Predict coefficients within environment given descriptors.'''
-        _system.build_coulmat_env(_env, self.max_neighbors_env)
-        pairwise_dists = cdist(_system.coulmat_env, self.descr_env_train,
-            'cityblock')
-        # Baseline predictions require nonzero self.alpha_train
-        if self.alpha_train is None:
-            raise ValueError("Can't learn refinement without baseline prediction")
-        self.predict_mol(_system)
-        baseline_sys = [[a,v] for a,v in
-                    zip(_system.populations, _system.valence_widths)]
-        baseline_dists = cdist(baseline_sys, self.baseline_env_train, 'cityblock')
-        kmat = scipy.exp(- pairwise_dists / self.krr_sigma_env
-                        - baseline_dists / self.krr_gamma_env)
-        pred = np.dot(kmat,self.alpha_env_train)
-        _system.populations += pred.T[0]
-        _system.valence_widths += pred.T[1]
-        logger.info("Prediction (refinement): %s" % _system.populations)
-        return None
-
-    def add_mol_in_env_to_training(self, new_system, env, populations, valwidths):
-        '''Add molecule embedded in environment to training set with given
-        populations and valence widths.'''
-        new_system.build_coulmat_env(env, self.max_neighbors_env)
-        if len(valwidths) != len(new_system.coulmat_env):
-            raise ValueError("Inconsistency in training data (%d vs %d)" % (
-                    len(valwidths), len(new_system.coulmat_env)))
-        self.descr_env_train += new_system.coulmat_env
-        if self.alpha_train is None:
-            raise ValueError("Can't learn refinement without baseline prediction")
-        self.predict_mol(new_system)
-        self.baseline_env_train += [[a,v] for a,v in
-                    zip(new_system.populations, new_system.valence_widths)]
-        # Subtract out molecular prediction from target
-        self.target_env_train += [[a-a0,v-v0] for a,a0,v,v0 in
-                zip(populations,new_system.populations,valwidths,new_system.valence_widths)]
-        logger.info("Added file to env training set: %s" % new_system)
         return None

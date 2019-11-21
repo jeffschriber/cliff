@@ -39,7 +39,6 @@ class MultipoleMLBSet:
         self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[]}
         # support vector regression
         self.clf = None
-        self.max_neighbors = options.multipole_max_neighbors
         # alpha_train has size 1,3,9
         self.max_coeffs = [1, 3, 9]
         self.offset_mtp = [0, 1, 4]

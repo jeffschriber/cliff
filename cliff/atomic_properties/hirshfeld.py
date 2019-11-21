@@ -27,7 +27,6 @@ class Hirshfeld:
         # support vector regression
         self.clf = None
         logger.setLevel(options.logger_level)
-        self.max_neighbors = options.hirsh_max_neighbors
         self.krr_kernel = options.hirsh_krr_kernel
         self.krr_sigma  = options.hirsh_krr_sigma
         self.krr_lambda = options.hirsh_krr_lambda

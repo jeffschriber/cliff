@@ -80,28 +80,6 @@ def build_coulomb_matrix(coords, atom_types,
     # d[3:,3:] = 0.0
     return d[np.triu_indices(max_neighbors)],reorder
 
-def build_coulomb_matrix_env(coords, atom_types,
-    central_atom_id, max_neighbors, coords_env, attyp_env):
-    '''Build Coulomb matrix between central_atom_id and coords_env'''
-    # Consider coordinates of central_atom_id and coords_env
-    coords_sys = np.array([coords[central_atom_id]])
-    coords_sys = np.append(coords_sys, coords_env, axis=0)
-    attyp_sys  = np.array([atom_types[central_atom_id]])
-    attyp_sys  = np.append(attyp_sys, attyp_env, axis=0)
-    # Delete any duplicate atom
-    dupl = []
-    for i in range(1,len(coords_sys)):
-        # Remove any element in coords
-        for j in range(len(coords)):
-            d = np.linalg.norm(coords_sys[i] - coords[j])
-            if d < 1e-3:
-                dupl.append(i)
-    for m in reversed(dupl):
-        coords_sys = np.delete(coords_sys, m, 0)
-        attyp_sys  = np.delete(attyp_sys, m,0)
-
-    return build_coulomb_matrix(coords_sys, attyp_sys, 0, max_neighbors)[0]
-
 
 def coulomb_with_grads(coords, atom_types,
     central_atom_id, max_neighbors):
@@ -485,33 +463,6 @@ def rotated_quadrupoles(gamma, g2, expa, shg, chg, norm, roti, rotj):
                                             d_tmp[3*m+p][3*n+o] * \
                                             rotj.T[l2][o] * roti[p][k2]
     return d_rot
-
-def compare_two_atomic_envs(moli, molj, at_i, at_j, rk):
-    """Compare atomic environments of at_i in moli and at_j in molj"""
-    dim = 3**rk
-    d = np.zeros((dim,dim)) if dim > 1 else 0.
-    sig = 1.
-    norm = 1./(2*np.sqrt(np.pi*sig**2))**3
-    for i in range(moli.num_atoms):
-        if at_i is not i:
-            for j in range(molj.num_atoms):
-                if at_j is not j:
-                    if moli.elements[i] == molj.elements[j]:
-                        veci, vecj = moli.pairwise_vec[at_i][i], molj.pairwise_vec[at_j][j]
-                        ri, rj = moli.pairwise_norm[at_i][i], molj.pairwise_norm[at_j][j]
-                        alpha, gamma = (ri**2+rj**2)/(4*sig**2), ri*rj/(2*sig**2)
-                        g2 = gamma**2
-                        expa, chg, shg = np.exp(-alpha), np.cosh(gamma), np.sinh(gamma)
-                        base = expa/g2*(gamma * chg - shg)
-                        ele = moli.elements[i]
-                        if rk == 0:
-                            d += base * norm
-                        elif rk == 1:
-                            d += base * np.outer(veci, vecj.T)/(ri*rj) * norm
-                        else: #rk == 2
-                            roti, rotj = moli.rot_mat[at_i][i], molj.rot_mat[at_j][j]
-                            d += rotated_quadrupoles(gamma, g2, expa, shg, chg, norm, roti, rotj)
-    return d
 
 def symmetrize(a):
     return a + a.T - np.diag(a.diagonal())
