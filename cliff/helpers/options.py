@@ -389,7 +389,7 @@ class Options:
         try:
             self.elst_type =  self.Config.get("electrostatics","type")
         except:
-            return "damped_mtp"
+            pass
         
         try:
             ret = {}
