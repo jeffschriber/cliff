@@ -31,11 +31,12 @@ def get_energy(filename):
     #1. Initialize relevant variables
     
     #loads parameters contained on the config.init file
-    options = Options(testpath + 'ml_test/config.ini') 
+    options = Options(testpath + '/ml_test/config.ini') 
     
     # set the path for reference parameters
     options.set_hirshfeld_training(testpath + '/../models/small/hirshfeld_model_0.3.pkl') 
-    options.set_atomicdensity_refpath(testpath + '/../models/small/atomic_pop_width_0.3.pkl') 
+    options.set_atomicdensity_training(testpath + '/../models/small/atomic_pop_width_0.3.pkl') 
+    options.set_atomicdensity_max_neighbors(6)
     
     
     #defines cell parameters for grid computations
@@ -111,7 +112,7 @@ def get_energy(filename):
     
 filenames = {}
 current = {}
-mols = glob.glob(testpath + 'ml_test/*monoA-unCP.xyz')
+mols = glob.glob(testpath + '/ml_test/*monoA-unCP.xyz')
 for mol in mols:
     monA = mol 
     monB = mol.strip("monoA-unCP.xyz") + "-monoB-unCP.xyz"
@@ -120,38 +121,37 @@ for mol in mols:
     monA = monA.split('-mon')[0]
     filenames[monA] = filename
     current[monA] = get_energy(filename)
+    print(current)
     
 
-refs = {}
-with open(testpath + 's30/s30_ref_noml.json','r') as f:
-    refs = json.load(f)
+{'S66-10': (-6.196385430450525, 6.3447123433391726, -1.762645149490338, -2.859498486568814, -4.473816723170504)}
 
 def test_elst():
     for k,v in current.items():
-        r = refs[k]
+        r = -6.196385430450525
         en = v[0]
-        assert (en - r[0]) < 1e-9
+        assert (en - r) < 1e-9
 
 def test_exch():
     for k,v in current.items():
-        r = refs[k]
+        r = 6.3447123433391726
         en = v[1]
-        assert (en - r[1]) < 1e-9
+        assert (en - r) < 1e-9
 
 def test_ind():
     for k,v in current.items():
-        r = refs[k]
+        r = -1.762645149490338
         en = v[2]
-        assert (en - r[2]) < 1e-9
+        assert (en - r) < 1e-9
 
 def test_disp():
     for k,v in current.items():
-        r = refs[k]
+        r = -2.859498486568814
         en = v[3]
-        assert (en - r[3]) < 1e-9
+        assert (en - r) < 1e-9
 
 def test_total():
     for k,v in current.items():
-        r = refs[k]
+        r = -4.473816723170504
         en = v[4]
-        assert (en - r[4]) < 1e-9
+        assert (en - r) < 1e-9

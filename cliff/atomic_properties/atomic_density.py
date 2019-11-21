@@ -38,6 +38,7 @@ class AtomicDensity:
         self.krr_sigma_env = options.atomicdensity_krr_sigma_env
         self.krr_gamma_env = options.atomicdensity_krr_gamma_env
         self.training_file = options.atomicdensity_training
+
         self.training_env_file = options.atomicdensity_training_env
         self.use_ref_density = options.atomicdensity_ref_adens
         self.refpath = options.atomicdensity_refpath
