@@ -7,7 +7,9 @@ matrix:
     # Extra includes for OSX since python language is not available by default on OSX
     - os: osx
       language: generic
-      env: PYTHON_VER=3.6
+      env: 
+        - PYTHON_VER=3.6
+        - NUMBA_DISABLE_JIT=1 # disable for codecov, will be slower 
 #    - os: osx
 #      language: generic
 #      env: PYTHON_VER=3.7
@@ -15,7 +17,9 @@ matrix:
 
     - os: linux
       language: generic  # No need to set Python version since its conda
-      env: PYTHON_VER=3.6
+      env: 
+        - PYTHON_VER=3.6
+        - NUMBA_DISABLE_JIT=1 # disable for codecov, will be slower 
 #    - os: linux
 #      language: generic
 #      env: PYTHON_VER=3.7
