@@ -82,7 +82,7 @@ class Hirshfeld:
         '''Predict coefficients given  descriptors.'''
 
         _system.build_coulomb_matrices(self.max_neighbors)
-        if self.from_file == "True" :
+        if self.from_file:
             h_ratios = []
             for hfile in _system.xyz:
                 hfile = self.filepath + hfile.split('/')[-1]

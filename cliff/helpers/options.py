@@ -152,7 +152,11 @@ class Options:
 
         # no default
         try:
-            self.hirsh_file_read = self.Config.get("hirshfeld","ref_hirsh")
+            val = self.Config.get("hirshfeld","ref_hirsh")
+            if val in ["True", "true", "t", "1"]:
+                self.hirsh_file_read = True 
+            else:
+                self.hirsh_file_read = False
         except:
             pass
 
