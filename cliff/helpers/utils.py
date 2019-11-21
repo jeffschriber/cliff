@@ -271,21 +271,6 @@ def neighboring_vectors(coords, atom_types, central_atom_id):
     ngb_vecs.resize((3,3))
     return ngb_vecs, vec_all_dir
 
-def find_orthogonal_vec(vec):
-    """Find a vector orthogonal to vec"""
-    aligned = True
-    vec_tmp = np.ones(3)
-    while aligned is True:
-        for i in range(3):
-            vec_tmp[i] += np.random.rand()
-        vec_tmp /= np.linalg.norm(vec_tmp)
-        # 0 vector -> any orthogonal vector will do
-        if np.linalg.norm(vec) < 1e-8:
-            aligned = False
-        elif abs(np.dot(vec_tmp,vec)/np.linalg.norm(vec) - 1.0) > 0.1:
-            aligned = False
-    return np.cross(vec,vec_tmp)
-
 def extract_atomic_numbers(cartesian,atom_types):
     '''Extract atomic number from name of atom type'''
     # Parse atom type, then read from dictionary
@@ -308,6 +293,27 @@ def atom_dens_free(at_coord, at_typ, pos, atom):
     ra = constants.rad_free[at_typ]
     return 1/((2*math.pi)**(1.5)*ra**3)*math.exp(
         -np.linalg.norm(pos-at_coord)**2/(2.*ra**2))
+
+@jit
+def convert_mtps_to_cartesian(mtp_sph, stone_convention):
+    'Convert spherical MTPs to cartesian'
+    # q={0,1,2} => 1+3+9 = 13 parameters
+    mtp_cart = np.zeros((len(mtp_sph),13))
+    if len(mtp_sph) == 0:
+        logger.error("Multipoles not initialized!")
+        print("Multipoles not initialized!")
+        exit(1)
+    for i in range(len(mtp_sph)):
+        mtp_cart[i][0] = mtp_sph[i][0]
+        mtp_cart[i][1] = mtp_sph[i][1]
+        mtp_cart[i][2] = mtp_sph[i][2]
+        mtp_cart[i][3] = mtp_sph[i][3]
+        # Convert spherical quadrupole
+        cart_quad = utils.spher_to_cart(
+                        mtp_sph[i][4:9], stone_convention=stone_convention)
+        # xx, xy, xz, yx, yy, yz, zx, zy, zz
+        mtp_cart[i][4:13] = cart_quad.reshape((1,9))
+    return mtp_cart
 
 @jit
 def spher_to_cart(quad, stone_convention=True):

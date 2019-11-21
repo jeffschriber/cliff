@@ -251,23 +251,3 @@ def interaction_tensor_third(vec, at_pol1, at_pol2, smearing,
     return - lambda7*15*vec[dir1]*vec[dir2]*vec[dir3]*ri7 \
             + lambda5*3*(coeff1+coeff2+coeff3)*ri5
 
-@jit
-def convert_mtps_to_cartesian(mtp_sph, stone_convention):
-    'Convert spherical MTPs to cartesian'
-    # q={0,1,2} => 1+3+9 = 13 parameters
-    mtp_cart = np.zeros((len(mtp_sph),13))
-    if len(mtp_sph) == 0:
-        logger.error("Multipoles not initialized!")
-        print("Multipoles not initialized!")
-        exit(1)
-    for i in range(len(mtp_sph)):
-        mtp_cart[i][0] = mtp_sph[i][0]
-        mtp_cart[i][1] = mtp_sph[i][1]
-        mtp_cart[i][2] = mtp_sph[i][2]
-        mtp_cart[i][3] = mtp_sph[i][3]
-        # Convert spherical quadrupole
-        cart_quad = utils.spher_to_cart(
-                        mtp_sph[i][4:9], stone_convention=stone_convention)
-        # xx, xy, xz, yx, yy, yz, zx, zy, zz
-        mtp_cart[i][4:13] = cart_quad.reshape((1,9))
-    return mtp_cart

@@ -108,21 +108,3 @@ class Dispersion(Polarizability):
             3*sum(self.freq_scaled)) * constants.au2kcalmol
         logger.info("energy: %7.4f kcal/mol" % self.energy)
         return None
-
-    def pairwise(self):
-        self.energy = 0.
-        for ati in range(self.num_atoms):
-            for atj in range(self.num_atoms):
-                if ati != atj:
-                    sigma = self.radius * (self.radius_vdw(ati) + \
-                                self.radius_vdw(atj))
-                    rij = self.cell.pbc_distance(self.system.coords[ati], \
-                                self.system.coords[atj])*constants.a2b
-                    rijn = np.linalg.norm(rij)
-                    self.energy -= self.csix_coeff[ati]*self.csix_coeff[atj] / \
-                        (self.pol_scaled[atj]/self.pol_scaled[ati] * self.csix_coeff[ati] +
-                        self.pol_scaled[ati]/self.pol_scaled[atj] * self.csix_coeff[atj]) / \
-                        rijn**6 * cutoff(rijn, sigma, self.scs_cutoff)
-        self.energy *= constants.au2kcalmol
-        logger.info("pairwise energy: %7.4f kcal/mol" % self.energy)
-        return None
