@@ -121,14 +121,12 @@ for mol in mols:
     monA = monA.split('-mon')[0]
     filenames[monA] = filename
     current[monA] = get_energy(filename)
-    print(current)
     
 
-{'S66-10': (-6.196385430450525, 6.3447123433391726, -1.762645149490338, -2.859498486568814, -4.473816723170504)}
 
 def test_elst():
     for k,v in current.items():
-        r = -6.196385430450525
+        r = -5.027323209193627
         en = v[0]
         assert (en - r) < 1e-9
 
@@ -140,7 +138,7 @@ def test_exch():
 
 def test_ind():
     for k,v in current.items():
-        r = -1.762645149490338
+        r = -1.6780631768387664
         en = v[2]
         assert (en - r) < 1e-9
 
@@ -152,6 +150,6 @@ def test_disp():
 
 def test_total():
     for k,v in current.items():
-        r = -4.473816723170504
+        r = -3.220172529262035
         en = v[4]
         assert (en - r) < 1e-9

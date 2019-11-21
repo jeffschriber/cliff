@@ -226,12 +226,12 @@ class Options:
             pass
 
         try:
-            self.atomicdensity_krr_sigma = self.Config.get("atomicdensity","krr_sigma")
+            self.atomicdensity_krr_sigma = self.Config.getfloat("atomicdensity","krr_sigma")
         except:
             pass
 
         try:
-            self.atomicdensity_krr_lambda = self.Config.get("atomicdensity","krr_lambda")
+            self.atomicdensity_krr_lambda = self.Config.getfloat("atomicdensity","krr_lambda")
         except:
             pass
 
@@ -309,12 +309,12 @@ class Options:
             pass
 
         try:
-            self.multipole_krr_sigma = self.Config.get("multipoles","krr_sigma")
+            self.multipole_krr_sigma = self.Config.getfloat("multipoles","krr_sigma")
         except:
             pass
 
         try:
-            self.multipole_krr_lambda = self.Config.get("multipoles","krr_lambda")
+            self.multipole_krr_lambda = self.Config.getfloat("multipoles","krr_lambda")
         except:
             pass
 
