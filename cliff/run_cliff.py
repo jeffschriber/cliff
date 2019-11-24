@@ -17,6 +17,7 @@ import operator
 import sys
 import argparse
 import os
+import glob
 
 import cliff
 from cliff.helpers.options import Options
@@ -50,11 +51,25 @@ def get_infile(args):
 
     return infile
 
-def get_filenames(args)
+def get_filenames(args):
     
     files = []
 
-    
+    if args.files == None:
+        # check for cwd
+        files = glob.glob('./*.xyz')
+        if len(files) == 0:
+            raise Exception("Cannot file xyz files!")
+        else:
+            print("Found {} files".format(len(files)))        
+    else:
+        files = glob.glob(args.files + '*.xyz')    
+        if len(files) == 0:
+            raise Exception("Cannot file xyz files!")
+        else:
+            print("Found {} files".format(len(files)))        
+        
+    return files
 
 def get_energy(filenames, config):
     np.set_printoptions(precision=4, suppress=True, linewidth=100)
@@ -83,51 +98,51 @@ def get_energy(filenames, config):
         mols.append(System(xyz))
         xyzs.append(xyz)
     
-#    for mol,xyz in zip(mols,xyzs):
-#        #predicts monomer multipole moments for each monomer
-#        mtp_ml.predict_mol(mol)
-#        #predicts Hirshfeld ratios usin KRR
-#        hirsh.predict_mol(mol,"krr")
-#    
-#    #initializes relevant classes with monomer A
-#    mtp = CPMultipoleCalc(mols[0], cell)
-#    ind = InductionCalc(mols[0], cell)
-#    rep = Repulsion(mols[0], cell)
-#    
-#    #adds monomer B
-#    for mol in mols[1:]:
-#        mtp.add_system(mol)
-#        ind.add_system(mol)
-#        rep.add_system(mol)
-#    
-#    #computes electrostatic, induction and exchange energies
-#    elst = mtp.mtp_energy()
-#    indu = ind.polarization_energy()
-#    exch = rep.compute_repulsion("slater_mbis")
-#    
-#    #creat dimer
-#    dimer = reduce(operator.add, mols)
-#
-#    #compute hirshfeld_ratios in the dimer basis 
-#    hirsh.predict_mol(dimer, "krr")   
-#    
-#    #use Hirshfeld ratios in the computation of dispersion energy
-#    #as disp = E_dim - E_monA - E_monB
-#    disp = 0.0
-#    for i, mol in enumerate([dimer] + mols):
-#        fac = 1.0 if i == 0 else -1.0
-#        #initialize Dispersion class 
-#        mbd = Dispersion(mol, cell)
-#        #compute C6 coefficients
-#        mbd.compute_csix()
-#        #compute anisotropic characteristic frequencies
-#        mbd.compute_freq_scaled_anisotropic()
-#        #execute MBD protocol
-#        mbd.mbd_protocol(None,None,None)
-#        disp += fac * mbd.energy
-#     
-#    # for printing
-#    return elst, exch, indu, disp,  elst+exch+indu+disp
+    for mol,xyz in zip(mols,xyzs):
+        #predicts monomer multipole moments for each monomer
+        mtp_ml.predict_mol(mol)
+        #predicts Hirshfeld ratios usin KRR
+        hirsh.predict_mol(mol,"krr")
+    
+    #initializes relevant classes with monomer A
+    mtp = CPMultipoleCalc(mols[0], cell)
+    ind = InductionCalc(mols[0], cell)
+    rep = Repulsion(mols[0], cell)
+    
+    #adds monomer B
+    for mol in mols[1:]:
+        mtp.add_system(mol)
+        ind.add_system(mol)
+        rep.add_system(mol)
+    
+    #computes electrostatic, induction and exchange energies
+    elst = mtp.mtp_energy()
+    indu = ind.polarization_energy()
+    exch = rep.compute_repulsion("slater_mbis")
+    
+    #creat dimer
+    dimer = reduce(operator.add, mols)
+
+    #compute hirshfeld_ratios in the dimer basis 
+    hirsh.predict_mol(dimer, "krr")   
+    
+    #use Hirshfeld ratios in the computation of dispersion energy
+    #as disp = E_dim - E_monA - E_monB
+    disp = 0.0
+    for i, mol in enumerate([dimer] + mols):
+        fac = 1.0 if i == 0 else -1.0
+        #initialize Dispersion class 
+        mbd = Dispersion(mol, cell)
+        #compute C6 coefficients
+        mbd.compute_csix()
+        #compute anisotropic characteristic frequencies
+        mbd.compute_freq_scaled_anisotropic()
+        #execute MBD protocol
+        mbd.mbd_protocol(None,None,None)
+        disp += fac * mbd.energy
+     
+    # for printing
+    return elst, exch, indu, disp,  elst+exch+indu+disp
 
 def print_banner(): 
     title = ''' 
