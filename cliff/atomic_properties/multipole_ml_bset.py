@@ -68,10 +68,13 @@ class MultipoleMLBSet:
         self.correct_charge = options.multipole_correct_charge
 
         ## Load the models on init
+        mtp_s = time.time()
         mtp_models = glob.glob(options.multipole_training + '/*.pkl') 
         for model in mtp_models:
             self.load_ml(model)
-        print("    Loaded {} multipole models in {}".format(len(mtp_models), options.multipole_training))
+        mtp_e = time.time() 
+        print("    Loaded {} multipole models in:\n\t\t {}".format(len(mtp_models), options.multipole_training))
+        print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
 
 
 

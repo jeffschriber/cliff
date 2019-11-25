@@ -37,7 +37,7 @@ class Dispersion(Polarizability):
         if beta != None:
             self.beta = beta
         if scs_cutoff != None:
-            self.scs_cutoff = cutoff
+            self.scs_cutoff = scs_cutoff
 
         #print("Using parameters: %f, %f, and %f" %(radius,beta,scs_cutoff))
         for ati in range(self.num_atoms):

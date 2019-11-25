@@ -9,11 +9,53 @@ import re
 import logging
 import math
 import copy
+import glob
+import os
 import cliff.helpers.constants as constants
 from numba import jit
 
 # Set logger
 logger = logging.getLogger(__name__)
+
+def file_finder(jobdir):
+    """
+    Compiles xyz files for multiple computations
+    
+    dirs points to directories, one for each computation
+    """
+    
+    # check current directory if none is passed
+    if jobdir == None:
+        jobdir = './'
+
+    # Gather directories in jobdir
+    jobdirs = [ name for name in os.listdir(jobdir) if os.path.isdir(os.path.join(jobdir, name)) ]
+    
+
+    if len(jobdirs) == 0:
+        raise Exception("Cannot find job directories!")
+    else:
+        print("    Found {} job directories".format(len(jobdirs)))        
+        
+    master_xyzs = []
+    filesum = 0
+    for n, jd in enumerate(jobdirs):
+        filelist = glob.glob(jd + '/*.xyz')
+        
+        if len(filelist) == 0:
+            print("WARNING: Job {} does not contain any files!".format(n))
+
+        filesum += len(filelist)
+        master_xyzs.append(filelist)
+
+    if filesum == 0:
+        raise Exception("Cannot file xyz files!")
+    else:
+        print("    Found {} xyz files".format(filesum))        
+
+
+    return master_xyzs
+
 
 def read_file(infile):
     'Read file and return content'

@@ -77,7 +77,7 @@ def get_energy(filename):
     
     #computes electrostatic, induction and exchange energies
     elst = mtp.mtp_energy()
-    indu = ind.polarization_energy(options)
+    indu = ind.polarization_energy(options,0.5478502)
     exch = rep.compute_repulsion("slater_mbis")
     
     #creat dimer
@@ -98,7 +98,7 @@ def get_energy(filename):
         #compute anisotropic characteristic frequencies
         mbd.compute_freq_scaled_anisotropic()
         #execute MBD protocol
-        mbd.mbd_protocol(None,None,None)
+        mbd.mbd_protocol(radius=0.57785, beta=2.40871,scs_cutoff=5.01451)
         disp += fac * mbd.energy
      
     # for printing

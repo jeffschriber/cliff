@@ -23,6 +23,7 @@ import cliff
 from cliff.helpers.options import Options
 from cliff.helpers.cell import Cell
 from cliff.helpers.system import System
+import cliff.helpers.utils as Utils
 from cliff.atomic_properties.hirshfeld import Hirshfeld
 from cliff.atomic_properties.multipole_ml_bset import MultipoleMLBSet
 from cliff.components.cp_multipoles import CPMultipoleCalc
@@ -56,26 +57,6 @@ def get_infile(args):
 
     print("    Loading options from {}".format(infile))
     return infile
-
-def get_filenames(args):
-    
-    files = []
-
-    if args.files == None:
-        # check for cwd
-        files = glob.glob('./*.xyz')
-        if len(files) == 0:
-            raise Exception("Cannot file xyz files!")
-        else:
-            print("    Found {} files".format(len(files)))        
-    else:
-        files = glob.glob(args.files + '*.xyz')    
-        if len(files) == 0:
-            raise Exception("Cannot file xyz files!")
-        else:
-            print("    Found {} xyz files".format(len(files)))        
-        
-    return files
 
 def get_energy(filenames, config):
     np.set_printoptions(precision=4, suppress=True, linewidth=100)
@@ -194,9 +175,9 @@ def canvas(with_attribution=True):
         Compiled string including quote and optional attribution
     """
 
-    quote = "The code is but a canvas to our imagination."
+    quote = "    The code is but a canvas to our imagination."
     if with_attribution:
-        quote += "\n\t- Adapted from Henry David Thoreau"
+        quote += "\n\t    - Adapted from Henry David Thoreau"
     return quote
 
 
@@ -206,8 +187,10 @@ if __name__ == "__main__":
 
     args = init_args()
     infile = get_infile(args)
-    filenames = get_filenames(args)
 
-    en = get_energy(filenames, infile)
-    print(en)
+    job_list = Utils.file_finder(args.files)
+    for filenames in job_list:
+        en = get_energy(filenames, infile)
+        print(en)
+
     print(canvas())
