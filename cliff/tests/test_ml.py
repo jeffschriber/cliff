@@ -53,7 +53,7 @@ def get_energy(filename):
 
     pkls = ['H.pkl', 'C.pkl', 'O.pkl', 'N.pkl']
     for pkl in pkls:
-        mtp_ml.load_ml(testpath + '/../models/small/' + pkl)
+        mtp_ml.load_ml(testpath + '/../models/small/mtp/' + pkl)
     
     #loads monomer geometries
     mols = []
