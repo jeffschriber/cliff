@@ -22,8 +22,13 @@ import glob
 import cliff
 from cliff.helpers.options import Options
 from cliff.helpers.cell import Cell
+from cliff.helpers.system import System
 from cliff.atomic_properties.hirshfeld import Hirshfeld
 from cliff.atomic_properties.multipole_ml_bset import MultipoleMLBSet
+from cliff.components.cp_multipoles import CPMultipoleCalc
+from cliff.components.repulsion import Repulsion
+from cliff.components.induction_calc import InductionCalc
+from cliff.components.dispersion import Dispersion
 
 def init_args():
     parser = argparse.ArgumentParser(description="CLIFF: a Component-based Learned Intermolecular Force Field")
@@ -49,6 +54,7 @@ def get_infile(args):
         else:
             infile = args.input                
 
+    print("    Loading options from {}".format(infile))
     return infile
 
 def get_filenames(args):
@@ -61,13 +67,13 @@ def get_filenames(args):
         if len(files) == 0:
             raise Exception("Cannot file xyz files!")
         else:
-            print("Found {} files".format(len(files)))        
+            print("    Found {} files".format(len(files)))        
     else:
         files = glob.glob(args.files + '*.xyz')    
         if len(files) == 0:
             raise Exception("Cannot file xyz files!")
         else:
-            print("Found {} files".format(len(files)))        
+            print("    Found {} xyz files".format(len(files)))        
         
     return files
 
@@ -95,7 +101,7 @@ def get_energy(filenames, config):
     xyzs = [] 
     for xyz in filenames:
         #computes descriptor for each monomer   
-        mols.append(System(xyz))
+        mols.append(System(options, xyz))
         xyzs.append(xyz)
     
     for mol,xyz in zip(mols,xyzs):
@@ -105,9 +111,9 @@ def get_energy(filenames, config):
         hirsh.predict_mol(mol,"krr")
     
     #initializes relevant classes with monomer A
-    mtp = CPMultipoleCalc(mols[0], cell)
-    ind = InductionCalc(mols[0], cell)
-    rep = Repulsion(mols[0], cell)
+    mtp = CPMultipoleCalc(options,mols[0], cell)
+    ind = InductionCalc(options, mols[0], cell)
+    rep = Repulsion(options, mols[0], cell)
     
     #adds monomer B
     for mol in mols[1:]:
@@ -117,7 +123,7 @@ def get_energy(filenames, config):
     
     #computes electrostatic, induction and exchange energies
     elst = mtp.mtp_energy()
-    indu = ind.polarization_energy()
+    indu = ind.polarization_energy(options)
     exch = rep.compute_repulsion("slater_mbis")
     
     #creat dimer
@@ -132,7 +138,7 @@ def get_energy(filenames, config):
     for i, mol in enumerate([dimer] + mols):
         fac = 1.0 if i == 0 else -1.0
         #initialize Dispersion class 
-        mbd = Dispersion(mol, cell)
+        mbd = Dispersion(options, mol, cell)
         #compute C6 coefficients
         mbd.compute_csix()
         #compute anisotropic characteristic frequencies
@@ -153,8 +159,7 @@ def print_banner():
                                __/         \__
                      _        /               \         
                    _/ \   ___/                 \        
-                  /    \_/                      \   
-                _/                               |  
+                __/    \_/                      \   
                / _____ _      _____ _____ _____  |  
               / / ____| |    |_   _|  ___|  ___| |  
              / | |    | |      | | | |__ | |__   |  
@@ -203,6 +208,6 @@ if __name__ == "__main__":
     infile = get_infile(args)
     filenames = get_filenames(args)
 
-    get_energy(filenames, infile)
-
+    en = get_energy(filenames, infile)
+    print(en)
     print(canvas())

@@ -19,6 +19,7 @@ import math
 import os
 import copy
 import time
+import glob
 # qml
 import qml
 from qml.representations import get_slatm_mbtypes
@@ -65,6 +66,14 @@ class MultipoleMLBSet:
             self.ref_path = options.multipole_ref_path
 
         self.correct_charge = options.multipole_correct_charge
+
+        ## Load the models on init
+        mtp_models = glob.glob(options.multipole_training + '/*.pkl') 
+        for model in mtp_models:
+            self.load_ml(model)
+        print("    Loaded {} multipole models in {}".format(len(mtp_models), options.multipole_training))
+
+
 
     def load_ml(self, load_file=None):
         '''Load machine learning model'''

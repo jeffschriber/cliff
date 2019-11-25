@@ -299,7 +299,7 @@ class Options:
             pass
 
         try:
-            self.multipole_training = self.Config.getint("multipoles","training")
+            self.multipole_training = self.Config.get("multipoles","training")
         except:
             pass
 
