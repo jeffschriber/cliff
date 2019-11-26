@@ -107,7 +107,8 @@ def get_energy(filename):
     
 filenames = {}
 current = {}
-mols = glob.glob(testpath + 's30/xyzs/*monoA-unCP.xyz')
+mols = glob.glob(testpath + 's30/xyzs/*/*monoA-unCP.xyz')
+mols = sorted(mols)
 for mol in mols:
     monA = mol 
     monB = mol.strip("monoA-unCP.xyz") + "-monoB-unCP.xyz"
@@ -117,37 +118,40 @@ for mol in mols:
     filenames[monA] = filename
     current[monA] = get_energy(filename)
     
+#with open(testpath + 's30/s30_ref.json','w') as f:
+#    json.dump(current,f)
+#exit()
 
 refs = {}
-with open(testpath + 's30/s30_ref_noml.json','r') as f:
+with open(testpath + 's30/s30_ref.json','r') as f:
     refs = json.load(f)
 
 def test_elst():
     for k,v in current.items():
         r = refs[k]
         en = v[0]
-        assert (en - r[0]) < 1e-9
+        assert (en - r[0]) < 1e-5
 
 def test_exch():
     for k,v in current.items():
         r = refs[k]
         en = v[1]
-        assert (en - r[1]) < 1e-9
+        assert (en - r[1]) < 1e-5
 
 def test_ind():
     for k,v in current.items():
         r = refs[k]
         en = v[2]
-        assert (en - r[2]) < 1e-9
+        assert (en - r[2]) < 1e-5
 
 def test_disp():
     for k,v in current.items():
         r = refs[k]
         en = v[3]
-        assert (en - r[3]) < 1e-9
+        assert (en - r[3]) < 1e-5
 
 def test_total():
     for k,v in current.items():
         r = refs[k]
         en = v[4]
-        assert (en - r[4]) < 1e-9
+        assert (en - r[4]) < 1e-5

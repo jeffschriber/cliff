@@ -66,23 +66,36 @@ class Repulsion:
         # Setup list of atoms to sum over
         atom_coord  = [crd for sys in self.systems
                         for _,crd in enumerate(sys.coords)]
-        atom_ele    = [ele for sys in self.systems
-                        for _,ele in enumerate(sys.elements)]
-        atom_bnd   = [bnd for sys in self.systems
-                            for _,bnd in enumerate(sys.bonded_atoms)]
-        atom_typ   = [typ for sys in self.systems
+       # atom_ele    = [ele for sys in self.systems
+       #                 for _,ele in enumerate(sys.elements)]
+       # atom_bnd   = [bnd for sys in self.systems
+       #                     for _,bnd in enumerate(sys.bonded_atoms)]
+        atom_type  = [typ for sys in self.systems
                             for _,typ in enumerate(sys.atom_types)]
         #print("Types", atom_typ)# for getting U
         populations = [p for _,p in enumerate(self.sys_comb.populations)]
         valwidths   = [v/constants.a2b for sys in self.systems
                         for _,v in enumerate(sys.valence_widths)]
  
-        self.energy = sum([utils.slater_mbis(self.cell,
-                atom_coord[i], populations[i], valwidths[i], self.rep[atom_typ[i]],
-                atom_coord[j], populations[j], valwidths[j], self.rep[atom_typ[j]])
-                for i,_ in enumerate(atom_coord)
-                for j,_ in enumerate(atom_coord)
-                if self.different_mols(i,j) and i<j])
+        #self.energy = sum([utils.slater_mbis(self.cell,
+        #        atom_coord[i], populations[i], valwidths[i], self.rep[atom_typ[i]],
+        #        atom_coord[j], populations[j], valwidths[j], self.rep[atom_typ[j]])
+        #        for i,_ in enumerate(atom_coord)
+        #        for j,_ in enumerate(atom_coord)
+        #        if self.different_mols(i,j) and i<j])
+        self.energy = 0.0
+        for i,_ in enumerate(atom_coord):
+            for j,_ in enumerate(atom_coord):
+                if self.different_mols(i,j) and i<j :
+                    self.energy += utils.slater_mbis(self.cell, 
+                    atom_coord[i], populations[i], valwidths[i], self.rep[atom_type[i]],
+                    atom_coord[j], populations[j], valwidths[j], self.rep[atom_type[j]])
+
+
+#                    print(atom_type[i],i,atom_type[j],j, utils.slater_mbis(self.cell,
+#                        atom_coord[i], populations[i], valwidths[i], self.rep[atom_type[i]],
+#                        atom_coord[j], populations[j], valwidths[j], self.rep[atom_type[j]])) 
+
 
         logger.info("Energy: %7.4f kcal/mol" % self.energy)
         return self.energy

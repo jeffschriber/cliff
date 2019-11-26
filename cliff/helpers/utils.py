@@ -29,7 +29,7 @@ def file_finder(jobdir):
         jobdir = './'
 
     # Gather directories in jobdir
-    jobdirs = [ name for name in os.listdir(jobdir) if os.path.isdir(os.path.join(jobdir, name)) ]
+    jobdirs = [ os.path.join(jobdir,name) for name in os.listdir(jobdir) if os.path.isdir(os.path.join(jobdir, name)) ]
     
 
     if len(jobdirs) == 0:
@@ -41,7 +41,6 @@ def file_finder(jobdir):
     filesum = 0
     for n, jd in enumerate(jobdirs):
         filelist = glob.glob(jd + '/*.xyz')
-        
         if len(filelist) == 0:
             print("WARNING: Job {} does not contain any files!".format(n))
 
@@ -49,7 +48,7 @@ def file_finder(jobdir):
         master_xyzs.append(filelist)
 
     if filesum == 0:
-        raise Exception("Cannot file xyz files!")
+        raise Exception("Cannot find xyz files!")
     else:
         print("    Found {} xyz files".format(filesum))        
 
@@ -520,14 +519,13 @@ def slater_mbis(cell, coord_i, N_i, v_i, U_i, coord_j, N_j, v_j, U_j):
     # Get interatomic distance
     vec = cell.pbc_distance(coord_i, coord_j)
     rij = np.linalg.norm(vec)
-
     # Call function externally to enable jit
     return U_i * U_j * slater_mbis_funcform(rij, N_i, v_i, N_j, v_j) 
 
 @jit
 def slater_mbis_funcform(rij, N_i, v_i, N_j, v_j):
     v_i2, v_j2 = v_i**2, v_j**2
-    if abs(v_i-v_j) > 1e-3:
+    if abs(v_i-v_j) > 1e-4: # Original IPML uses 1e-3
         # regular formula
         g0ab = -4*v_i2*v_j2/(v_i2-v_j2)**3
         g1ab = v_i/(v_i2-v_j2)**2
@@ -537,13 +535,14 @@ def slater_mbis_funcform(rij, N_i, v_i, N_j, v_j):
                             ((g0ab+g1ab*rij)*np.exp(-rij/v_i) \
                             + (g0ba+g1ba*rij)*np.exp(-rij/v_j))
     else:
-        rv = rij/v_i
+        v = 0.5 * (v_i + v_j)
+        rv = rij/v
         rv2, rv3, rv4 = rv**2, rv**3, rv**4
         exprv = np.exp(-rv)
         return N_i*N_j * \
-            (1./(192*np.pi*v_i**3) * (3+3*rv+rv2) * exprv \
-            + (v_j-v_i)/(384*v_i**4) * (-9-9*rv-2*rv2+rv3) * exprv \
-            + (v_j-v_i)**2/(3840*v_i**5) * (90+90*rv+5*rv2-25*rv3+3*rv4) * exprv)
+            (1./(192*np.pi*v**3) * (3+3*rv+rv2) * exprv \
+            + abs(v_j-v_i)/(384*v**4) * (-9-9*rv-2*rv2+rv3) * exprv \
+            + (v_j-v_i)**2/(3840*v**5) * (90+90*rv+5*rv2-25*rv3+3*rv4) * exprv)
 
 
 

@@ -26,6 +26,8 @@ class Options:
         self.logger.setLevel(self.logger_level)
         util.set_logger_level(self.logger_level)
 
+        self.test_mode = False
+
         # The options and default values
 
         # Hirshfeld train/learn options
@@ -96,6 +98,15 @@ class Options:
 
     def load_hirsh_options(self):
         
+        #test
+        try:
+            val = self.Config.get("output", "test_mode")
+            if val in ["True", "true", "t", "1"]:
+                self.test_mode = True 
+            else:
+                self.test_mode = False
+        except:
+            pass
         # log level
         try:
             self.logger_level = self.Config.getint("output", "log_level")

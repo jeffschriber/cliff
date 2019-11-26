@@ -138,7 +138,8 @@ def test_exch():
 
 def test_ind():
     for k,v in current.items():
-        r = -1.6780631768387664
+        #r = -1.6780631768387664
+        r = -1.6740255524068077
         en = v[2]
         assert (en - r) < 1e-5
 
