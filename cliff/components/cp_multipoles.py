@@ -12,6 +12,7 @@ from cliff.helpers.cell import Cell
 from cliff.helpers.system import System
 import cliff.helpers.constants as constants
 import cliff.helpers.utils as utils
+from numba import jit
 
 # Set logger
 logger = logging.getLogger(__name__)
@@ -55,16 +56,17 @@ class CPMultipoleCalc:
 
         return None
 
+ #   @jit
     def convert_mtps_to_cartesian(self, stone_convention):
         'Convert spherical MTPs to cartesian'
         num_atoms = sum(sys.num_atoms for sys in self.systems)
         # q={0,1,2} => 1+3+9 = 13 parameters
         self.mtps_cart = np.zeros((num_atoms,13))
         self.mtps_cart_elec = np.zeros((num_atoms,13))
-        idx = 0
         atom_ele   = [ele for sys in self.systems
                             for _, ele in enumerate(sys.elements)]
 
+        idx = 0
         for sys in self.systems:
             if len(sys.multipoles) == 0:
                 logger.error("Multipoles not initialized for system %s!"
