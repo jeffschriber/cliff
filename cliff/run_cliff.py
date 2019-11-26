@@ -39,21 +39,21 @@ def init_args():
 
     return parser.parse_args()
 
-def get_infile(args):
+def get_infile(inpt):
     
     infile = ""
 
-    if args.input == None:
+    if inpt == None:
         # If no input provided, look for the default
         if os.path.exists('config.ini'):
             infile = 'config.ini'            
         else:
             raise Exception("Cannot find input file")
     else:
-        if not os.path.exists(args.input):
-            raise Exception("File {} does not exist!".format(args.input))
+        if not os.path.exists(inpt):
+            raise Exception("File {} does not exist!".format(inpt))
         else:
-            infile = args.input                
+            infile = inpt                
 
     print("    Loading options from {}".format(infile))
     return infile
@@ -180,17 +180,37 @@ def canvas(with_attribution=True):
         quote += "\n\t    - Adapted from Henry David Thoreau"
     return quote
 
+def print_ret(ret):
+    '''
+    Print out results from return dict
+    '''
+    print("")
+    print("    Output summary (kcal/mol)")
+    print("    File Directory   |  Electrostatics |   Exchange   |   Induction   |   Dispersion  |   Total ")
+    print("    ----------------------------------------------------------------------------------------------") 
+    for k,v in ret.items():
+        print("    %-17s%18.5f %14.5f %15.5f %15.5f %11.5f" % (k, v[0],v[1],v[2],v[3],v[4]))
 
-if __name__ == "__main__":
+
+def main(inpt=None, files=None):
     # Do something if this file is invoked on its own
     print_banner()
 
-    args = init_args()
-    infile = get_infile(args)
+    infile = get_infile(inpt)
+    job_list = Utils.file_finder(files)
 
-    job_list = Utils.file_finder(args.files)
+    ret = {}
+
     for filenames in job_list:
+        dirname = filenames[0].split('/')[-2]
         en = get_energy(filenames, infile)
-        print(en)
+        ret[dirname] = en
 
-    print(canvas())
+    print_ret(ret)
+
+    return ret
+
+if __name__ == "__main__":
+    args = init_args()
+    main(args.input, args.files)
+
