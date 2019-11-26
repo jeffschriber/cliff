@@ -36,6 +36,7 @@ def get_energy(filename):
     # set the path for reference parameters
     options.set_hirshfeld_training(testpath + '/../models/small/hirshfeld_model_0.3.pkl') 
     options.set_atomicdensity_training(testpath + '/../models/small/atomic_pop_width_0.3.pkl') 
+    options.set_multipole_training(testpath + '/../models/small/mtp/')
     options.set_atomicdensity_max_neighbors(6)
     
     
@@ -51,10 +52,6 @@ def get_energy(filename):
     #load multipoles with aSLATM representation
     mtp_ml  = MultipoleMLBSet(options, descriptor="slatm") 
 
-    pkls = ['H.pkl', 'C.pkl', 'O.pkl', 'N.pkl']
-    for pkl in pkls:
-        mtp_ml.load_ml(testpath + '/../models/small/mtp/' + pkl)
-    
     #loads monomer geometries
     mols = []
     xyzs = [] 
