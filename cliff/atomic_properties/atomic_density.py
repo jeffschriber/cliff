@@ -13,7 +13,10 @@ import logging
 import pickle
 import numpy as np
 import operator
+import os
 
+import cliff.tests as t
+testpath = os.path.abspath(t.__file__).split('__init__')[0]
 # Set logger
 logger = logging.getLogger(__name__)
 
@@ -33,6 +36,9 @@ class AtomicDensity:
 
         self.use_ref_density = options.atomicdensity_ref_adens
         self.refpath = options.atomicdensity_refpath
+
+        if options.test_mode:
+            self.refpath = testpath + self.refpath
 
     def load_ml(self):
         logger.info(

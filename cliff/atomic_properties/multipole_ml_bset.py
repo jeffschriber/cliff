@@ -20,6 +20,9 @@ import os
 import copy
 import time
 import glob
+
+import cliff.tests as t
+testpath = os.path.abspath(t.__file__).split('__init__')[0]
 # qml
 import qml
 from qml.representations import get_slatm_mbtypes
@@ -61,20 +64,22 @@ class MultipoleMLBSet:
         self.ref_mtp = options.multipole_ref_mtp
 
         self.ref_path = ""
-        
         if self.ref_mtp:
             self.ref_path = options.multipole_ref_path
+        if options.test_mode:
+            self.ref_path = testpath + self.ref_path
 
         self.correct_charge = options.multipole_correct_charge
 
         ## Load the models on init
-        mtp_s = time.time()
-        mtp_models = glob.glob(options.multipole_training + '/*.pkl') 
-        for model in mtp_models:
-            self.load_ml(model)
-        mtp_e = time.time() 
-        print("    Loaded {} multipole models in:\n\t\t {}".format(len(mtp_models), options.multipole_training))
-        print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
+        if not self.ref_mtp:
+            mtp_s = time.time()
+            mtp_models = glob.glob(options.multipole_training + '/*.pkl') 
+            for model in mtp_models:
+                self.load_ml(model)
+            mtp_e = time.time() 
+#           print("    Loaded {} multipole models in:\n\t\t {}".format(len(mtp_models), options.multipole_training))
+#           print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
 
 
 

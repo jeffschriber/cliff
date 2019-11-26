@@ -12,7 +12,10 @@ from scipy.spatial.distance import pdist, cdist, squareform
 import logging
 import pickle
 import numpy as np
+import os
 
+import cliff.tests as t
+testpath = os.path.abspath(t.__file__).split('__init__')[0]
 # Set logger
 logger = logging.getLogger(__name__)
 
@@ -37,6 +40,9 @@ class Hirshfeld:
 
         self.from_file = options.hirsh_file_read
         self.filepath  = options.hirsh_filepath
+
+        if options.test_mode:
+            self.filepath = testpath + self.filepath
         
         self.training_file = options.hirsh_training
 
