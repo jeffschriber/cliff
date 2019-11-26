@@ -74,12 +74,6 @@ def read_file(infile):
 def set_logger_level(level):
     logger.setLevel(level)
 
-def merge_two_dicts(x, y):
-    """Merge two dictionaries."""
-    z = x.copy()
-    z.update(y)
-    return z
-
 #@jit
 def build_coulomb_matrix(coords, atom_types,
     central_atom_id, max_neighbors, direction=None):
@@ -122,95 +116,6 @@ def build_coulomb_matrix(coords, atom_types,
     return d[np.triu_indices(max_neighbors)],reorder
 
 
-def coulomb_with_grads(coords, atom_types,
-    central_atom_id, max_neighbors):
-    """Build Coulomb matrix with first and second derivatives."""
-    N = len(coords)
-    cart_ord, atom_typ_ord, reorder = reorder_atoms(coords, atom_types,
-        central_atom_id, max_neighbors)
-    Z = extract_atomic_numbers(coords,atom_typ_ord)
-    Z.resize(max_neighbors)
-    # Compute distance matrix
-    d0 = np.zeros((max_neighbors,max_neighbors))
-    # Matrix of first derivatives
-    d1 = np.zeros((3,max_neighbors,max_neighbors))
-    # Matrix of second derivatives
-    d2 = np.zeros((9,max_neighbors,max_neighbors))
-    for i in range(min(N,max_neighbors)):
-        for j in range(3):
-            diff2 = cart_ord[i,j] - cart_ord[:,j]
-            d1[j,i,:] = -diff2
-            diff2 **= 2
-            d0[i,:] += diff2
-    np.sqrt(d0,d0)
-    for i in range(min(N,max_neighbors)):
-        for j in range(min(N,max_neighbors)):
-            if i != j:
-                for k in range(3):
-                    d1[k,i,j] = -Z[i]*Z[j]*d1[k,i,j]/d0[i,j]**3
-                    for l in range(3):
-                        # 2nd derivative
-                        d2[3*k+l,i,j] = 3*(cart_ord[j,k]-cart_ord[i,k]) * (cart_ord[j,l]-cart_ord[i,l])
-                        if k == l:
-                            d2[3*k+l,i,j] -= d0[i,j]
-                        d2[3*k+l,i,j] *= Z[i]*Z[j]/d0[i,j]**5
-                d0[i,j] = Z[i]*Z[j]/d0[i,j]
-            else:
-                d0[i,i] = 0.5*Z[i]**(2.4)
-                for k in range(3):
-                    d1[k,i,i] = 0.5*Z[i]**(2.4)
-                    for l in range(3):
-                        d2[3*k+l,i,j] = 0.5*Z[i]**(2.4)
-    d0[N:,:] = 0.0
-    d0[:,N:] = 0.0
-    d1[:,N:,:] = 0.0
-    d1[:,:,N:] = 0.0
-    d2[:,N:,:] = 0.0
-    d2[:,:,N:] = 0.0
-    # Matrix of second derivatives in spherical coordinates
-    s2 = np.zeros((5,max_neighbors,max_neighbors))
-    s2[0,:,:] = d2[8,:,:]
-    s2[1,:,:] = 2./math.sqrt(3.)*d2[2,:,:]
-    s2[2,:,:] = 2./math.sqrt(3.)*d2[5,:,:]
-    s2[3,:,:] = 1./math.sqrt(3.)*(d2[0,:,:]-d2[4,:,:])
-    s2[4,:,:] = 2./math.sqrt(3.)*d2[1,:,:]
-    return [d0[np.triu_indices(max_neighbors)]], \
-            [d1[j,:,:][np.triu_indices(max_neighbors)] for j in range(3)], \
-            [s2[j,:,:][np.triu_indices(max_neighbors)] for j in range(5)], \
-            reorder
-
-
-def coulomb_matrix_com(coords, elements, max_neighbors, ordered=False):
-    """Build coulomb matrix centered at the center of mass."""
-    # Index masses
-    masses = np.array([float(constants.atomic_weight[ele])
-                    for _,ele in enumerate(elements)])
-    # Center of mass
-    com = np.sum([m*c for m,c in zip(masses,coords)],axis=0)/np.sum(masses)
-    N = len(coords)
-    cart_ord, atom_typ_ord, reorder = reorder_atoms_com(coords, elements,
-        com, max_neighbors, ordered)
-    Z = extract_atomic_numbers(coords,atom_typ_ord)
-    Z.resize(max_neighbors)
-    # Compute distance matrix
-    d = np.zeros((max_neighbors,max_neighbors))
-    for i in range(min(N,max_neighbors)):
-        for j in range(3):
-            diff2 = cart_ord[i,j] - cart_ord[:,j]
-            diff2 **= 2
-            d[i,:] += diff2
-    np.sqrt(d,d)
-    for i in range(min(N,max_neighbors)):
-        for j in range(min(N,max_neighbors)):
-            if i != j:
-                d[i,j] = Z[i]*Z[j]/d[i,j]
-            else:
-                d[i,i] = 0.5*Z[i]**(2.4)
-    d[N:,:] = 0.0
-    d[:,N:] = 0.0
-    # print d
-    return d[np.triu_indices(max_neighbors)],reorder
-
 def reorder_atoms(coords, atom_types, central_atom_id, max_neighbors):
     '''Reorder list of atoms from the central atom and by its distance'''
     distMain = sum([(coords[central_atom_id][j] - coords[:,j])**2
@@ -224,34 +129,6 @@ def reorder_atoms(coords, atom_types, central_atom_id, max_neighbors):
         atom_typ_ord.append(atom_types[reorder[i]])
     return cart_ord, atom_typ_ord, reorder
 
-def reorder_atoms_com(coords, atom_types, com, max_neighbors, ordered=False):
-    '''Reorder list of atoms from the center of mass and by its distance'''
-    distMain = sum([(com[j] - coords[:,j])**2
-                    for j in range(3)])
-    reorder = np.argsort(distMain)
-    cart_ord = np.zeros((max_neighbors,3))
-    for i in range(min(len(coords),max_neighbors)):
-        cart_ord[i,:] = coords[reorder[i],:]
-    atom_typ_ord = []
-    for i in range(len(coords)):
-        atom_typ_ord.append(atom_types[reorder[i]])
-    if ordered:
-        Z = extract_atomic_numbers(cart_ord,atom_typ_ord)
-        if max_neighbors > 1:
-            if Z[1] > Z[0]:
-                # Swap 1 and 0
-                cart_ord[0], cart_ord[1] = cart_ord[1], cart_ord[0].copy()
-                atom_typ_ord[0], atom_typ_ord[1] = atom_typ_ord[1], atom_typ_ord[0]
-                reorder[0], reorder[1] = reorder[1], reorder[0]
-        if max_neighbors > 3:
-            # Keep #2 and 3 close to either #0 or 1, depending on the distance
-            if np.linalg.norm(cart_ord[2,:]-cart_ord[0,:]) > \
-                np.linalg.norm(cart_ord[2,:]-cart_ord[1,:]):
-                # Swap 2 and 3
-                cart_ord[3], cart_ord[2] = cart_ord[2], cart_ord[3].copy()
-                atom_typ_ord[3], atom_typ_ord[2] = atom_typ_ord[2], atom_typ_ord[3]
-                reorder[3], reorder[2] = reorder[2], reorder[3]
-    return cart_ord, atom_typ_ord, reorder
 
 def neighboring_vectors(coords, atom_types, central_atom_id):
     '''Returns neighboring pairwise vectors starting from central atom up
@@ -371,25 +248,6 @@ def cart_to_spher(cart, stone_convention=True):
         spher[3] = 1./constants.sqrt_3*(cart[0,0]-cart[1,1])
         spher[4] = 2./constants.sqrt_3*cart[0,1]
     return spher
-
-def inertia_tensor(coords, elements):
-    """
-    Compute inertia tensor for coordinates coords and chemical
-    elements elements. Return sorted eigenvectors and eigenvalues.
-    """
-    # Index masses
-    masses = np.array([float(constants.atomic_weight[ele])
-                    for _,ele in enumerate(elements)])
-    # Center of mass
-    com = np.sum([m*c for m,c in zip(masses,coords)],axis=0)/np.sum(masses)
-    # Build inertia tensor
-    coords_relative = coords - com
-    inertia = np.dot(masses*coords_relative.T,coords_relative)
-    eigvals, eigvecs = np.linalg.eig(inertia)
-    sort_index = (-eigvals).argsort()
-    eigvals = eigvals[sort_index]
-    eigvecs = eigvecs[sort_index]
-    return eigvals,eigvecs
 
 def rotate_mtps(glob_coeffs, princ_axes):
     '''Rotate global multipoles using principal axes'''

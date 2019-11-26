@@ -38,10 +38,6 @@ class System:
         # Coulomb matrix
         self.coulomb_mat = None
         self.atom_reorder = None
-        # Coulomb matrix and derivatives
-        self.coulmat_grads = None
-        # Bag of bonds
-        self.bag_of_bonds = None
         # slatm
         self.slatm = None
         # Predict ratios
@@ -58,8 +54,6 @@ class System:
         self.mtp_expansion = None
         # Basis set for expansion
         self.basis = []
-        # Voronoi baseline for MTPs
-        self.voronoi_baseline = []
         # Principal axes for MTPs
         self.principal_axes = []
         # Pairwise vectors and rotation matrices for atomic environment descriptor
@@ -129,17 +123,6 @@ class System:
             self.atom_reorder.append(reorder_atoms)
         return None
 
-    def build_coulomb_grads(self, max_neighbors):
-        self.coulmat_grads = []
-        self.atom_reorder = []
-        for at in range(len(self.elements)):
-            coulmat0, coulmat1, coulmat2, reorder_atoms = \
-                utils.coulomb_with_grads(self.coords, self.elements,
-                at, max_neighbors)
-            self.coulmat_grads.append([coulmat0,coulmat1,coulmat2])
-            self.atom_reorder.append(reorder_atoms)
-        return None
-
     def build_slatm(self, mbtypes, xyz=None):
         self.slatm = []
         # Need xyz
@@ -162,66 +145,6 @@ class System:
         # MTPs based on derivatives. 1+3+6
         self.multipoles_grads = np.zeros((self.num_atoms,10))
         return None
-
-
-    def compute_principal_axes(self):
-        '''Project MTP coefficients (except for Q00) along each atom-atom vector.
-        Ordered by atom ID. Returns  principal axes.'''
-        self.principal_axes = []
-        mass = np.zeros(len(self.elements))
-        for m in range(len(self.elements)):
-            mass[m] = constants.atomic_weight[self.elements[m]]
-        for i in range(len(self.coords)):
-            atomi = self.coords[i]
-            eigvecs = np.zeros((3,3))
-            if self.num_atoms == 1:
-                eigvecs = np.identity(3)
-            elif self.num_atoms == 2:
-                # Only one axis defined
-                eigvecs[:,0] = self.coords[i]
-                for j in range(len(self.coords)):
-                    # Only take neighbor
-                    if j==i+1:
-                        eigvecs[:,0] -= self.coords[j]
-                if abs(np.linalg.norm(eigvecs[:,0])) > 1e-12:
-                    eigvecs[:,0] /= np.linalg.norm(eigvecs[:,0])
-                # Construct other two eigenvectors
-                eigvecs[:,1] = np.cross([1,1,1],eigvecs[:,0])
-                if abs(np.linalg.norm(eigvecs[:,1])) > 1e-12:
-                    eigvecs[:,1] /= np.linalg.norm(eigvecs[:,1])
-                eigvecs[:,2] = np.cross(eigvecs[:,0],eigvecs[:,1])
-                if abs(np.linalg.norm(eigvecs[:,2])) > 1e-12:
-                    eigvecs[:,2] /= np.linalg.norm(eigvecs[:,2])
-                # center of mass of molecule
-                com = sum([mass[j]*self.coords[j] for j in \
-                    range(len(self.coords))]) / sum(mass)
-                for v in range(3):
-                    if np.dot(com - self.coords[i],eigvecs[v]) < 0.:
-                      eigvecs[v] *= -1.
-            else:
-                # Compute inertia tensor of molecule around atom i
-                coords = self.coords - self.coords[i]
-                inertia = np.dot(mass*coords.transpose(),coords)
-                eigvals,eigvecs = np.linalg.eig(inertia)
-                # center of mass of molecule
-                com = sum([mass[j]*self.coords[j] for j in \
-                    range(len(self.coords))]) / sum(mass)
-            # Orient first two eigenvectors so that com is in positive quadrant.
-            for v in range(3):
-                if np.dot(com - self.coords[i],eigvecs[v]) < 0.:
-                  eigvecs[v] *= -1.
-            self.principal_axes.append(eigvecs.transpose())
-            logger.debug("Principal axes for atom %s (ID: %d):\n %s" % \
-                (self.elements[i],i,self.principal_axes[i]))
-        return None
-
-
-    def molecular_principal_components(self):
-        """
-        Principal components around center of mass.
-        Returns sorted eigenvalues and eigenvectors.
-        """
-        return utils.inertia_tensor(self.coords, self.elements)
 
     def expand_multipoles(self):
         """
@@ -277,40 +200,6 @@ class System:
             self.basis.append(bas)
             vec_all_dir.append(vec)
         return vec_all_dir
-
-    def rotate_random(self):
-        """Arbitrary rotation around center of mass of coordinates
-        as well as multipole moments"""
-        masses = np.array([float(constants.atomic_weight[ele])
-                    for _,ele in enumerate(self.elements)])
-        com = np.sum([m*c for m,c in zip(masses,self.coords)],
-                axis=0)/np.sum(masses)
-        print("dis",np.linalg.norm(self.coords[1]-self.coords[0]),\
-            np.linalg.norm(self.coords[2]-self.coords[0]))
-        # Generate random rotation matrix
-        rotmat = np.zeros((3,3))
-        for i in range(3):
-            for j in range(3):
-                rotmat[i,j] = np.random.rand()
-        rotmat[2] = np.cross(rotmat[0],rotmat[1])
-        rotmat[0] = np.cross(rotmat[1],rotmat[2])
-        for i in range(3):
-            rotmat[i] /= np.linalg.norm(rotmat[i,:])
-        print(self.multipoles)
-        print(rotmat)
-        # Update coordinates and multipoles
-        for i in range(self.num_atoms):
-            self.coords[i] = np.dot(rotmat, self.coords[i] - com) + com
-            self.multipoles[i][1:4] = np.dot(rotmat, self.multipoles[i][1:4])
-            self.multipoles[i][4:9] = utils.cart_to_spher(np.dot(np.dot(
-                rotmat,utils.spher_to_cart(self.multipoles[i][4:9])), rotmat.T))
-            if i == 0:
-                print("rot\n",utils.spher_to_cart(self.multipoles[i][4:9]).reshape((3,3)))
-                print(np.dot(np.dot(rotmat.T, utils.spher_to_cart(self.multipoles[i][4:9])),
-                           rotmat))
-                print(self.multipoles[i][4:9])
-        return None
-
 
     def identify_atom_types(self):
         "Identifies the atom type and bonds of every atom in the molecule"

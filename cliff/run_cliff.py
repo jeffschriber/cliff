@@ -132,7 +132,7 @@ def get_energy(filenames, config):
     return elst, exch, indu, disp,  elst+exch+indu+disp
 
 def print_banner(): 
-    title = ''' 
+    title = r''' 
                                                       
                                       ___               
                                      /   \              
@@ -152,8 +152,7 @@ def print_banner():
     A Component-based Learned Intermolecular Force Field
 
     Jeffrey B. Schriber, C. David Sherrill (2019)
-    ====================================================
-'''
+    ===================================================='''
 
     
     print(title)
