@@ -107,7 +107,7 @@ def get_energy(filename):
     
 filenames = {}
 current = {}
-mols = glob.glob(testpath + 's30/xyzs/*monoA-unCP.xyz')
+mols = glob.glob(testpath + 's30/xyzs/*/*monoA-unCP.xyz')
 for mol in mols:
     monA = mol 
     monB = mol.strip("monoA-unCP.xyz") + "-monoB-unCP.xyz"
@@ -118,9 +118,8 @@ for mol in mols:
     current[monA] = get_energy(filename)
     break
     
-
 refs = {}
-with open(testpath + 's30/s30_ref_noml.json','r') as f:
+with open(testpath + 's30/s30_ref.json','r') as f:
     refs = json.load(f)
 
 def test_elst():
