@@ -84,8 +84,11 @@ class System:
         return s
 
     def __str__(self):
+        out_str = ""
         if self.xyz:
-            return self.xyz
+            for xyz in self.xyz:
+                out_str += xyz + "_"
+                return out_str
         else:
             logger.error("No molecule name!")
             print("No molecule name!")
@@ -230,4 +233,24 @@ class System:
                 self.atom_types.append('Cl'+str(len(bonded)))
             elif at_ele == 'F':
                 self.atom_types.append('F'+str(len(bonded)))
+        return None
+
+    def load_mtp_from_hipart(self, txt, rotate=False):
+        """Load multipoles from hipart output text file"""
+        extract_file = utils.read_file(txt)
+        self.multipoles = [np.array([
+                        float(extract_file[i].split()[4]),
+                        float(extract_file[i].split()[6]),
+                        float(extract_file[i].split()[7]),
+                        float(extract_file[i].split()[5]),
+                        float(extract_file[i].split()[8]),
+                        float(extract_file[i].split()[9]),
+                        float(extract_file[i].split()[10]),
+                        float(extract_file[i].split()[11]),
+                        float(extract_file[i].split()[12])])
+                            for i in range(4,len(extract_file))]
+        if rotate is True:
+            self.compute_principal_axes()
+            self.multipoles = utils.rotate_mtps_back(
+                    self.multipoles, self.principal_axes)
         return None

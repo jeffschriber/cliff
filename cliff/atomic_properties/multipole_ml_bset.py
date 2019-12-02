@@ -138,8 +138,8 @@ class MultipoleMLBSet:
             if len(self.descr_train[e]) > 0:
                 logger.info("Training set size: %d atoms; %d molecules" % (size_training,
                     self.num_mols_train[e]))
-                print("Training set size: %d atoms; %d molecules" % (size_training,
-                    self.num_mols_train[e]))
+                #print("Training set size: %d atoms; %d molecules" % (size_training,
+                #    self.num_mols_train[e]))
                 tgt_prop = [[self.target_train[e][i][mtp_rank][coeff]
                             for mtp_rank in range(3)
                             for coeff in range(self.max_coeffs[mtp_rank])]
@@ -148,8 +148,8 @@ class MultipoleMLBSet:
                     constants.ml_metric[self.kernel]))
                 logger.info("building kernel matrix of size (%d,%d); %7.4f Gbytes" \
                     % (size_training, size_training, 8*size_training**2/1e9))
-                print("building kernel matrix of size (%d,%d); %7.4f Gbytes" \
-                    % (size_training, size_training, 8*size_training**2/1e9))
+                #print("building kernel matrix of size (%d,%d); %7.4f Gbytes" \
+                #    % (size_training, size_training, 8*size_training**2/1e9))
                 power  = constants.ml_power[self.kernel]
                 prefac = constants.ml_prefactor[self.kernel]
                 kmat = scipy.exp(- pairwise_dists**power / (prefac*self.krr_sigma**power))
