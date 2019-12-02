@@ -254,20 +254,10 @@ class MultipoleMLBSet:
                 self.qml_filter_ele.append([1 if (str(mol.atomtypes[i]) == atom) else 0
                                     for i in range(mol.natoms)])
         new_system.multipoles = np.empty((new_system.num_atoms,9))
-        # Read in multipole moments from DMA or hipart txt file
-        if pun[-4:] == ".txt":
-            new_system.load_mtp_from_hipart(pun, rotate=False)
-        elif pun[-4:] == ".dat":
-            mtps = utils.read_file(pun)
-            if len(mtps) != new_system.num_atoms:
-                logger.error("Wrong number of charges in %s" % (pun))
-            for i in range(new_system.num_atoms):
-                new_system.multipoles[i][0] = mtps[i]
-        elif pun[-4:] == ".log":
-            new_system.load_mtp_from_poltype(pun)
-        else:
-            logger.error("Unrecognized file extension for %s" % pun)
-            exit(1)
+        # Read in multipole moments from txt file
+        new_system.load_mtp_from_hipart(pun, rotate=False)
+        if len(new_system.multipoles) != new_system.num_atoms:
+            raise Exception("Wrong number of charges in %s" % (pun))
 
         for i in range(len(new_system.elements)):
             ele_i = new_system.elements[i]
@@ -280,9 +270,6 @@ class MultipoleMLBSet:
                 new_target_train = []
                 # Rotate system until atom pairs point in all x,y,z directions
                 vec_all_dir = new_system.compute_basis()
-                # Descriptor -- Do nothing for SLATM yet
-                if self.descriptor == "coulombmatrix":
-                    self.descr_train[ele_i].append(new_system.coulomb_mat[i])
                 # charge
                 new_target_train.append([new_system.multipoles[i][0]])
                 # dipole
@@ -299,35 +286,3 @@ class MultipoleMLBSet:
         logger.info("Added file to training set: %s" % new_system)
         return None
 
-    def normalize(self, ele):
-        'Normalize data'
-        # Charge
-        data = []
-        for i in range(3):
-            data_tmp = np.empty((0))
-            if len(self.target_train[ele]) > 0:
-                for j in range(self.max_coeffs[i]):
-                    data_tmp =  np.append(data_tmp, np.hstack([tgt[i][j] for tgt in self.target_train[ele]]))
-                data.append(np.hstack(data_tmp))
-                # normed = (data - data.mean(axis=0)) / data.std(axis=0)
-                self.norm_tgt_mean[ele][i] = data[i].mean(axis=0)
-                self.norm_tgt_std[ele][i]  = data[i].std(axis=0)
-        for e in self.target_train.keys():
-            for tgt in self.target_train[e]:
-                for i in range(3):
-                    for j in range(self.max_coeffs[i]):
-                        if abs(self.norm_tgt_std[e][i]) > 1e-6:
-                            tgt[i][j] = (tgt[i][j] - self.norm_tgt_mean[e][i]) / self.norm_tgt_std[e][i]
-        return None
-
-    def rev_normalize(self, _system):
-        'Revert normalization of predicted property'
-        for i,tgt in enumerate(_system.mtp_expansion):
-            e = _system.elements[i]
-            k = 0
-            for i in range(3):
-                for j in range(self.max_coeffs[i]):
-                    if abs(self.norm_tgt_std[e][i]) > 1e-6:
-                        tgt[k] = self.norm_tgt_std[e][i]*tgt[k] + self.norm_tgt_mean[e][i]
-                    k += 1
-        return None
