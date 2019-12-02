@@ -119,19 +119,18 @@ class MultipoleMLBSet:
         '''Train machine learning model of multipole rank mtp_rank and
         basis set expansion coefficient coeff.'''
         # SLATM: First compute mbtypes and the representation
-        if self.descriptor == "slatm":
-            # Reinitialize descriptor
-            for key in self.descr_train.keys():
-                self.descr_train[key] = []
-            # Check that mbtypes exists
-            if self.mbtypes is None:
-                raise ValueError("mbtypes missing")
-            for i,mol in enumerate(self.qml_mols):
-                mol.generate_slatm(self.mbtypes, local=True)
-                for j,at in enumerate(self.qml_filter_ele[i]):
-                    if at == 1:
-                        # Do include the descriptor
-                        self.descr_train[mol.atomtypes[j]].append(mol.representation[j])
+        # Reinitialize descriptor
+        for key in self.descr_train.keys():
+            self.descr_train[key] = []
+        # Check that mbtypes exists
+        if self.mbtypes is None:
+            raise ValueError("mbtypes missing")
+        for i,mol in enumerate(self.qml_mols):
+            mol.generate_slatm(self.mbtypes, local=True)
+            for j,at in enumerate(self.qml_filter_ele[i]):
+                if at == 1:
+                    # Do include the descriptor
+                    self.descr_train[mol.atomtypes[j]].append(mol.representation[j])
         for e in  self.descr_train.keys():
             size_training = len(self.target_train[e])
             # self.normalize(e)
@@ -200,12 +199,8 @@ class MultipoleMLBSet:
                 _system.build_slatm(self.mbtypes, xyz=xyz)
             for e in self.alpha_train.keys():
                 if self.alpha_train[e] is not None:
-                    if self.descriptor == "coulombmatrix":
-                        pairwise_dists = cdist(_system.coulomb_mat, \
-                            self.descr_train[e], constants.ml_metric[self.kernel])
-                    elif self.descriptor == "slatm":
-                        pairwise_dists = cdist(_system.slatm, \
-                            self.descr_train[e], constants.ml_metric[self.kernel])
+                    pairwise_dists = cdist(_system.slatm, \
+                        self.descr_train[e], constants.ml_metric[self.kernel])
                     power  = constants.ml_power[self.kernel]
                     prefac = constants.ml_prefactor[self.kernel]
                     kmat = scipy.exp(- pairwise_dists**power / (prefac*self.krr_sigma**power))
@@ -235,24 +230,22 @@ class MultipoleMLBSet:
     def add_mol_to_training(self, new_system, pun, atom=None, xyz=None):
         'Add molecule to training set'
         new_system.initialize_multipoles()
-        if self.descriptor == "coulombmatrix":
-            new_system.build_coulomb_matrices(self.max_neighbors)
-        elif self.descriptor == "slatm":
-            # Don't build SLATM yet, only add information to mbtypes
-            mol = None
-            if new_system.xyz[0] is None:
-                if xyz is not None:
-                    mol = qml.Compound(xyz)
-                else:
-                    raise ValueError("Missing xyz file")
+
+        # Don't build SLATM yet, only add information to mbtypes
+        mol = None
+        if new_system.xyz[0] is None:
+            if xyz is not None:
+                mol = qml.Compound(xyz)
             else:
-                mol = qml.Compound(new_system.xyz[0])
-            self.qml_mols.append(mol)
-            if atom is None:
-                self.qml_filter_ele.append([1 for i in range(mol.natoms)])
-            else:
-                self.qml_filter_ele.append([1 if (str(mol.atomtypes[i]) == atom) else 0
-                                    for i in range(mol.natoms)])
+                raise ValueError("Missing xyz file")
+        else:
+            mol = qml.Compound(new_system.xyz[0])
+        self.qml_mols.append(mol)
+        if atom is None:
+            self.qml_filter_ele.append([1 for i in range(mol.natoms)])
+        else:
+            self.qml_filter_ele.append([1 if (str(mol.atomtypes[i]) == atom) else 0
+                                for i in range(mol.natoms)])
         new_system.multipoles = np.empty((new_system.num_atoms,9))
         # Read in multipole moments from txt file
         new_system.load_mtp_from_hipart(pun, rotate=False)
