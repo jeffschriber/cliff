@@ -211,7 +211,7 @@ def test_vw():
 
     res = abs(np.divide(np.subtract(ref_ad,ad),ref_ad))
 
-    res = np.sum(res)
+    res = np.sum(res) / len(res)
         
     assert res < 1e-6
 
