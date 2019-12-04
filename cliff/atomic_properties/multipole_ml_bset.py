@@ -73,13 +73,14 @@ class MultipoleMLBSet:
 
         ## Load the models on init
         if not self.ref_mtp:
+            print("    Loading multipole models")
             mtp_s = time.time()
             mtp_models = glob.glob(options.multipole_training + '/*.pkl') 
             for model in mtp_models:
                 self.load_ml(model)
             mtp_e = time.time() 
-#           print("    Loaded {} multipole models in:\n\t\t {}".format(len(mtp_models), options.multipole_training))
-#           print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
+            print("    Loaded {} multipole models in:\n\t\t {}".format(len(mtp_models), options.multipole_training))
+            print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
 
 
 
@@ -161,6 +162,7 @@ class MultipoleMLBSet:
 
     def predict_mol(self, _system, charge=0, xyz=None):
         '''Predict multipoles in local reference frame given descriptors.'''
+        tp = time.time()
         _system.initialize_multipoles()
         _system.compute_basis()
 
@@ -193,16 +195,13 @@ class MultipoleMLBSet:
                             float(extract_file[i].split()[12])])
                                 for i in range(4,len(extract_file))]
         else:
-            if self.descriptor == "coulombmatrix":
-                _system.build_coulomb_matrices(self.max_neighbors)
-            elif self.descriptor == "slatm":
-                _system.build_slatm(self.mbtypes, xyz=xyz)
+            _system.build_slatm(self.mbtypes, xyz=xyz)
+            power  = constants.ml_power[self.kernel]
+            prefac = constants.ml_prefactor[self.kernel]
             for e in self.alpha_train.keys():
                 if self.alpha_train[e] is not None:
                     pairwise_dists = cdist(_system.slatm, \
                         self.descr_train[e], constants.ml_metric[self.kernel])
-                    power  = constants.ml_power[self.kernel]
-                    prefac = constants.ml_prefactor[self.kernel]
                     kmat = scipy.exp(- pairwise_dists**power / (prefac*self.krr_sigma**power))
                     pred = np.dot(kmat,self.alpha_train[e])
                     for i in range(_system.num_atoms):
@@ -215,7 +214,6 @@ class MultipoleMLBSet:
                 # Weigh by ML error
                 mol_mu = sum([constants.ml_chg_correct_error[ele]
                                 for ele in _system.elements])
-                abscharge = sum([abs(mtp[0]) for mtp in _system.mtp_expansion])
                 totalcharge = sum([mtp[0] for mtp in _system.mtp_expansion])
                 excess_chg = totalcharge - float(charge)
                 if mol_mu > 0.:
@@ -225,6 +223,8 @@ class MultipoleMLBSet:
             # Compute multipoles from basis set expansion
             _system.expand_multipoles()
         logger.debug("Predicted multipole expansion for %s" % ( _system.xyz[0]))
+
+        print("    Time spent predicting multipoles: %8.3f s" % (time.time() - tp))
         return None
 
     def add_mol_to_training(self, new_system, pun, atom=None, xyz=None):

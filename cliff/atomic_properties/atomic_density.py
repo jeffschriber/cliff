@@ -11,6 +11,7 @@ from scipy import stats
 from scipy.spatial.distance import pdist, cdist, squareform
 import logging
 import pickle
+import time
 import numpy as np
 import operator
 import os
@@ -68,6 +69,7 @@ class AtomicDensity:
 
     def predict_mol(self, _system):
         '''Predict coefficients given  descriptors.'''
+        t1 = time.time()
 
         if self.use_ref_density:
             xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
@@ -92,6 +94,7 @@ class AtomicDensity:
             pred = np.dot(kmat,self.alpha_train)
             _system.populations, _system.valence_widths = pred.T[0], pred.T[1]
         logger.info("Prediction: %s" % _system.populations)
+        print("    Time spent predicting valence-widths and populations: %8.3f" % (time.time() - t1))
         return None
 
     def add_mol_to_training(self, new_system, populations, valwidths):

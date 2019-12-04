@@ -13,6 +13,7 @@ import logging
 import pickle
 import numpy as np
 import os
+import time
 
 import cliff.tests as t
 testpath = os.path.abspath(t.__file__).split('__init__')[0]
@@ -86,7 +87,7 @@ class Hirshfeld:
 
     def predict_mol(self, _system, ml_method):
         '''Predict coefficients given  descriptors.'''
-
+        t1 = time.time()
         _system.build_coulomb_matrices(self.max_neighbors)
         if self.from_file:
             h_ratios = []
@@ -117,6 +118,8 @@ class Hirshfeld:
             logger.error("unknown ML method %s" % ml_method)
             exit(1)
         logger.info("Prediction: %s" % _system.hirshfeld_ratios)
+
+        print("    Time spent predicting Hirshfeld ratios: %8.3f" % (time.time()-t1))
         return None
 
     def add_mol_to_training(self, new_system):

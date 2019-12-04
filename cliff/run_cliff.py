@@ -18,6 +18,7 @@ import sys
 import argparse
 import os
 import glob
+import time
 
 import cliff
 from cliff.helpers.options import Options
@@ -58,7 +59,7 @@ def get_infile(inpt):
     print("    Loading options from {}".format(infile))
     return infile
 
-def get_energy(filenames, config):
+def get_energy(filenames, config, timer=None):
     np.set_printoptions(precision=4, suppress=True, linewidth=100)
     
     #1. Initialize relevant variables
@@ -103,9 +104,17 @@ def get_energy(filenames, config):
         rep.add_system(mol)
     
     #computes electrostatic, induction and exchange energies
+    t1 = time.time()
     elst = mtp.mtp_energy()
+    elst_time = time.time() - t1
+
+    t2 = time.time()
     indu = ind.polarization_energy(options)
+    ind_time = time.time() - t2
+
+    t3 = time.time()
     exch = rep.compute_repulsion("slater_mbis")
+    rep_time = time.time() - t3
     
     #creat dimer
     dimer = reduce(operator.add, mols)
@@ -115,6 +124,7 @@ def get_energy(filenames, config):
     
     #use Hirshfeld ratios in the computation of dispersion energy
     #as disp = E_dim - E_monA - E_monB
+    t4 = time.time()
     disp = 0.0
     for i, mol in enumerate([dimer] + mols):
         fac = 1.0 if i == 0 else -1.0
@@ -127,7 +137,15 @@ def get_energy(filenames, config):
         #execute MBD protocol
         mbd.mbd_protocol(None,None,None)
         disp += fac * mbd.energy
+    
+    disp_time = time.time() - t4
+
      
+    timer['elst'] =  elst_time
+    timer['exch'] =  rep_time
+    timer['ind']  =  ind_time
+    timer['disp'] =  disp_time
+
     # for printing
     return elst, exch, indu, disp,  elst+exch+indu+disp
 
@@ -190,6 +208,13 @@ def print_ret(ret):
     for k,v in ret.items():
         print("    %-17s%18.5f %14.5f %15.5f %15.5f %11.5f" % (k, v[0],v[1],v[2],v[3],v[4]))
 
+def print_timings(timer):
+    print("")
+    print("    Component Timings")
+    print("    Electrostatics:  %10.3f s" % timer['elst'])
+    print("    Exchange      :  %10.3f s" % timer['exch'])
+    print("    Induction     :  %10.3f s" % timer['ind'])
+    print("    Dispersion    :  %10.3f s" % timer['disp'])
 
 def main(inpt=None, files=None):
     # Do something if this file is invoked on its own
@@ -199,17 +224,23 @@ def main(inpt=None, files=None):
     job_list = Utils.file_finder(files)
 
     ret = {}
+    timer = {}
 
     for filenames in job_list:
         dirname = filenames[0].split('/')[-2]
-        en = get_energy(filenames, infile)
+        en = get_energy(filenames, infile, timer)
         ret[dirname] = en
 
     print_ret(ret)
+    print_timings(timer)
 
     return ret
 
 if __name__ == "__main__":
+    start = time.time()
     args = init_args()
     main(args.input, args.files)
+    end = time.time()
+
+    print("    CLIFF ran in {} s".format(end-start))
 
