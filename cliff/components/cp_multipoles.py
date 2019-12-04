@@ -7,7 +7,6 @@
 import numpy as np
 from numpy import exp
 import logging
-from cliff.atomic_properties.atomic_density import AtomicDensity
 from cliff.helpers.cell import Cell
 from cliff.helpers.system import System
 import cliff.helpers.constants as constants
@@ -29,11 +28,6 @@ class CPMultipoleCalc:
         self.mtps_cart_elec = None
         self.energy_elst = 0.0
 
-        # for predicting sys valence width (move?)
-        self.adens = AtomicDensity(options)
-        self.adens.load_ml()
-        self.adens.predict_mol(sys)
-
         # Combined system for combined valence-width prediction
         self.sys_comb = sys
         self.exp = options.elst_damping_exponents
@@ -44,13 +38,8 @@ class CPMultipoleCalc:
         self.atom_in_system += [last_system_id+1]*len(sys.elements)
         self.sys_comb = self.sys_comb + sys
         self.sys_comb.populations, self.sys_comb.valence_widths = [], []
-        self.adens.predict_mol(sys)
         # Refinement
         for s in self.systems:
-            # self.adens.predict_mol_env(s,self.sys_comb)
-            #s.chg_core = [mtp[0]-N for mtp,N in zip(s.multipoles, s.populations)]
-            #self.sys_comb.chg_core = np.append(self.sys_comb.chg_core,
-            #        [mtp[0]-N for mtp,N in zip(s.multipoles, s.populations)])
             self.sys_comb.valence_widths = np.append(self.sys_comb.valence_widths,
                     s.valence_widths)
 
@@ -88,10 +77,6 @@ class CPMultipoleCalc:
 
         for n, atom in enumerate(atom_ele):
             self.mtps_cart_elec[n][0] -= constants.atomic_number[atom]
-
-            #test zero quad
-            #for i in range(4,13):
-            #    self.mtps_cart_elec[n][i] = 0.0
 
         return None
 

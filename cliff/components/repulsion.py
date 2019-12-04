@@ -13,7 +13,6 @@ from cliff.helpers.system import System
 from cliff.helpers.cell import Cell
 from cliff.atomic_properties.hirshfeld import Hirshfeld
 from cliff.atomic_properties.polarizability import Polarizability
-from cliff.atomic_properties.atomic_density import AtomicDensity
 import logging
 
 # Set logger
@@ -33,14 +32,7 @@ class Repulsion:
         self.cell = cell
         # energy
         self.energy = 0.0
-        # Predict valence widths for sys
-        self.adens = AtomicDensity(options)
-        self.adens.load_ml()
-        # self.adens.load_ml_env()
-        self.adens.predict_mol(sys)
-        # Combined system for combined valence-width prediction
         self.sys_comb = sys
-        self.adens.predict_mol(self.sys_comb)
         # Load variables from config file
 
         self.rep = options.exch_int_params
@@ -50,11 +42,9 @@ class Repulsion:
         last_system_id = self.atom_in_system[-1]
         self.atom_in_system += [last_system_id+1]*len(sys.elements)
         self.sys_comb = self.sys_comb + sys
-        self.adens.predict_mol(sys)
         self.sys_comb.populations, self.sys_comb.valence_widths = [], []
         # Refinement
         for s in self.systems:
-            # self.adens.predict_mol_env(s,self.sys_comb)
             self.sys_comb.populations    = np.append(self.sys_comb.populations,
                                                         s.populations)
             self.sys_comb.valence_widths = np.append(self.sys_comb.valence_widths,

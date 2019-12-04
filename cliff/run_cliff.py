@@ -26,6 +26,7 @@ from cliff.helpers.cell import Cell
 from cliff.helpers.system import System
 import cliff.helpers.utils as Utils
 from cliff.atomic_properties.hirshfeld import Hirshfeld
+from cliff.atomic_properties.atomic_density import AtomicDensity
 from cliff.atomic_properties.multipole_ml_bset import MultipoleMLBSet
 from cliff.components.cp_multipoles import CPMultipoleCalc
 from cliff.components.repulsion import Repulsion
@@ -71,9 +72,11 @@ def get_energy(filenames, config, timer=None):
     
     #initializes Hirshfeld class
     hirsh = Hirshfeld(options) 
+    adens = AtomicDensity(options)
     
     #load KRR model for Hirshfeld as specified in the config.init file
     hirsh.load_ml() 
+    adens.load_ml()
     
     #load multipoles with aSLATM representation
     mtp_ml  = MultipoleMLBSet(options, descriptor="slatm") 
@@ -87,10 +90,13 @@ def get_energy(filenames, config, timer=None):
         xyzs.append(xyz)
     
     for mol,xyz in zip(mols,xyzs):
+        print("")
+        print("    Predicting atomic properties for {}".format(xyz))
         #predicts monomer multipole moments for each monomer
         mtp_ml.predict_mol(mol)
-        #predicts Hirshfeld ratios usin KRR
+        #predicts Hirshfeld ratios using KRR
         hirsh.predict_mol(mol,"krr")
+        adens.predict_mol(mol)
     
     #initializes relevant classes with monomer A
     mtp = CPMultipoleCalc(options,mols[0], cell)
@@ -119,6 +125,7 @@ def get_energy(filenames, config, timer=None):
     #creat dimer
     dimer = reduce(operator.add, mols)
 
+    print("\n    Predicting supersystem properties")
     #compute hirshfeld_ratios in the dimer basis 
     hirsh.predict_mol(dimer, "krr")   
     

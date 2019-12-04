@@ -224,7 +224,7 @@ class MultipoleMLBSet:
             _system.expand_multipoles()
         logger.debug("Predicted multipole expansion for %s" % ( _system.xyz[0]))
 
-        print("    Time spent predicting multipoles: %8.3f s" % (time.time() - tp))
+        print("    Time spent predicting multipoles:                     %8.3f s" % (time.time() - tp))
         return None
 
     def add_mol_to_training(self, new_system, pun, atom=None, xyz=None):

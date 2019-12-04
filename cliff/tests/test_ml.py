@@ -7,6 +7,7 @@ from cliff.helpers.cell import Cell
 from cliff.helpers.system import System
 from cliff.atomic_properties.hirshfeld import Hirshfeld
 from cliff.atomic_properties.multipole_ml_bset import MultipoleMLBSet
+from cliff.atomic_properties.atomic_density import AtomicDensity 
 from cliff.components.cp_multipoles import CPMultipoleCalc
 from cliff.components.induction_calc import InductionCalc
 from cliff.components.repulsion import Repulsion
@@ -45,9 +46,11 @@ def get_energy(filename):
     
     #initializes Hirshfeld class
     hirsh = Hirshfeld(options) 
+    adens = AtomicDensity(options)
     
     #load KRR model for Hirshfeld as specified in the config.init file
     hirsh.load_ml() 
+    adens.load_ml()
     
     #load multipoles with aSLATM representation
     mtp_ml  = MultipoleMLBSet(options, descriptor="slatm") 
@@ -65,6 +68,7 @@ def get_energy(filename):
         mtp_ml.predict_mol(mol)
         #predicts Hirshfeld ratios usin KRR
         hirsh.predict_mol(mol,"krr")
+        adens.predict_mol(mol)
     
     #initializes relevant classes with monomer A
     mtp = CPMultipoleCalc(options,mols[0], cell)

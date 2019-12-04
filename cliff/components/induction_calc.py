@@ -9,7 +9,6 @@ from cliff.helpers.system import System
 from cliff.components.cp_multipoles import CPMultipoleCalc, interaction_tensor
 from cliff.atomic_properties.hirshfeld import Hirshfeld
 from cliff.atomic_properties.polarizability import Polarizability
-from cliff.atomic_properties.atomic_density import AtomicDensity
 from cliff.helpers.cell import Cell
 from numpy import exp
 from copy import deepcopy
@@ -30,19 +29,7 @@ class InductionCalc(CPMultipoleCalc):
         self.induced_dip = None
         self.energy_polarization = 0.0
         self.energy_shortranged = 0.0
-        # Predict Hirshfeld ratios for sys
-        self.hirshfeld_pred = hirshfeld_pred
-        self.hirsh = Hirshfeld(options)
-        self.hirsh.load_ml()
-        self.hirsh.predict_mol(sys,self.hirshfeld_pred)
-        # Predict valence widths for sys
-        self.adens = AtomicDensity(options)
-        self.adens.load_ml()
-        # self.adens.load_ml_env()
-        self.adens.predict_mol(sys)
-        # All molecules together
         self.sys_comb = sys
-        self.adens.predict_mol(self.sys_comb)
 
         self.omega = options.indu_omega
         self.conv  = options.indu_conv        
@@ -51,13 +38,11 @@ class InductionCalc(CPMultipoleCalc):
 
     def add_system(self, sys):
         CPMultipoleCalc.add_system(self, sys)
-        self.hirsh.predict_mol(sys, self.hirshfeld_pred)
         self.sys_comb.hirshfeld_ratios = np.append(self.sys_comb.hirshfeld_ratios,
             sys.hirshfeld_ratios)
         self.sys_comb.populations, self.sys_comb.valence_widths = [], []
         # Refinement
         for s in self.systems:
-            # self.adens.predict_mol_env(s,self.sys_comb)
             self.sys_comb.populations    = np.append(self.sys_comb.populations,
                                                         s.populations)
             self.sys_comb.valence_widths = np.append(self.sys_comb.valence_widths,

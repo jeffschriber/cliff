@@ -119,7 +119,7 @@ class Hirshfeld:
             exit(1)
         logger.info("Prediction: %s" % _system.hirshfeld_ratios)
 
-        print("    Time spent predicting Hirshfeld ratios: %8.3f" % (time.time()-t1))
+        print("    Time spent predicting Hirshfeld ratios:               %8.3f s" % (time.time()-t1))
         return None
 
     def add_mol_to_training(self, new_system):
