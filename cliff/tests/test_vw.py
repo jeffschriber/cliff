@@ -213,5 +213,5 @@ def test_vw():
 
     res = np.sum(res) / len(res)
         
-    assert res < 1e-6
+    assert res < 1e-5
 
