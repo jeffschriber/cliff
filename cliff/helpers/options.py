@@ -44,14 +44,10 @@ class Options:
 
         # Atomic Density options
         self.atomicdensity_training = "" 
-        self.atomicdensity_training_env = ""
         self.atomicdensity_max_neighbors = 12
-        self.atomicdensity_max_neighbors_env = 2
         self.atomicdensity_krr_kernel = 'laplacian'
         self.atomicdensity_krr_sigma = 1000.0
         self.atomicdensity_krr_lambda = 1e-9
-        self.atomicdensity_krr_sigma_env = 1000.0
-        self.atomicdensity_krr_gamma_env = 1000.0
         self.atomicdensity_ref_adens = False
         self.atomicdensity_refpath = ""
 
@@ -218,16 +214,7 @@ class Options:
             pass
 
         try:
-            self.atomicdensity_training_env = self.Config.get("atomicdensity","training_env")
-        except:
-            pass
-
-        try:
             self.atomicdensity_max_neighbors = self.Config.getint("atomicdensity","max_neighbors")
-        except:
-            pass
-        try:
-            self.atomicdensity_max_neighbors_env = self.Config.getint("atomicdensity","max_neighbors_env")
         except:
             pass
 
@@ -247,16 +234,6 @@ class Options:
             pass
 
         try:
-            self.atomicdensity_krr_sigma_env = self.Config.get("atomicdensity","krr_sigma_env")
-        except:
-            pass
-
-        try:
-            self.atomicdensity_krr_gamma_env = self.Config.get("atomicdensity","krr_gamma_env")
-        except:
-            pass
-
-        try:
             val = self.Config.get("atomicdensity","ref_adens")
             if val in ["True", "true", "t", "1"]:
                 self.atomicdensity_ref_adens = True 
@@ -271,14 +248,8 @@ class Options:
     def set_atomicdensity_training(self, val):
         self.atomicdensity_training = val
 
-    def set_atomicdensity_training_env(self, val):
-        self.atomicdensity_training_env = val
-
     def set_atomicdensity_max_neighbors(self, val):
         self.atomicdensity_max_neighbors = val
-
-    def set_atomicdensity_max_neighbors_env(self, val):
-        self.atomicdensity_max_neighbors_env = val
 
     def set_atomicdensity_krr_kernel(self, val):
         self.atomicdensity_krr_kernel = val
@@ -288,12 +259,6 @@ class Options:
 
     def set_atomicdensity_krr_lambda(self, val):
         self.atomicdensity_krr_lambda = val
-
-    def set_atomicdensity_krr_sigma_env(self, val):
-        self.atomicdensity_krr_sigma_env = val
-
-    def set_atomicdensity_krr_gamma_env(self, val):
-        self.atomicdensity_krr_gamma_env = val
 
     def set_atomicdensity_ref_adens(self, val):
         self.atomicdensity_ref_adens = val 
