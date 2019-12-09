@@ -36,11 +36,8 @@ class Options:
         self.hirsh_krr_kernel = 'laplacian'
         self.hirsh_krr_sigma = 1000.0
         self.hirsh_krr_lambda = 1e-9
-        self.hirsh_svr_kernel = 'linear'
-        self.hirsh_svr_C = 1.0
         self.hirsh_filepath = ""
         self.hirsh_file_read = False
-        self.hirsh_svr_epsilon = 0.5
 
         # Atomic Density options
         self.atomicdensity_training = "" 
@@ -52,7 +49,6 @@ class Options:
         self.atomicdensity_refpath = ""
 
         # Defaults for multipoles
-        self.multipole_max_neighbors = 12
         self.multipole_training = ""
         self.multipole_kernel = 'laplacian'
         self.multipole_krr_sigma = 10.0
@@ -139,18 +135,6 @@ class Options:
         except:
             pass
 
-        # Return type of kernel
-        try:
-            self.hirsh_svr_kernel =  self.Config.get("hirshfeld","svr_kernel")
-        except:
-            pass
-
-        # Return sigma parameter for machinelearning
-        try:
-            self.hirsh_svr_C = self.Config.getfloat("hirshfeld","svr_C")
-        except:
-            pass
-
         # no default
         try:
             self.hirsh_filepath = self.Config.get("hirshfeld","ref_path")
@@ -167,11 +151,6 @@ class Options:
         except:
             pass
 
-        # Return sigma parameter for machinelearning
-        try:
-            self.hirsh_svr_epsilon = self.Config.getfloat("hirshfeld","svr_epsilon")
-        except:
-            pass
 
     def set_logger_level(self, val):
         self.logger_level = val
@@ -191,20 +170,11 @@ class Options:
     def set_hirshfeld_krr_lambda(self, val):
         self.hirsh_krr_lambda = val
 
-    def set_hirshfeld_svr_kernel(self, val):
-        self.hirsh_svr_kernel = val
-
-    def set_hirshfeld_svr_C(self, val):
-        self.hirsh_svr_C = val
-
     def set_hirshfeld_file_read(self, val):
-        self._hirsh_file_read = val
+        self.hirsh_file_read = val
 
     def set_hirshfeld_filepath(self, val):
         self.hirsh_filepath = val
-
-    def set_hirshfeld_svr_epsilon(self, val):
-        self.hirsh_svr_epsilon = val
 
     ### Options for atomic density computations 
     def load_atomic_density_options(self):
@@ -329,9 +299,6 @@ class Options:
         except:
             pass
 
-    def set_multipole_max_neighbors(self, val):
-        self.multipoles_max_neighbors = val
-
     def set_multipole_training(self, val):
         self.multipole_training = val
 
@@ -437,7 +404,6 @@ class Options:
 
     def set_exchange_int_params(self, val):
             self.exch_int_params = val
-            ret = constants.exch_int_params 
 
     ### Options for Disp/polarizability
     def load_disp_options(self):
