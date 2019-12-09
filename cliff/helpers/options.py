@@ -344,7 +344,7 @@ class Options:
         except:
             pass
 
-    def set_elec_type(self, val):
+    def set_elst_type(self, val):
         self.elst_type = val
     
     def set_damping_exponents(self, val):

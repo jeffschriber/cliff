@@ -117,7 +117,7 @@ def get_energy(filename):
     }
 
     options.set_elst_type('damped_mtp')
-    options.set_damping_coefficients(elst_cp_exp)
+    options.set_damping_exponents(elst_cp_exp)
 
     options.set_indu_smearing_coeff(0.5478502)
     options.set_induction_omega(0.75)
