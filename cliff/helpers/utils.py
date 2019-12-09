@@ -184,13 +184,6 @@ def extract_atomic_numbers(cartesian,atom_types):
     return Z
 
 @jit
-def atom_dens_free(at_coord, at_typ, pos, atom):
-    '''Free-atom Gaussian density'''
-    ra = constants.rad_free[at_typ]
-    return 1/((2*math.pi)**(1.5)*ra**3)*math.exp(
-        -np.linalg.norm(pos-at_coord)**2/(2.*ra**2))
-
-@jit
 def spher_to_cart(quad, stone_convention=True):
     'convert spherical to cartesian multipoles'
     cart = np.zeros((3,3))
@@ -211,25 +204,16 @@ def spher_to_cart(quad, stone_convention=True):
     return cart
 
 @jit
-def cart_to_spher(cart, stone_convention=True):
+def cart_to_sphere(cart):
     'Convert cartesian to spherical multipoles'
     spher = np.zeros(5)
-    if not stone_convention:
-        spher[0] = 2.*cart[2,2]
-        spher[1] = 2.*constants.sqrt_3*cart[0,2]
-        spher[2] = 2.*constants.sqrt_3*cart[1,2]
-        spher[3] = 1.*constants.sqrt_3*(cart[0,0]-cart[1,1])
-        spher[4] = 2.*constants.sqrt_3*cart[0,1]
-    else:
-        spher[0] = cart[2,2]
-        spher[1] = 2./constants.sqrt_3*cart[0,2]
-        spher[2] = 2./constants.sqrt_3*cart[1,2]
-        spher[3] = 1./constants.sqrt_3*(cart[0,0]-cart[1,1])
-        spher[4] = 2./constants.sqrt_3*cart[0,1]
+    # use Stone convention
+    spher[0] = cart[2,2]
+    spher[1] = 2./constants.sqrt_3*cart[0,2]
+    spher[2] = 2./constants.sqrt_3*cart[1,2]
+    spher[3] = 1./constants.sqrt_3*(cart[0,0]-cart[1,1])
+    spher[4] = 2./constants.sqrt_3*cart[0,1]
     return spher
-
-def symmetrize(a):
-    return a + a.T - np.diag(a.diagonal())
 
 def slater_mbis(cell, coord_i, N_i, v_i, U_i, coord_j, N_j, v_j, U_j):  
     """

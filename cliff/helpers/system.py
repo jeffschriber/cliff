@@ -164,10 +164,9 @@ class System:
             # quadrupole
             if np.linalg.norm(self.mtp_expansion[i][4:]) > 0.:
                 quadloc = self.mtp_expansion[i][4:].reshape((3,3))
-                quad = utils.cart_to_spher(np.dot(np.dot(
+                quad = utils.cart_to_sphere(np.dot(np.dot(
                         self.basis[i].T,
-                    self.mtp_expansion[i][4:].reshape((3,3))),self.basis[i]),
-                    stone_convention=True)
+                    self.mtp_expansion[i][4:].reshape((3,3))),self.basis[i]))
                 # quadloc = utils.spher_to_cart(self.mtp_expansion[i][4:])
                 # quad = utils.cart_to_spher(np.dot(np.dot(
                 #         np.linalg.inv(self.basis[i]), quadloc),
