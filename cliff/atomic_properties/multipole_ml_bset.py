@@ -194,6 +194,7 @@ class MultipoleMLBSet:
             prefac = constants.ml_prefactor[self.kernel]
             for e in self.alpha_train.keys():
                 if self.alpha_train[e] is not None:
+                    # slowest part of the whole project
                     pairwise_dists = cdist(_system.slatm, \
                         self.descr_train[e], constants.ml_metric[self.kernel])
                     kmat = scipy.exp(- pairwise_dists**power / (prefac*self.krr_sigma**power))
