@@ -76,7 +76,7 @@ def test_hirsh_ml():
         hirsh.add_mol_to_training(mol)
     
     # 4. Train the model using kernel ridge regression
-    hirsh.train_ml("krr")
+    hirsh.train_ml()
     res = np.abs(np.divide(np.subtract(h_at,hirsh.alpha_train), h_at))
 
     # avg rel error

@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 #
-# Multipoles_ml_bset class. Predict multipole parameters from ML.
-# No local axis system. Instead, basis set expansion along the pairwise vectors.
 
-# Tristan Bereau (2016)
-
-#from electrostatics import Electrostatics
 from cliff.helpers.system import System
 import scipy
 from scipy import stats

@@ -95,7 +95,7 @@ def get_energy(filenames, config, timer=None):
         #predicts monomer multipole moments for each monomer
         mtp_ml.predict_mol(mol)
         #predicts Hirshfeld ratios using KRR
-        hirsh.predict_mol(mol,"krr")
+        hirsh.predict_mol(mol)
         adens.predict_mol(mol)
     
     #initializes relevant classes with monomer A
@@ -127,7 +127,7 @@ def get_energy(filenames, config, timer=None):
 
     print("\n    Predicting supersystem properties")
     #compute hirshfeld_ratios in the dimer basis 
-    hirsh.predict_mol(dimer, "krr")   
+    hirsh.predict_mol(dimer)   
     
     #use Hirshfeld ratios in the computation of dispersion energy
     #as disp = E_dim - E_monA - E_monB
