@@ -35,6 +35,8 @@ class InductionCalc(CPMultipoleCalc):
         self.conv  = options.indu_conv        
         self.ind_sr = options.indu_sr_params
         self.smearing_coeff = options.indu_smearing_coeff
+        self.scs_cutoff = options.pol_scs_cutoff
+        self.pol_exponent = options.pol_exponent
 
     def add_system(self, sys):
         CPMultipoleCalc.add_system(self, sys)
@@ -69,7 +71,7 @@ class InductionCalc(CPMultipoleCalc):
         self.induced_dip = np.zeros((len(atom_ele),3))
         # Atomic polarizabilities
         atom_alpha_iso = [alpha for _, alpha in enumerate(
-                                Polarizability(options,self.sys_comb).get_pol_scaled())]
+                                Polarizability(self.scs_cutoff,self.pol_exponent,self.sys_comb).get_pol_scaled())]
 
         # Short-range correction 
         self.energy_shortranged = 0.0 #-0.0480131753842 #comes from linear coefficient

@@ -165,39 +165,21 @@ def get_energy(filename):
     mtp = CPMultipoleCalc(options,mols[0], cell)
     ind = InductionCalc(options,mols[0], cell)
     rep = Repulsion(options, mols[0], cell)
+    dis = Dispersion(options, mols[0], cell)
     
     #adds monomer B
     for mol in mols[1:]:
         mtp.add_system(mol)
         ind.add_system(mol)
         rep.add_system(mol)
+        dis.add_system(mol)
     
     #computes electrostatic, induction and exchange energies
     elst = mtp.mtp_energy()
     indu = ind.polarization_energy(options,0.5478502)
     exch = rep.compute_repulsion("slater_mbis")
+    disp = dis.compute_dispersion("MBD", hirsh)
     
-    #creat dimer
-    dimer = reduce(operator.add, mols)
-
-    #compute hirshfeld_ratios in the dimer basis 
-    hirsh.predict_mol(dimer)   
-    
-    #use Hirshfeld ratios in the computation of dispersion energy
-    #as disp = E_dim - E_monA - E_monB
-    disp = 0.0
-    for i, mol in enumerate([dimer] + mols):
-        fac = 1.0 if i == 0 else -1.0
-        #initialize Dispersion class 
-        mbd = Dispersion(options, mol, cell)
-        #compute C6 coefficients
-        mbd.compute_freq_pol()
-        #compute anisotropic characteristic frequencies
-        mbd.compute_freq_scaled_anisotropic()
-        #execute MBD protocol
-        mbd.mbd_protocol(radius=0.57785, beta=2.40871,scs_cutoff=5.01451)
-        disp += fac * mbd.energy
-     
     # for printing
     return elst, exch, indu, disp,  elst+exch+indu+disp
     

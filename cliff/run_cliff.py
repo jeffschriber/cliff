@@ -11,9 +11,7 @@ Handles the primary functions
 """
 
 import numpy as np
-from functools import reduce
 import configparser
-import operator
 import sys
 import argparse
 import os
@@ -102,12 +100,14 @@ def get_energy(filenames, config, timer=None):
     mtp = CPMultipoleCalc(options,mols[0], cell)
     ind = InductionCalc(options, mols[0], cell)
     rep = Repulsion(options, mols[0], cell)
+    disp = Dispersion(options, mols[0], cell) 
     
     #adds monomer B
     for mol in mols[1:]:
         mtp.add_system(mol)
         ind.add_system(mol)
         rep.add_system(mol)
+        disp.add_system(mol)
     
     #computes electrostatic, induction and exchange energies
     t1 = time.time()
@@ -122,29 +122,9 @@ def get_energy(filenames, config, timer=None):
     exch = rep.compute_repulsion("slater_mbis")
     rep_time = time.time() - t3
     
-    #creat dimer
-    dimer = reduce(operator.add, mols)
-
-    print("\n    Predicting supersystem properties")
-    #compute hirshfeld_ratios in the dimer basis 
-    hirsh.predict_mol(dimer)   
-    
     #use Hirshfeld ratios in the computation of dispersion energy
-    #as disp = E_dim - E_monA - E_monB
     t4 = time.time()
-    disp = 0.0
-    for i, mol in enumerate([dimer] + mols):
-        fac = 1.0 if i == 0 else -1.0
-        #initialize Dispersion class 
-        mbd = Dispersion(options, mol, cell)
-        #compute C6 coefficients
-        mbd.compute_freq_pol()
-        #compute anisotropic characteristic frequencies
-        mbd.compute_freq_scaled_anisotropic()
-        #execute MBD protocol
-        mbd.mbd_protocol(None,None,None)
-        disp += fac * mbd.energy
-    
+    disp_en = disp.compute_dispersion(method='MBD',hirsh=hirsh)  
     disp_time = time.time() - t4
 
      
@@ -154,7 +134,7 @@ def get_energy(filenames, config, timer=None):
     timer['disp'] =  disp_time
 
     # for printing
-    return elst, exch, indu, disp,  elst+exch+indu+disp
+    return elst, exch, indu, disp_en,  elst+exch+indu+disp_en
 
 def print_banner(): 
     title = r''' 
