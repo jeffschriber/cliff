@@ -35,8 +35,8 @@ class Polarizability:
         self.scs_cutoff = options.pol_scs_cutoff
         self.exponent = options.pol_exponent
 
-    def compute_csix(self):
-        'Compute C6 coefficients'
+    def compute_freq_pol(self):
+        'Compute characteristic frequency and static polarizabilities'
         hirshfeld_ratios = self.system.hirshfeld_ratios
         if hirshfeld_ratios is None:
             logger.error("Assign Hirshfeld ratios first")
@@ -56,18 +56,16 @@ class Polarizability:
                 / self.pol_scaled[i]**2
             self.freq_scaled_vec[i] = np.array([self.freq_scaled[i],
                 self.freq_scaled[i], self.freq_scaled[i]])
-        self.csix_coeff = 3/4. * np.multiply(self.freq_free_atom,
-            np.multiply(self.pol_scaled, self.pol_scaled))
+
         logger.info("Scaled isotropic polarizability:   %s" % self.pol_scaled)
         logger.info("Characteristic frequencies free:   %s" % self.freq_free_atom)
         logger.info("Characteristic frequencies scaled: %s" % self.freq_scaled)
-        logger.info("C_six:                             %s" % self.csix_coeff)
         return None
 
     def compute_freq_scaled_anisotropic(self):
         'Compute anisotropic characteristic frequencies'
         if self.pol_scaled is None:
-            self.compute_csix()
+            self.compute_freq_pol()
         self.pol_scaled_vec = np.zeros((self.num_atoms,3))
         for i in range(self.num_atoms):
             rvdw_i = constants.rad_free[self.system.elements[i]]*constants.b2a
@@ -101,14 +99,9 @@ class Polarizability:
                     self.pol_scaled_vec[i][2]))
         return None
 
-    def get_csix_coeff(self):
-        if self.csix_coeff is None:
-            self.compute_csix()
-        return self.csix_coeff
-
     def get_pol_scaled(self):
         if self.pol_scaled is None:
-            self.compute_csix()
+            self.compute_freq_pol()
         return self.pol_scaled
 
     def get_pol_scaled_vec(self):

@@ -138,7 +138,7 @@ def get_energy(filenames, config, timer=None):
         #initialize Dispersion class 
         mbd = Dispersion(options, mol, cell)
         #compute C6 coefficients
-        mbd.compute_csix()
+        mbd.compute_freq_pol()
         #compute anisotropic characteristic frequencies
         mbd.compute_freq_scaled_anisotropic()
         #execute MBD protocol
