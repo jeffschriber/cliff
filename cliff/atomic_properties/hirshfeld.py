@@ -35,9 +35,6 @@ class Hirshfeld:
         self.krr_kernel = options.hirsh_krr_kernel
         self.krr_sigma  = options.hirsh_krr_sigma
         self.krr_lambda = options.hirsh_krr_lambda
-        self.svr_kernel = options.hirsh_svr_kernel
-        self.svr_C = options.hirsh_svr_C
-        self.svr_epsilon = options.hirsh_svr_epsilon
 
         self.from_file = options.hirsh_file_read
         self.filepath  = options.hirsh_filepath

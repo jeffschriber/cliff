@@ -71,6 +71,10 @@ class CPMultipoleCalc:
                                 sys.multipoles[i][4:9], stone_convention)
                 # xx, xy, xz, yx, yy, yz, zx, zy, zz
                 self.mtps_cart[idx][4:13] = cart_quad.reshape((1,9))
+
+                # print some spherical mtps for ref
+                #print()                
+            
                 idx += 1
 
         self.mtps_cart_elec[:] = self.mtps_cart
