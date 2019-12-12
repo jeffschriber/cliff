@@ -85,7 +85,7 @@ def get_energy(filename):
     elst = mtp.mtp_energy()
     indu = ind.polarization_energy(options,0.5478502)
     exch = rep.compute_repulsion("slater_mbis")
-    disp = dis.compute_dispersion("MBD",hirsh)
+    disp = dis.compute_dispersion(hirsh)
     
     # for printing
     return elst, exch, indu, disp,  elst+exch+indu+disp

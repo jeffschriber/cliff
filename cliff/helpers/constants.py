@@ -350,6 +350,26 @@ exch_int_params = {
 'O2'  :  22.72871279
 }
 
+disp_coeffs = {
+'Cl1' :  1.0, 
+'F1'  :  1.0, 
+'S1'  :  1.0, 
+'S2'  :  1.0,
+'HS'  :  1.0,
+'HC'  :  1.0, 
+'HN'  :  1.0, 
+'HO'  :  1.0, 
+'C4'  :  1.0, 
+'C3'  :  1.0, 
+'C2'  :  1.0,
+'N3'  :  1.0, 
+'N2'  :  1.0, 
+'N1'  :  1.0, 
+'O1'  :  1.0, 
+'O2'  :  1.0
+}
+
+
 # Default smearing coefficient for induction (Thole model)
 indu_smearing_coeff = 0.5478502 
 

@@ -17,6 +17,7 @@ import argparse
 import os
 import glob
 import time
+import json
 
 import cliff
 from cliff.helpers.options import Options
@@ -124,7 +125,7 @@ def get_energy(filenames, config, timer=None):
     
     #use Hirshfeld ratios in the computation of dispersion energy
     t4 = time.time()
-    disp_en = disp.compute_dispersion(method='MBD',hirsh=hirsh)  
+    disp_en = disp.compute_dispersion(hirsh=hirsh)  
     disp_time = time.time() - t4
 
      
@@ -192,6 +193,10 @@ def print_ret(ret):
     print("    Output summary (kcal/mol)")
     print("    File Directory   |  Electrostatics |   Exchange   |   Induction   |   Dispersion  |   Total ")
     print("    ----------------------------------------------------------------------------------------------") 
+
+    with open('output.json','w') as out:
+        json.dump(ret,out)
+
     for k,v in ret.items():
         print("    %-17s%18.5f %14.5f %15.5f %15.5f %11.5f" % (k, v[0],v[1],v[2],v[3],v[4]))
 

@@ -30,7 +30,7 @@ class AtomicDensity:
         # kernel ridge regression
         self.alpha_train = None
         logger.setLevel(options.logger_level)
-        self.max_neighbors     = options.atomicdensity_max_neighbors
+        self.max_neighbors = options.atomicdensity_max_neighbors
         self.krr_sigma = options.atomicdensity_krr_sigma
         self.krr_lambda = options.atomicdensity_krr_lambda
         self.training_file = options.atomicdensity_training

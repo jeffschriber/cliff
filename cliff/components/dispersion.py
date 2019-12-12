@@ -20,6 +20,7 @@ class Dispersion():
     def __init__(self, options, _system, cell):
         logger.setLevel(options.logger_level)
 
+        self.method = options.disp_method
         self.systems = [_system]
         self.energy = 0.0
         self.cell = cell
@@ -28,15 +29,25 @@ class Dispersion():
         self.scs_cutoff = options.pol_scs_cutoff
         self.pol_exponent = options.pol_exponent
 
+        self.disp_coeffs = options.disp_coeffs
+
+        self.c_6 = []
+        self.c_8 = []
 
     def add_system(self, sys):
         self.systems.append(sys)
         
 
-    def compute_dispersion(self, method='MBD', hirsh=None):
+    def compute_dispersion(self, hirsh=None):
 
         # Driver for dispersion computations
-        if method == 'MBD':
+        if self.method == "TT":
+            
+            disp = self.compute_tang_toennies()
+
+            return disp * constants.au2kcalmol
+
+        if self.method == 'MBD':
             if hirsh == None:
                 raise Exception("Must pass Hirshfeld model for MBD method")
             dimer = reduce(operator.add, self.systems)
@@ -53,7 +64,141 @@ class Dispersion():
                 disp += fac * self.mbd_protocol(pol,None,None,None)
             return disp
             
+    def compute_tang_toennies(self):
+        '''
+        Computes total dispersion energy using Tang-Toennies damping.
+        Uses prefactor from Van Vleet 2018
+        '''        
+
+        # compute c6 coefficients
+        c6_ab = self.compute_c6_coeffs()
+        c8_ab = self.compute_c8_coeffs(c6_ab)
+        cdict = {6:c6_ab,8:c8_ab}  
+
+        # assume two systems
+        sys_i = self.systems[0]                    
+        sys_j = self.systems[1]                    
+
+        disp = 0.0
+        
+        for A, ele_A in enumerate(sys_i.atom_types):
+            # valence decay rates
+            b_A = 1.0 / (sys_i.valence_widths[A])
+            for B, ele_B in enumerate(sys_j.atom_types):
+                b_B = 1.0/(sys_j.valence_widths[B])
+
+                # get interatomic distance
+                coord_A = sys_i.coords[A]
+                coord_B = sys_j.coords[B]
+                vec = self.cell.pbc_distance(coord_A,coord_B) * constants.a2b
+                rAB = np.linalg.norm(vec)
+
+                # use combining rule
+                b_AB = np.sqrt(b_A*b_B)
+                
+                # so far we're only doing r6 and r8 terms
+                dij = 0.0
+                for n in [6,8]:
+                    fn = self.compute_tt_damping(n, rAB, b_AB)
+                    cn = cdict[n]
+                         
+                    dij += fn * cn[A][B] / (rAB**n)   
+
+                disp -= self.disp_coeffs[ele_A] * self.disp_coeffs[ele_B] * dij
+
+        return disp
+
+
+    def compute_tt_damping(self, n, rAB, b_AB):
+        '''
+        Computes Tang--Toennies damping for dispersion, thanks to MVV
+        
+        @params:
+        
+        n: Order of damping funcion, usually 6 or 8
+    
+        rab: The interatomic distance in au
+
+        b_AB: the Bab parameter, computed as square root of product of
+              the inverse of the valence widths for atoms A and B
+
+        '''
+        # compute x
+        x = (b_AB - (2*b_AB*b_AB*rAB + 3*b_AB)/(b_AB*b_AB*rAB*rAB + 3*b_AB*rAB + 3.0)) * rAB 
+
+        # Compute damping function
+        x_sum = 1.0
+        # so far we are hard-coding use of C6 and C8 only
+        for k in range(1, n+1):
+            x_sum += (x**k)/math.factorial(k)
+
+        return 1.0 - np.exp(-x)*x_sum
+
+
+    def compute_c6_coeffs(self):
+
+        nsys = len(self.systems)
+
+        if nsys <= 1:
+            raise Exception("Need at least two monomers")
+        
+        # assume two systems
+        sys_i = self.systems[0]                    
+        sys_j = self.systems[1]                    
+
+        C6_AB = np.zeros([len(sys_i.elements), len(sys_j.elements)])
+
+        # hirshfeld ratios
+        hi = sys_i.hirshfeld_ratios
+        hj = sys_j.hirshfeld_ratios
+
+        for A,ele_A in enumerate(sys_i.elements):
+            # get effective C6s from free-atom C6s
+            c6_AA = constants.csix_free[ele_A]*hi[A]*hi[A]
+
+            # get effective atomic polarizabilities
+            a_A = (hi[A]**(4/3.)) * constants.pol_free[ele_A]
+
+            for B,ele_B in enumerate(sys_j.elements):
+                c6_BB = constants.csix_free[ele_B]*hj[B]*hj[B]
+                a_B = (hj[B]**(4/3.)) * constants.pol_free[ele_B]
+                
+                C6_AB[A][B] = (2.0 * c6_AA * c6_BB) / ((a_B/a_A)*c6_AA + (a_A/a_B)*c6_BB)
+
+        return C6_AB
+
+    def compute_c8_coeffs(self, C6_AB):
+        '''
+        Computes C8 coefficients using the Starkschall recursion relation
+        '''
+
+        # 1. First copy the C6s in the C8s
+        C8_AB = np.copy(C6_AB)
+
+        # 2. Grab systems
+        sys_i = self.systems[0]                    
+        sys_j = self.systems[1]                    
+        
+        for A, ele_A in enumerate(sys_i.elements):
+            # 3. For each atom, get free-atom  <r2> and <r4>
+            r2_A = constants.atomic_r2[ele_A]#*(constants.a2b**2)
+            r4_A = constants.atomic_r4[ele_A]#*(constants.a2b**4)
+            r42A = r4_A / r2_A
+            for B, ele_B in enumerate(sys_j.elements):
+                # 3. For each atom, get free-atom  <r2> and <r4>
+                r2_B = constants.atomic_r2[ele_B]#*(constants.a2b**2) 
+                r4_B = constants.atomic_r4[ele_B]#*(constants.a2b**4)
+                r42B = r4_B / r2_B
             
+                # 4. Compute C8
+                
+                C8_AB[A][B] *= (3.0/2.0) * (r42A + r42B)
+        
+                # Note: The above expression was derived from Starckschall and Gordon (1972)
+                #       MEDFF uses a similar expression, but with the sum of the r42 terms
+                #       with in a square root, not sure why. 
+        return C8_AB
+
 
     def mbd_protocol(self, pol, radius=None, beta=None, scs_cutoff=None):
         'Compute many-body dispersion and molecular polarizability'

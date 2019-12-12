@@ -2,8 +2,6 @@
 #
 # Polarizability class. Compute atomic and molecular polarizabilities.
 #
-# Tristan Bereau (2017)
-
 import numpy as np
 from cliff.helpers.system import System
 from cliff.atomic_properties.hirshfeld import Hirshfeld
@@ -22,7 +20,7 @@ class Polarizability:
         self.system = sys
         self.num_atoms = self.system.num_atoms
         self.elements = self.system.elements
-        self.csix_coeff = None
+
         self.freq_free_atom = None
         self.freq_scaled = None
         self.freq_scaled_vec = None
@@ -34,12 +32,12 @@ class Polarizability:
         self.scs_cutoff = scs_cutoff
         self.exponent = pol_exponent
 
+
     def compute_freq_pol(self):
         'Compute characteristic frequency and static polarizabilities'
         hirshfeld_ratios = self.system.hirshfeld_ratios
         if hirshfeld_ratios is None:
             logger.error("Assign Hirshfeld ratios first")
-        self.csix_coeff = np.zeros(self.num_atoms)
         self.freq_free_atom = np.zeros(self.num_atoms)
         self.freq_scaled = np.zeros(self.num_atoms)
         self.freq_scaled_vec = np.empty((self.num_atoms,3))

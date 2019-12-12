@@ -73,6 +73,9 @@ class Options:
         self.exch_int_params = constants.exch_int_params 
 
         # Defaults for dispersion/polarizability
+
+        self.disp_method    = 'MBD'
+        self.disp_coeffs    = constants.disp_coeffs
         self.pol_scs_cutoff = 5.01451 
         self.disp_beta      = 2.40871
         self.disp_radius    = 0.57785
@@ -426,6 +429,21 @@ class Options:
             self.pol_exponent = self.Config.getfloat("polarizability","exponent")
         except:
             pass
+    
+        try:
+            self.disp_method = self.Config.get("dispersion","method")
+        except:
+            pass
+
+        try:
+            at_types = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
+            ret = {}
+            # Grab exponents from config if provided
+            for at in at_types:
+                ret[at] = self.Config.getfloat("dispersion", "disp["+at+"]")
+            self.disp_coeffs = ret
+        except:
+            pass 
 
     def set_pol_scs_cutoff(self, val):
         self.pol_scs_cutoff = val
@@ -438,4 +456,8 @@ class Options:
 
     def set_pol_exponent(self, val):
         self.pol_exponent = val
+    
+    def set_disp_method(self, val):
+        self.disp_method = val
+
 
