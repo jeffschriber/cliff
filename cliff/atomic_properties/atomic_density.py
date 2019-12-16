@@ -94,7 +94,7 @@ class AtomicDensity:
             pred = np.dot(kmat,self.alpha_train)
             _system.populations, _system.valence_widths = pred.T[0], pred.T[1]
         logger.info("Prediction: %s" % _system.populations)
-        print("    Time spent predicting valence-widths and populations: %8.3f s" % (time.time() - t1))
+       # print("    Time spent predicting valence-widths and populations: %8.3f s" % (time.time() - t1))
         return None
 
     def add_mol_to_training(self, new_system, populations, valwidths):

@@ -17,7 +17,7 @@ from numba import jit
 # Set logger
 logger = logging.getLogger(__name__)
 
-def file_finder(jobdir):
+def file_finder(jobdir = None):
     """
     Compiles xyz files for multiple computations
     

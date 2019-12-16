@@ -17,8 +17,15 @@ logger = logging.getLogger(__name__)
 class Dispersion():
     'Dispersion class. Computes many-body dispersion'
 
-    def __init__(self, options, _system, cell):
+    def __init__(self, options, _system, cell, scale6=None, scale8=None):
         logger.setLevel(options.logger_level)
+
+        self.scale6 = scale6
+        self.scale8 = scale8
+        if scale6 == None:
+            self.scale6 = 1.0
+        if scale8 == None:
+            self.scale8 = 1.0
 
         self.method = options.disp_method
         self.systems = [_system]
@@ -98,11 +105,17 @@ class Dispersion():
                 
                 # so far we're only doing r6 and r8 terms
                 dij = 0.0
-                for n in [6,8]:
-                    fn = self.compute_tt_damping(n, rAB, b_AB)
-                    cn = cdict[n]
-                         
-                    dij += fn * cn[A][B] / (rAB**n)   
+                #for n in [6,8]:
+                #    fn = self.compute_tt_damping(n, rAB, b_AB)
+                #    cn = cdict[n]
+                #         
+                #    dij += fn * cn[A][B] / (rAB**n)   
+                
+                f6 = self.compute_tt_damping(6, rAB, b_AB)
+                f8 = self.compute_tt_damping(8, rAB, b_AB)
+
+                dij += self.scale6 * f6*c6_ab[A][B]/(rAB**6.0) 
+                dij += self.scale8 * f8*c8_ab[A][B]/(rAB**8.0)
 
                 disp -= self.disp_coeffs[ele_A] * self.disp_coeffs[ele_B] * dij
 
@@ -124,7 +137,11 @@ class Dispersion():
 
         '''
         # compute x
-        x = (b_AB - (2*b_AB*b_AB*rAB + 3*b_AB)/(b_AB*b_AB*rAB*rAB + 3*b_AB*rAB + 3.0)) * rAB 
+#        x = (b_AB - (2*b_AB*b_AB*rAB + 3*b_AB)/(b_AB*b_AB*rAB*rAB + 3*b_AB*rAB + 3.0)) * rAB 
+
+        b2 = b_AB*b_AB
+
+        x = b_AB*rAB - (2.0*b2*rAB + 3*b_AB)*rAB / (b2*rAB*rAB + 3.0*b_AB*rAB + 3.0)
 
         # Compute damping function
         x_sum = 1.0
@@ -158,11 +175,14 @@ class Dispersion():
 
             # get effective atomic polarizabilities
             a_A = (hi[A]**(4/3.)) * constants.pol_free[ele_A]
+            #a_A = hi[A] * constants.pol_free[ele_A]
 
             for B,ele_B in enumerate(sys_j.elements):
                 c6_BB = constants.csix_free[ele_B]*hj[B]*hj[B]
                 a_B = (hj[B]**(4/3.)) * constants.pol_free[ele_B]
+                #a_B = hj[B] * constants.pol_free[ele_B]
                 
+                #C6_AB[A][B] = self.scale6 * (2.0 * c6_AA * c6_BB) / ((a_B/a_A)*c6_AA + (a_A/a_B)*c6_BB)
                 C6_AB[A][B] = (2.0 * c6_AA * c6_BB) / ((a_B/a_A)*c6_AA + (a_A/a_B)*c6_BB)
 
         return C6_AB
@@ -192,8 +212,15 @@ class Dispersion():
             
                 # 4. Compute C8
                 
-                C8_AB[A][B] *= (3.0/2.0) * (r42A + r42B)
+                #C8_AB[A][B] *= (3.0/2.0) * (r42A + r42B) * self.scale8
         
+                # from grimme:
+                qa = math.sqrt(constants.Z_val[ele_A]) * r42A
+                qb = math.sqrt(constants.Z_val[ele_B]) * r42B
+                C8_AB[A][B] *= 3*math.sqrt(qa*qb)
+        
+                #C8_AB[A][B] *= 3.0 * math.sqrt(r42A * r42B) * self.scale8
+
                 # Note: The above expression was derived from Starckschall and Gordon (1972)
                 #       MEDFF uses a similar expression, but with the sum of the r42 terms
                 #       with in a square root, not sure why. 

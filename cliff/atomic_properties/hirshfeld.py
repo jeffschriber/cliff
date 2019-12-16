@@ -112,7 +112,7 @@ class Hirshfeld:
             _system.hirshfeld_ratios = np.dot(kmat,self.alpha_train)
         logger.info("Prediction: %s" % _system.hirshfeld_ratios)
 
-        print("    Time spent predicting Hirshfeld ratios:               %8.3f s" % (time.time()-t1))
+       # print("    Time spent predicting Hirshfeld ratios:               %8.3f s" % (time.time()-t1))
         return None
 
     def add_mol_to_training(self, new_system):
