@@ -137,11 +137,9 @@ class Dispersion():
 
         '''
         # compute x
-#        x = (b_AB - (2*b_AB*b_AB*rAB + 3*b_AB)/(b_AB*b_AB*rAB*rAB + 3*b_AB*rAB + 3.0)) * rAB 
-
         b2 = b_AB*b_AB
 
-        x = b_AB*rAB - (2.0*b2*rAB + 3*b_AB)*rAB / (b2*rAB*rAB + 3.0*b_AB*rAB + 3.0)
+        x = b_AB*rAB - ((2.0*b2*rAB + 3*b_AB)*rAB / (b2*rAB*rAB + 3.0*b_AB*rAB + 3.0))
 
         # Compute damping function
         x_sum = 1.0
@@ -174,15 +172,12 @@ class Dispersion():
             c6_AA = constants.csix_free[ele_A]*hi[A]*hi[A]
 
             # get effective atomic polarizabilities
-            a_A = (hi[A]**(4/3.)) * constants.pol_free[ele_A]
-            #a_A = hi[A] * constants.pol_free[ele_A]
+            a_A = hi[A] * constants.pol_free[ele_A]
 
             for B,ele_B in enumerate(sys_j.elements):
                 c6_BB = constants.csix_free[ele_B]*hj[B]*hj[B]
-                a_B = (hj[B]**(4/3.)) * constants.pol_free[ele_B]
-                #a_B = hj[B] * constants.pol_free[ele_B]
+                a_B = hj[B] * constants.pol_free[ele_B]
                 
-                #C6_AB[A][B] = self.scale6 * (2.0 * c6_AA * c6_BB) / ((a_B/a_A)*c6_AA + (a_A/a_B)*c6_BB)
                 C6_AB[A][B] = (2.0 * c6_AA * c6_BB) / ((a_B/a_A)*c6_AA + (a_A/a_B)*c6_BB)
 
         return C6_AB
@@ -198,16 +193,18 @@ class Dispersion():
         # 2. Grab systems
         sys_i = self.systems[0]                    
         sys_j = self.systems[1]                    
+        hi = sys_i.hirshfeld_ratios
+        hj = sys_j.hirshfeld_ratios
         
         for A, ele_A in enumerate(sys_i.elements):
             # 3. For each atom, get free-atom  <r2> and <r4>
-            r2_A = constants.atomic_r2[ele_A]#*(constants.a2b**2)
-            r4_A = constants.atomic_r4[ele_A]#*(constants.a2b**4)
+            r2_A = constants.atomic_r2[ele_A]
+            r4_A = constants.atomic_r4[ele_A]
             r42A = r4_A / r2_A
             for B, ele_B in enumerate(sys_j.elements):
                 # 3. For each atom, get free-atom  <r2> and <r4>
-                r2_B = constants.atomic_r2[ele_B]#*(constants.a2b**2) 
-                r4_B = constants.atomic_r4[ele_B]#*(constants.a2b**4)
+                r2_B = constants.atomic_r2[ele_B] 
+                r4_B = constants.atomic_r4[ele_B]
                 r42B = r4_B / r2_B
             
                 # 4. Compute C8
@@ -215,17 +212,20 @@ class Dispersion():
                 #C8_AB[A][B] *= (3.0/2.0) * (r42A + r42B) * self.scale8
         
                 # from grimme:
-                qa = math.sqrt(constants.Z_val[ele_A]) * r42A
-                qb = math.sqrt(constants.Z_val[ele_B]) * r42B
+                qa = math.sqrt(constants.atomic_number[ele_A]) * r42A
+                qb = math.sqrt(constants.atomic_number[ele_B]) * r42B
                 C8_AB[A][B] *= 3*math.sqrt(qa*qb)
         
-                #C8_AB[A][B] *= 3.0 * math.sqrt(r42A * r42B) * self.scale8
+                #C8_AB[A][B] *= 1.5 * math.sqrt(r42A + r42B) * self.scale8
+                #C8_AB[A][B] *= 1.5 * (r42A + r42B) * self.scale8
 
                 # Note: The above expression was derived from Starckschall and Gordon (1972)
                 #       MEDFF uses a similar expression, but with the sum of the r42 terms
                 #       with in a square root, not sure why. 
         return C8_AB
 
+
+    #def compute_c10_coeffs(self, C6_AB)
 
     def mbd_protocol(self, pol, radius=None, beta=None, scs_cutoff=None):
         'Compute many-body dispersion and molecular polarizability'
