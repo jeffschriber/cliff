@@ -17,15 +17,15 @@ logger = logging.getLogger(__name__)
 class Dispersion():
     'Dispersion class. Computes many-body dispersion'
 
-    def __init__(self, options, _system, cell, scale6=None, scale8=None):
+    def __init__(self, options, _system, cell):
         logger.setLevel(options.logger_level)
 
-        self.scale6 = scale6
-        self.scale8 = scale8
-        if scale6 == None:
-            self.scale6 = 1.0
-        if scale8 == None:
-            self.scale8 = 1.0
+       # self.scale6 = scale6
+       # self.scale8 = scale8
+       # if scale6 == None:
+       #     self.scale6 = 1.0
+       # if scale8 == None:
+       #     self.scale8 = 1.0
 
         self.method = options.disp_method
         self.systems = [_system]
@@ -103,8 +103,6 @@ class Dispersion():
                 # use combining rule
                 b_AB = np.sqrt(b_A*b_B)
                 
-                # so far we're only doing r6 and r8 terms
-                dij = 0.0
                 #for n in [6,8]:
                 #    fn = self.compute_tt_damping(n, rAB, b_AB)
                 #    cn = cdict[n]
@@ -114,10 +112,10 @@ class Dispersion():
                 f6 = self.compute_tt_damping(6, rAB, b_AB)
                 f8 = self.compute_tt_damping(8, rAB, b_AB)
 
-                dij += self.scale6 * f6*c6_ab[A][B]/(rAB**6.0) 
-                dij += self.scale8 * f8*c8_ab[A][B]/(rAB**8.0)
-
-                disp -= self.disp_coeffs[ele_A] * self.disp_coeffs[ele_B] * dij
+                #disp += self.scale6 * f6*c6_ab[A][B]/(rAB**6.0) 
+                #disp += self.scale8 * f8*c8_ab[A][B]/(rAB**8.0)
+                disp -= f6*c6_ab[A][B]/(rAB**6.0) 
+                disp -= self.disp_coeffs[ele_A]*self.disp_coeffs[ele_B] * f8*c8_ab[A][B]/(rAB**8.0)
 
         return disp
 

@@ -69,10 +69,10 @@ class Hirshfeld:
 
         if self.krr_kernel == 'gaussian':
             pairwise_dists = squareform(pdist(self.descr_train, 'euclidean'))
-            kmat = scipy.exp(- pairwise_dists**2 / (2.*self.krr_sigma**2) )
+            kmat = np.exp(- pairwise_dists**2 / (2.*self.krr_sigma**2) )
         elif self.krr_kernel == 'laplacian':
             pairwise_dists = squareform(pdist(self.descr_train, 'cityblock'))
-            kmat = scipy.exp(- pairwise_dists / self.krr_sigma )
+            kmat = np.exp(- pairwise_dists / self.krr_sigma )
         else:
             print("Kernel",self.krr_kernel,"not implemented.")
 
@@ -101,11 +101,11 @@ class Hirshfeld:
             if self.krr_kernel == 'gaussian':
                 pairwise_dists = cdist(_system.coulomb_mat, self.descr_train,
                     'euclidean')
-                kmat = scipy.exp(- pairwise_dists**2 / (2.*self.krr_sigma**2) )
+                kmat = np.exp(- pairwise_dists**2 / (2.*self.krr_sigma**2) )
             elif self.krr_kernel == 'laplacian':
                 pairwise_dists = cdist(_system.coulomb_mat, self.descr_train,
                     'cityblock')
-                kmat = scipy.exp(- pairwise_dists / self.krr_sigma )
+                kmat = np.exp(- pairwise_dists / self.krr_sigma )
             else:
                 logger.error("Kernel %s not implemented" % self.krr_kernel)
                 exit(1)

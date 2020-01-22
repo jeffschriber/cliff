@@ -60,7 +60,7 @@ class AtomicDensity:
             logger.error("No molecule in the training set.")
             exit(1)
         pairwise_dists = squareform(pdist(self.descr_train, 'cityblock'))
-        kmat = scipy.exp(- pairwise_dists / self.krr_sigma )
+        kmat = np.exp(- pairwise_dists / self.krr_sigma )
         kmat += self.krr_lambda*np.identity(len(self.target_train))
         self.alpha_train = np.linalg.solve(kmat,self.target_train)
         logger.info("training finished.")
@@ -90,7 +90,7 @@ class AtomicDensity:
             _system.build_coulomb_matrices(self.max_neighbors)
             pairwise_dists = cdist(_system.coulomb_mat, self.descr_train,
                 'cityblock')
-            kmat = scipy.exp(- pairwise_dists / self.krr_sigma )
+            kmat = np.exp(- pairwise_dists / self.krr_sigma )
             pred = np.dot(kmat,self.alpha_train)
             _system.populations, _system.valence_widths = pred.T[0], pred.T[1]
         logger.info("Prediction: %s" % _system.populations)

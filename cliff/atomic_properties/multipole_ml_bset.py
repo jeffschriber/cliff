@@ -42,6 +42,7 @@ class MultipoleMLBSet:
         self.max_coeffs = [1, 3, 9]
         self.offset_mtp = [0, 1, 4]
         self.alpha_train = {'H':None, 'C':None, 'O':None, 'N':None, 'S':None, 'Cl':None, 'F':None}
+        self.ml_method  = options.multipole_ml_method
         self.kernel     = options.multipole_kernel
         self.krr_sigma  = options.multipole_krr_sigma
         self.krr_lambda = options.multipole_krr_lambda
@@ -65,8 +66,10 @@ class MultipoleMLBSet:
 
         self.correct_charge = options.multipole_correct_charge
 
+        self.nn_mtp = None
+
         ## Load the models on init
-        if not self.ref_mtp:
+        if self.ml_method == "KRR":
             print("    Loading multipole models")
             mtp_s = time.time()
             mtp_models = glob.glob(options.multipole_training + '/*.pkl') 
@@ -75,7 +78,9 @@ class MultipoleMLBSet:
             mtp_e = time.time() 
             print("    Loaded {} multipole models in:\n\t\t {}".format(len(mtp_models), options.multipole_training))
             print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
-
+        elif self.ml_method == "NNAP":
+            from atomicmultipole import Molecule, MultipoleModel
+            self.nn_mtp = MultipoleModel.from_directory(options.multipole_training)
 
 
     def load_ml(self, load_file=None):
@@ -146,7 +151,7 @@ class MultipoleMLBSet:
                 #    % (size_training, size_training, 8*size_training**2/1e9))
                 power  = constants.ml_power[self.kernel]
                 prefac = constants.ml_prefactor[self.kernel]
-                kmat = scipy.exp(- pairwise_dists**power / (prefac*self.krr_sigma**power))
+                kmat = np.exp(- pairwise_dists**power / (prefac*self.krr_sigma**power))
                 #kmat += self.krr_lambda*np.identity(len(self.target_train[e]))
                 kmat.flat[::len(self.target_train[e])+1] += self.krr_lambda 
 
@@ -188,7 +193,7 @@ class MultipoleMLBSet:
                             float(extract_file[i].split()[11]),
                             float(extract_file[i].split()[12])])
                                 for i in range(4,len(extract_file))]
-        else:
+        elif self.ml_method == "KRR" :
             _system.build_slatm(self.mbtypes, xyz=xyz)
             power  = constants.ml_power[self.kernel]
             prefac = constants.ml_prefactor[self.kernel]
@@ -197,7 +202,7 @@ class MultipoleMLBSet:
                     # slowest part of the whole project
                     pairwise_dists = cdist(_system.slatm, \
                         self.descr_train[e], constants.ml_metric[self.kernel])
-                    kmat = scipy.exp(- pairwise_dists**power / (prefac*self.krr_sigma**power))
+                    kmat = np.exp(- pairwise_dists**power / (prefac*self.krr_sigma**power))
                     pred = np.dot(kmat,self.alpha_train[e])
                     for i in range(_system.num_atoms):
                         if _system.elements[i] == e:
@@ -217,6 +222,16 @@ class MultipoleMLBSet:
                         mtp_i[0] += -1.*excess_chg * (w_i/mol_mu)
             # Compute multipoles from basis set expansion
             _system.expand_multipoles()
+        elif self.ml_method == "NNAP":
+            ## multipoles based on neural network models
+            # Build the Molecule object
+            elements = _system.elements
+            coords = _system.coords
+            mol = Molecule(elements, coords)
+        else:
+            print("    Multipole ML method not available!")
+
+
         logger.debug("Predicted multipole expansion for %s" % ( _system.xyz[0]))
 
         print("    Time spent predicting multipoles:                     %8.3f s" % (time.time() - tp))

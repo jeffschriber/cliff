@@ -50,6 +50,7 @@ class Options:
 
         # Defaults for multipoles
         self.multipole_training = ""
+        self.multipole_ml_method = "KRR"
         self.multipole_kernel = 'laplacian'
         self.multipole_krr_sigma = 10.0
         self.multipole_krr_lambda = 1e-3
@@ -248,6 +249,11 @@ class Options:
             pass
 
         try:
+            self.multipole_ml_method = self.Config.getint("multipoles","ml_method")
+        except:
+            pass
+
+        try:
             self.multipole_training = self.Config.get("multipoles","training")
         except:
             pass
@@ -304,6 +310,9 @@ class Options:
 
     def set_multipole_training(self, val):
         self.multipole_training = val
+
+    def set_multipole_ml_method(self, val):
+        self.multipole_ml_method = val
 
     def set_multipole_kernel(self, val):
         self.multipole_kernel = val
@@ -450,6 +459,9 @@ class Options:
 
     def set_disp_beta(self, val):
         self.disp_beta = val
+
+    def set_disp_coeffs(self, val):
+        self.disp_coeffs = val
 
     def set_disp_radius(self, val):
         self.disp_radius = val
