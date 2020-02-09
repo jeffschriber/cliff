@@ -32,6 +32,7 @@ from cliff.components.repulsion import Repulsion
 from cliff.components.induction_calc import InductionCalc
 from cliff.components.dispersion import Dispersion
 
+
 def init_args():
     parser = argparse.ArgumentParser(description="CLIFF: a Component-based Learned Intermolecular Force Field")
     parser.add_argument('-i','--input', type=str, help='Location of input configuration file')
@@ -59,26 +60,29 @@ def get_infile(inpt):
     print("    Loading options from {}".format(infile))
     return infile
 
-def get_energy(filenames, config, timer=None):
-    np.set_printoptions(precision=4, suppress=True, linewidth=100)
-    
-    #1. Initialize relevant variables
-    options = Options(config) 
-    
-   
-    #defines cell parameters for grid computations
-    cell = Cell.lattice_parameters(100., 100., 100.)
-    
+def load_models(options):
     #initializes Hirshfeld class
     hirsh = Hirshfeld(options) 
     adens = AtomicDensity(options)
-    
+
     #load KRR model for Hirshfeld as specified in the config.init file
     hirsh.load_ml() 
     adens.load_ml()
-    
+
     #load multipoles with aSLATM representation
     mtp_ml  = MultipoleMLBSet(options, descriptor="slatm") 
+
+    return [hirsh, adens, mtp_ml]
+
+def get_energy(filenames, models, options, timer=None):
+    np.set_printoptions(precision=4, suppress=True, linewidth=100)
+    
+    hirsh = models[0]
+    adens = models[1]
+    mtp_ml = models[2]
+   
+    #defines cell parameters for grid computations
+    cell = Cell.lattice_parameters(100., 100., 100.)
     
     #loads monomer geometries
     mols = []
@@ -88,6 +92,7 @@ def get_energy(filenames, config, timer=None):
         mols.append(System(options, xyz))
         xyzs.append(xyz)
     
+#    mtp_ml.predict_mols(mols)
     for mol,xyz in zip(mols,xyzs):
         print("")
         print("    Predicting atomic properties for {}".format(xyz))
@@ -218,9 +223,13 @@ def main(inpt=None, files=None):
     ret = {}
     timer = {}
 
+    #1. Initialize relevant variables
+    options = Options(infile) 
+
+    models = load_models(options)
     for filenames in job_list:
         dirname = filenames[0].split('/')[-2]
-        en = get_energy(filenames, infile, timer)
+        en = get_energy(filenames, models, options, timer)
         ret[dirname] = en
 
     print_ret(ret)
