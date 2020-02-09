@@ -177,7 +177,7 @@ class System:
         # print mtps to ref files
         if self.mtp_to_disk:
             xyz = self.xyz[0].split('/')[-1].strip('.xyz')
-            reffile = slef.mtp_save_path + xyz + '-mtp.txt'
+            reffile = self.mtp_save_path + xyz + '-mtp.txt'
             print(reffile) 
             #if os.path.exists(reffile):
             #    return None
@@ -214,6 +214,10 @@ class System:
             for i,at in enumerate(self.coords):
                 at_i = self.elements[i]
                 thrsld = 1.6 if at_ele == 'H' or at_i == 'H' else 2.0
+            
+                if at_ele == 'S' or at_i == 'S':
+                    thrsld = 2.2
+
                 dist = np.linalg.norm(at_crd-self.coords[i])
                 if dist < thrsld and i != at_id:
                     bonded.append((at_i,at,dist))

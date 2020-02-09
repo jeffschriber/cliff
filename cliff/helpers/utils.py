@@ -228,6 +228,13 @@ def slater_mbis(cell, coord_i, N_i, v_i, U_i, coord_j, N_j, v_j, U_j):
     rij = np.linalg.norm(vec)
     # Call function externally to enable jit
     return U_i * U_j * slater_mbis_funcform(rij, N_i, v_i, N_j, v_j) 
+    #return U_i * U_j * slater_mbis_funcform(rij, v_i, v_j) 
+
+#@jit
+#def slater_mbis_funcform(rij,vi, vj):
+#    Bij = np.sqrt(1.0/(vi*vj))
+#
+#    return ((1./3)*Bij*Bij*rij*rij + Bij*rij + 1) * np.exp(-Bij*rij) 
 
 @jit
 def slater_mbis_funcform(rij, N_i, v_i, N_j, v_j):

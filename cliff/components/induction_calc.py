@@ -121,7 +121,7 @@ class InductionCalc(CPMultipoleCalc):
                                     for j,_ in enumerate(atom_ele) if i != j]))
             counter += 1
             if np.linalg.norm(mu_next-mu_prev) > diff_init*10 or counter > 2000:
-                logger.error("Can't converge self-consistent equations. Exiting.")
+                print("Can't converge self-consistent equations. Exiting.")
                 exit(1)
             if counter % 50 == 0 and self.omega > 0.2:
                 self.omega *= 0.8

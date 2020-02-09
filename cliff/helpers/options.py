@@ -75,11 +75,15 @@ class Options:
 
         # Defaults for dispersion/polarizability
 
-        self.disp_method    = 'MBD'
+        self.disp_method    = 'TT'
         self.disp_coeffs    = constants.disp_coeffs
-        self.pol_scs_cutoff = 5.01451 
+        #self.pol_scs_cutoff = 5.01451 
+        #self.disp_beta      = 2.40871
+        #self.disp_radius    = 0.57785
+        #self.pol_exponent   = 0.177346
+        self.pol_scs_cutoff = 3.93473 
         self.disp_beta      = 2.40871
-        self.disp_radius    = 0.57785
+        self.disp_radius    = 0.58605
         self.pol_exponent   = 0.177346
 
 
@@ -249,7 +253,7 @@ class Options:
             pass
 
         try:
-            self.multipole_ml_method = self.Config.getint("multipoles","ml_method")
+            self.multipole_ml_method = self.Config.get("multipoles","ml_method")
         except:
             pass
 

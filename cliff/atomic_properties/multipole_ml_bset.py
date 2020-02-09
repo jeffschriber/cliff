@@ -22,6 +22,9 @@ testpath = os.path.abspath(t.__file__).split('__init__')[0]
 import qml
 from qml.representations import get_slatm_mbtypes
 
+# for NNs
+#from atomicmultipole import Molecule, MultipoleModel
+
 # Set logger
 logger = logging.getLogger(__name__)
 
@@ -69,18 +72,23 @@ class MultipoleMLBSet:
         self.nn_mtp = None
 
         ## Load the models on init
+      #  print("    Predicting atomic multipoles with {}".format(self.ml_method))
         if self.ml_method == "KRR":
-            print("    Loading multipole models")
+       #     print("    Loading multipole models")
             mtp_s = time.time()
             mtp_models = glob.glob(options.multipole_training + '/*.pkl') 
             for model in mtp_models:
                 self.load_ml(model)
             mtp_e = time.time() 
-            print("    Loaded {} multipole models in:\n\t\t {}".format(len(mtp_models), options.multipole_training))
-            print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
+        #    print("    Loaded {} multipole models in:\n\t\t {}".format(len(mtp_models), options.multipole_training))
+         #   print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
         elif self.ml_method == "NNAP":
-            from atomicmultipole import Molecule, MultipoleModel
+            print("    Loading multipole models")
+            mtp_s = time.time()
             self.nn_mtp = MultipoleModel.from_directory(options.multipole_training)
+            mtp_e = time.time() 
+            print("    Loaded multipole model in:\n\t\t {}".format(options.multipole_training))
+            print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
 
 
     def load_ml(self, load_file=None):
@@ -159,6 +167,58 @@ class MultipoleMLBSet:
         logger.info("training of multipoles finished.")
         return None
 
+    #def predict_mols(self, systems, charge=0, xyzs=None):
+    #    '''Predict multipoles in local reference frame given descriptors.'''
+    #    tp = time.time()
+    #    ## multipoles based on neural network models
+    #    mols = []
+    #    for sys in systems: 
+
+    #        # Build the Molecule object
+    #        elements = [constants.atomic_number[Z] for Z in sys.elements]
+    #        coords = sys.coords
+    #        m = np.zeros((len(elements), 12))
+    #        mols.append(Molecule(elements, coords, Q=m))
+
+    #    tq = time.time()
+    #    Qpred = self.nn_mtp.predict(mols, verbose=False)
+    #    tqf = time.time()
+    #    print("Time spent predicting: %8.4f" % (tqf - tq))
+    #    Qpred = Qpred[0]
+
+    #    if self.correct_charge:
+    #        # Weigh by ML error
+    #        mol_mu = sum([constants.ml_chg_correct_error[ele]
+    #                        for ele in _system.elements])
+    #        totalcharge = np.sum(Qpred, axis=0)[0]
+    #        excess_chg = totalcharge - float(charge)
+    #        if mol_mu > 0.:
+    #            for i,mtp_i in enumerate(Qpred):
+    #                w_i = constants.ml_chg_correct_error[_system.elements[i]]
+    #                mtp_i[0] += -1.*excess_chg * (w_i/mol_mu)
+
+    #    full_mtp = np.zeros((len(elements), 13))
+
+    #    for ele in range(len(elements)):
+    #        # copy charge and dipoles
+    #        full_mtp[ele][0] = Qpred[ele][0]
+    #        full_mtp[ele][1] = Qpred[ele][1]
+    #        full_mtp[ele][2] = Qpred[ele][2]
+    #        full_mtp[ele][3] = Qpred[ele][3]
+
+    #        # get quadripole ordering
+    #        full_mtp[ele][4] = Qpred[ele][4] #xx
+    #        full_mtp[ele][5] = Qpred[ele][5] #xy
+    #        full_mtp[ele][6] = Qpred[ele][6] #xz
+    #        full_mtp[ele][7] = Qpred[ele][5] #yx
+    #        full_mtp[ele][8] = Qpred[ele][7] #yy
+    #        full_mtp[ele][9] = Qpred[ele][8] #yz
+    #        full_mtp[ele][10] = Qpred[ele][6] #zx
+    #        full_mtp[ele][11] = Qpred[ele][8] #zy
+    #        full_mtp[ele][12] = Qpred[ele][9] #zz
+
+    #    _system.multipoles = full_mtp 
+
     def predict_mol(self, _system, charge=0, xyz=None):
         '''Predict multipoles in local reference frame given descriptors.'''
         tp = time.time()
@@ -171,28 +231,28 @@ class MultipoleMLBSet:
             xyz = xyz.replace('gold.','', 1)
             reffile = self.ref_path + xyz + '-mtp.txt'
             extract_file = utils.read_file(reffile)
-         #   _system.multipoles = [np.array([
-         #                   float(extract_file[i].split()[0]),
-         #                   float(extract_file[i].split()[1]),
-         #                   float(extract_file[i].split()[2]),
-         #                   float(extract_file[i].split()[3]),
-         #                   float(extract_file[i].split()[4]),
-         #                   float(extract_file[i].split()[5]),
-         #                   float(extract_file[i].split()[6]),
-         #                   float(extract_file[i].split()[7]),
-         #                   float(extract_file[i].split()[8])])
-         #                       for i in range(len(extract_file))]
             _system.multipoles = [np.array([
+                            float(extract_file[i].split()[0]),
+                            float(extract_file[i].split()[1]),
+                            float(extract_file[i].split()[2]),
+                            float(extract_file[i].split()[3]),
                             float(extract_file[i].split()[4]),
+                            float(extract_file[i].split()[5]),
                             float(extract_file[i].split()[6]),
                             float(extract_file[i].split()[7]),
-                            float(extract_file[i].split()[5]),
-                            float(extract_file[i].split()[8]),
-                            float(extract_file[i].split()[9]),
-                            float(extract_file[i].split()[10]),
-                            float(extract_file[i].split()[11]),
-                            float(extract_file[i].split()[12])])
-                                for i in range(4,len(extract_file))]
+                            float(extract_file[i].split()[8])])
+                                for i in range(len(extract_file))]
+         #   _system.multipoles = [np.array([
+         #                   float(extract_file[i].split()[4]),
+         #                   float(extract_file[i].split()[6]),
+         #                   float(extract_file[i].split()[7]),
+         #                   float(extract_file[i].split()[5]),
+         #                   float(extract_file[i].split()[8]),
+         #                   float(extract_file[i].split()[9]),
+         #                   float(extract_file[i].split()[10]),
+         #                   float(extract_file[i].split()[11]),
+         #                   float(extract_file[i].split()[12])])
+         #                       for i in range(4,len(extract_file))]
         elif self.ml_method == "KRR" :
             _system.build_slatm(self.mbtypes, xyz=xyz)
             power  = constants.ml_power[self.kernel]
@@ -222,19 +282,59 @@ class MultipoleMLBSet:
                         mtp_i[0] += -1.*excess_chg * (w_i/mol_mu)
             # Compute multipoles from basis set expansion
             _system.expand_multipoles()
-        elif self.ml_method == "NNAP":
-            ## multipoles based on neural network models
-            # Build the Molecule object
-            elements = _system.elements
-            coords = _system.coords
-            mol = Molecule(elements, coords)
-        else:
-            print("    Multipole ML method not available!")
+    #    elif self.ml_method == "NNAP":
+    #        ## multipoles based on neural network models
+    #        # Build the Molecule object
+    #        elements = [constants.atomic_number[Z] for Z in _system.elements]
+    #        coords = _system.coords
+    #        m = np.zeros((len(elements), 12))
+    #        mol = [Molecule(elements, coords, Q=m)]
+
+    #        tq = time.time()
+    #        Qpred = self.nn_mtp.predict(mol, verbose=False)
+    #        tqf = time.time()
+    #        print("Time spent predicting: %8.4f" % (tqf - tq))
+    #        Qpred = Qpred[0]
+
+    #        if self.correct_charge:
+    #            # Weigh by ML error
+    #            mol_mu = sum([constants.ml_chg_correct_error[ele]
+    #                            for ele in _system.elements])
+    #            totalcharge = np.sum(Qpred, axis=0)[0]
+    #            excess_chg = totalcharge - float(charge)
+    #            if mol_mu > 0.:
+    #                for i,mtp_i in enumerate(Qpred):
+    #                    w_i = constants.ml_chg_correct_error[_system.elements[i]]
+    #                    mtp_i[0] += -1.*excess_chg * (w_i/mol_mu)
+
+    #        full_mtp = np.zeros((len(elements), 13))
+
+    #        for ele in range(len(elements)):
+    #            # copy charge and dipoles
+    #            full_mtp[ele][0] = Qpred[ele][0]
+    #            full_mtp[ele][1] = Qpred[ele][1]
+    #            full_mtp[ele][2] = Qpred[ele][2]
+    #            full_mtp[ele][3] = Qpred[ele][3]
+
+    #            # get quadripole ordering
+    #            full_mtp[ele][4] = Qpred[ele][4] #xx
+    #            full_mtp[ele][5] = Qpred[ele][5] #xy
+    #            full_mtp[ele][6] = Qpred[ele][6] #xz
+    #            full_mtp[ele][7] = Qpred[ele][5] #yx
+    #            full_mtp[ele][8] = Qpred[ele][7] #yy
+    #            full_mtp[ele][9] = Qpred[ele][8] #yz
+    #            full_mtp[ele][10] = Qpred[ele][6] #zx
+    #            full_mtp[ele][11] = Qpred[ele][8] #zy
+    #            full_mtp[ele][12] = Qpred[ele][9] #zz
+
+    #        _system.multipoles = full_mtp 
+    #    else:
+    #        print("    Multipole ML method not available!")
 
 
         logger.debug("Predicted multipole expansion for %s" % ( _system.xyz[0]))
 
-        print("    Time spent predicting multipoles:                     %8.3f s" % (time.time() - tp))
+       # print("    Time spent predicting multipoles:                     %8.3f s" % (time.time() - tp))
         return None
 
     def add_mol_to_training(self, new_system, pun, atom=None, xyz=None):

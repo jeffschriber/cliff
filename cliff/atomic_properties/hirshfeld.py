@@ -84,20 +84,22 @@ class Hirshfeld:
     def predict_mol(self, _system):
         '''Predict coefficients given  descriptors.'''
         t1 = time.time()
-        _system.build_coulomb_matrices(self.max_neighbors)
         if self.from_file:
             h_ratios = []
             for hfile in _system.xyz:
-                hfile = self.filepath + hfile.split('/')[-1]
+                hfile = self.filepath + hfile.split('/')[-1].strip('.xyz') + '-h.txt'
                 with open(hfile,'r') as infile:
                     for line in infile:
                         line = line.split()
                         if len(line) == 6:
                             h_ratios.append(float(line[4])) 
+                        else:
+                            h_ratios.append(float(line[0]))
 
             _system.hirshfeld_ratios = h_ratios
 
         else:
+            _system.build_coulomb_matrices(self.max_neighbors)
             if self.krr_kernel == 'gaussian':
                 pairwise_dists = cdist(_system.coulomb_mat, self.descr_train,
                     'euclidean')
