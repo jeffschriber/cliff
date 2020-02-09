@@ -76,15 +76,20 @@ class Dispersion():
         Computes total dispersion energy using Tang-Toennies damping.
         Uses prefactor from Van Vleet 2018
         '''        
+        # assume two systems
+        sys_i = self.systems[0]                    
+        sys_j = self.systems[1]                    
 
         # compute c6 coefficients
         c6_ab = self.compute_c6_coeffs()
         c8_ab = self.compute_c8_coeffs(c6_ab)
-        cdict = {6:c6_ab,8:c8_ab}  
+        #cdict = {6:c6_ab,8:c8_ab}  
 
-        # assume two systems
-        sys_i = self.systems[0]                    
-        sys_j = self.systems[1]                    
+        #for A, ele_A in enumerate(sys_i.atom_types):
+        #    for B, ele_B in enumerate(sys_j.atom_types):
+        #        c8_ab[A][B] *= self.disp_coeffs[ele_A]*self.disp_coeffs[ele_B]
+        c10_ab = self.compute_c10_coeffs(c6_ab, c8_ab)
+
 
         disp = 0.0
         
@@ -111,11 +116,13 @@ class Dispersion():
                 
                 f6 = self.compute_tt_damping(6, rAB, b_AB)
                 f8 = self.compute_tt_damping(8, rAB, b_AB)
+                f10 = self.compute_tt_damping(10, rAB, b_AB)
 
                 #disp += self.scale6 * f6*c6_ab[A][B]/(rAB**6.0) 
                 #disp += self.scale8 * f8*c8_ab[A][B]/(rAB**8.0)
                 disp -= f6*c6_ab[A][B]/(rAB**6.0) 
-                disp -= self.disp_coeffs[ele_A]*self.disp_coeffs[ele_B] * f8*c8_ab[A][B]/(rAB**8.0)
+                #disp -= self.disp_coeffs[ele_A]*self.disp_coeffs[ele_B] * f8*c8_ab[A][B]/(rAB**8.0)
+                disp -= (f8*c8_ab[A][B]/(rAB**8.0) + f10*c10_ab[A][B]/(rAB**10.0)) * self.disp_coeffs[ele_A]*self.disp_coeffs[ele_B]
 
         return disp
 
@@ -223,7 +230,17 @@ class Dispersion():
         return C8_AB
 
 
-    #def compute_c10_coeffs(self, C6_AB)
+    def compute_c10_coeffs(self, C6_AB, C8_AB):
+
+        # C10 coefficients are computed with the recursion relation:
+        #
+        #   C10 = (49/40) * C8^2 / C6
+
+        C10_AB = np.copy(np.square(C8_AB))
+        C10_AB = np.divide(C10_AB,C6_AB)
+        C10_AB = np.multiply(C10_AB, (49.0/40.0))
+
+        return C10_AB
 
     def mbd_protocol(self, pol, radius=None, beta=None, scs_cutoff=None):
         'Compute many-body dispersion and molecular polarizability'
