@@ -231,28 +231,28 @@ class MultipoleMLBSet:
             xyz = xyz.replace('gold.','', 1)
             reffile = self.ref_path + xyz + '-mtp.txt'
             extract_file = utils.read_file(reffile)
-            _system.multipoles = [np.array([
-                            float(extract_file[i].split()[0]),
-                            float(extract_file[i].split()[1]),
-                            float(extract_file[i].split()[2]),
-                            float(extract_file[i].split()[3]),
-                            float(extract_file[i].split()[4]),
-                            float(extract_file[i].split()[5]),
-                            float(extract_file[i].split()[6]),
-                            float(extract_file[i].split()[7]),
-                            float(extract_file[i].split()[8])])
-                                for i in range(len(extract_file))]
          #   _system.multipoles = [np.array([
+         #                   float(extract_file[i].split()[0]),
+         #                   float(extract_file[i].split()[1]),
+         #                   float(extract_file[i].split()[2]),
+         #                   float(extract_file[i].split()[3]),
          #                   float(extract_file[i].split()[4]),
+         #                   float(extract_file[i].split()[5]),
          #                   float(extract_file[i].split()[6]),
          #                   float(extract_file[i].split()[7]),
-         #                   float(extract_file[i].split()[5]),
-         #                   float(extract_file[i].split()[8]),
-         #                   float(extract_file[i].split()[9]),
-         #                   float(extract_file[i].split()[10]),
-         #                   float(extract_file[i].split()[11]),
-         #                   float(extract_file[i].split()[12])])
-         #                       for i in range(4,len(extract_file))]
+         #                   float(extract_file[i].split()[8])])
+         #                       for i in range(len(extract_file))]
+            _system.multipoles = [np.array([
+                            float(extract_file[i].split()[4]),
+                            float(extract_file[i].split()[6]),
+                            float(extract_file[i].split()[7]),
+                            float(extract_file[i].split()[5]),
+                            float(extract_file[i].split()[8]),
+                            float(extract_file[i].split()[9]),
+                            float(extract_file[i].split()[10]),
+                            float(extract_file[i].split()[11]),
+                            float(extract_file[i].split()[12])])
+                                for i in range(4,len(extract_file))]
         elif self.ml_method == "KRR" :
             _system.build_slatm(self.mbtypes, xyz=xyz)
             power  = constants.ml_power[self.kernel]

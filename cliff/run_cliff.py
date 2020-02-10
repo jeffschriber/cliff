@@ -130,7 +130,7 @@ def get_energy(filenames, models, options, timer=None):
     
     #use Hirshfeld ratios in the computation of dispersion energy
     t4 = time.time()
-    disp_en = disp.compute_dispersion(hirsh=hirsh)  
+    disp_en = disp.compute_dispersion(hirsh)  
     disp_time = time.time() - t4
 
      

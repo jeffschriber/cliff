@@ -20,13 +20,6 @@ class Dispersion():
     def __init__(self, options, _system, cell):
         logger.setLevel(options.logger_level)
 
-       # self.scale6 = scale6
-       # self.scale8 = scale8
-       # if scale6 == None:
-       #     self.scale6 = 1.0
-       # if scale8 == None:
-       #     self.scale8 = 1.0
-
         self.method = options.disp_method
         self.systems = [_system]
         self.energy = 0.0
@@ -38,13 +31,9 @@ class Dispersion():
 
         self.disp_coeffs = options.disp_coeffs
 
-        self.c_6 = []
-        self.c_8 = []
-
     def add_system(self, sys):
         self.systems.append(sys)
         
-
     def compute_dispersion(self, hirsh=None):
 
         # Driver for dispersion computations

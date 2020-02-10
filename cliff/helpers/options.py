@@ -77,14 +77,14 @@ class Options:
 
         self.disp_method    = 'TT'
         self.disp_coeffs    = constants.disp_coeffs
-        #self.pol_scs_cutoff = 5.01451 
-        #self.disp_beta      = 2.40871
-        #self.disp_radius    = 0.57785
-        #self.pol_exponent   = 0.177346
-        self.pol_scs_cutoff = 3.93473 
+        self.pol_scs_cutoff = 5.01451 
         self.disp_beta      = 2.40871
-        self.disp_radius    = 0.58605
+        self.disp_radius    = 0.57785
         self.pol_exponent   = 0.177346
+        #self.pol_scs_cutoff = 3.93473 
+        #self.disp_beta      = 2.40871
+        #self.disp_radius    = 0.58605
+        #self.pol_exponent   = 0.177346
 
 
         # load the options
