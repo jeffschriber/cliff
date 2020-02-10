@@ -118,28 +118,28 @@ def test_elst():
     for k,v in current.items():
         r = refs[k]
         en = v[0]
-        assert (en - r[0]) < 1e-5
+        assert abs(en - r[0]) < 1e-5
 
 def test_exch():
     for k,v in current.items():
         r = refs[k]
         en = v[1]
-        assert (en - r[1]) < 1e-5
+        assert abs(en - r[1]) < 1e-5
 
 def test_ind():
     for k,v in current.items():
         r = refs[k]
         en = v[2]
-        assert (en - r[2]) < 1e-5
+        assert abs(en - r[2]) < 1e-5
 
 def test_disp():
     for k,v in current.items():
         r = refs[k]
         en = v[3]
-        assert (en - r[3]) < 1e-5
+        assert abs(en - r[3]) < 1e-5
 
 def test_total():
     for k,v in current.items():
         r = refs[k]
         en = v[4]
-        assert (en - r[4]) < 1e-5
+        assert abs(en - r[4]) < 1e-5

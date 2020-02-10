@@ -21,7 +21,7 @@ def test_cliff_runscript():
     import cliff.run_cliff as rc
     
     ret = rc.main(testpath + '/cliff_test/config.ini', testpath + '/s30/xyzs/' )
-    with open(testpath + 's30/s30_ref.json','r') as f:
+    with open(testpath + 's30/s30_ref_TT.json','r') as f:
         refs = json.load(f)
 
         rc.print_ret(refs)
@@ -30,8 +30,8 @@ def test_cliff_runscript():
         for k,v in ret.items():
             r = refs[k]
             assert abs(v[0] - r[0]) < 1e-5 
-            assert abs(v[1] - r[1]) < 1e-5 #fail 
-            assert abs(v[2] - r[2]) < 1e-5 #fail 
+            assert abs(v[1] - r[1]) < 1e-5 
+            assert abs(v[2] - r[2]) < 1e-5 
             assert abs(v[3] - r[3]) < 1e-5 
             assert abs(v[4] - r[4]) < 1e-5 
             #if abs(v[2] - r[2]) > 1e-5:

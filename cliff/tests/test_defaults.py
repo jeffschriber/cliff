@@ -22,6 +22,7 @@ from random import shuffle
 from functools import reduce
 import configparser
 import operator
+import pytest
 
 import cliff.tests as t
 testpath = os.path.abspath(t.__file__).split('__init__')[0]
@@ -102,38 +103,38 @@ for mol in mols:
     monA = monA.split('-mon')[0]
     filenames[monA] = filename
     current[monA] = get_energy(filename)
-    break
+   # break
     
 refs = {}
-with open(testpath + 's30/s30_ref.json','r') as f:
+with open(testpath + 's30/s30_ref_TT.json','r') as f:
     refs = json.load(f)
 
 def test_elst():
     for k,v in current.items():
         r = refs[k]
         en = v[0]
-        assert (en - r[0]) < 1e-9
+        assert abs(en - r[0]) < 1e-9
 
 def test_exch():
     for k,v in current.items():
         r = refs[k]
         en = v[1]
-        assert (en - r[1]) < 1e-9
+        assert abs(en - r[1]) < 1e-9
 
 def test_ind():
     for k,v in current.items():
         r = refs[k]
         en = v[2]
-        assert (en - r[2]) < 1e-9
+        assert abs(en - r[2]) < 1e-9
 
 def test_disp():
     for k,v in current.items():
         r = refs[k]
         en = v[3]
-        assert (en - r[3]) < 1e-9
+        assert abs(en - r[3]) < 1e-9
 
 def test_total():
     for k,v in current.items():
         r = refs[k]
         en = v[4]
-        assert (en - r[4]) < 1e-9
+        assert abs(en - r[4]) < 1e-9

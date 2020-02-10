@@ -111,29 +111,32 @@ def test_elst():
     for k,v in current.items():
         r = -5.027323209193627
         en = v[0]
-        assert (en - r) < 1e-5
+        assert abs(en - r) < 1e-5
 
 def test_exch():
     for k,v in current.items():
-        r = 6.3447123433391726
+        #r = 6.3447123433391726
+        r = 6.304172281865544
         en = v[1]
-        assert (en - r) < 1e-5
+        assert abs(en - r) < 1e-5
 
 def test_ind():
     for k,v in current.items():
         #r = -1.6780631768387664
         r = -1.6740255524068077
         en = v[2]
-        assert (en - r) < 1e-5
+        assert abs(en - r) < 1e-5
 
 def test_disp():
     for k,v in current.items():
-        r = -2.859498486568814
+        #r = -2.859498486568814
+        r = -3.9808814637304235
         en = v[3]
-        assert (en - r) < 1e-5
+        assert abs(en - r) < 1e-5
 
 def test_total():
     for k,v in current.items():
-        r = -3.220172529262035
+        #r = -3.220172529262035
+        r = -4.378058261715589
         en = v[4]
-        assert (en - r) < 1e-5
+        assert abs(en - r) < 1e-5
