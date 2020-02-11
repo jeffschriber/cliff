@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-#
-# AtomicDensity class. Predicts atomic populations and valence widths.
-#
-# Tristan Bereau (2016)
 
 from cliff.helpers.system import System
 import cliff.helpers.utils
@@ -20,6 +16,9 @@ import cliff.tests as t
 testpath = os.path.abspath(t.__file__).split('__init__')[0]
 # Set logger
 logger = logging.getLogger(__name__)
+fh = logging.FileHandler('output.log')
+logger.addHandler(fh)
+
 
 class AtomicDensity:
     'AtomicDensity class. Predicts atomic populations and valence widths.'
@@ -43,7 +42,7 @@ class AtomicDensity:
 
     def load_ml(self):
         logger.info(
-            "Reading atomic-density training from %s" % self.training_file)
+            "    Loading atomic-density training from %s" % self.training_file)
 
         if self.use_ref_density:
             return
@@ -93,7 +92,6 @@ class AtomicDensity:
             kmat = np.exp(- pairwise_dists / self.krr_sigma )
             pred = np.dot(kmat,self.alpha_train)
             _system.populations, _system.valence_widths = pred.T[0], pred.T[1]
-        logger.info("Prediction: %s" % _system.populations)
        # print("    Time spent predicting valence-widths and populations: %8.3f s" % (time.time() - t1))
         return None
 

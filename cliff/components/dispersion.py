@@ -13,6 +13,8 @@ import logging
 
 # Set logger
 logger = logging.getLogger(__name__)
+fh = logging.FileHandler('output.log')
+logger.addHandler(fh)
 
 class Dispersion():
     'Dispersion class. Computes many-body dispersion'
@@ -58,6 +60,8 @@ class Dispersion():
                 pol.compute_freq_scaled_anisotropic()
                 #execute MBD protocol
                 disp += fac * self.mbd_protocol(pol,None,None,None)
+
+            logger.info("  Dispersion energy: %8.4f" % disp)
             return disp
             
     def compute_tang_toennies(self):

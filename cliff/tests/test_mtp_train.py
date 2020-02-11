@@ -4,7 +4,7 @@ import cliff
 from cliff.helpers.options import Options
 from cliff.helpers.cell import Cell
 from cliff.helpers.system import System
-from cliff.atomic_properties.multipole_ml_bset import MultipoleMLBSet
+from cliff.atomic_properties.multipole import Multipole
 import os
 import pickle
 import glob
@@ -211,7 +211,7 @@ ca_ref = np.array([[ 3.56764869e-01, -7.99961726e-02, 1.96965580e-02,-2.85287115
 def test_ml_mtp():
     """Train machine learning on data set"""
     options = Options(testpath + '/mtp_train/config.ini') 
-    mtp_model = MultipoleMLBSet(options, descriptor="slatm")
+    mtp_model = Multipole(options, descriptor="slatm")
     # Load mbtypes
     with open(testpath + "/../models/mbtypes.pkl", 'rb') as f:
         mtp_model.mbtypes = pickle.load(f)

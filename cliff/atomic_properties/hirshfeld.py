@@ -19,6 +19,8 @@ import cliff.tests as t
 testpath = os.path.abspath(t.__file__).split('__init__')[0]
 # Set logger
 logger = logging.getLogger(__name__)
+fh = logging.FileHandler('output.log')
+logger.addHandler(fh)
 
 class Hirshfeld:
     'Hirshfeld class. Predicts Hirshfeld ratios.'
@@ -51,7 +53,7 @@ class Hirshfeld:
             return
 
         logger.info(
-            "Reading Hirshfeld training from %s" % self.training_file)
+            "    Loading Hirshfeld training from %s" % self.training_file)
         with open(self.training_file, 'rb') as f:
             self.descr_train, self.alpha_train = pickle.load(f, encoding='bytes')
 
@@ -62,7 +64,7 @@ class Hirshfeld:
             logger.error("No molecule in the training set.")
             exit(1)
 
-        logger.info("building kernel matrix of size (%d,%d); %7.4f Gbytes" \
+        logger.info("   Building kernel matrix of size (%d,%d); %7.4f Gbytes" \
             % (size_training, size_training, 8*size_training**2/1e9))
         print("building kernel matrix of size (%d,%d); %7.4f Gbytes" \
             % (size_training, size_training, 8*size_training**2/1e9))
@@ -113,7 +115,6 @@ class Hirshfeld:
                 logger.error("Kernel %s not implemented" % self.krr_kernel)
                 exit(1)
             _system.hirshfeld_ratios = np.dot(kmat,self.alpha_train)
-        logger.info("Prediction: %s" % _system.hirshfeld_ratios)
 
        # print("    Time spent predicting Hirshfeld ratios:               %8.3f s" % (time.time()-t1))
         return None

@@ -15,6 +15,8 @@ from numba import jit
 
 # Set logger
 logger = logging.getLogger(__name__)
+fh = logging.FileHandler('output.log')
+logger.addHandler(fh)
 
 class CPMultipoleCalc:
     'Mulitpole_calc class computes cp-corrected multipole electrostatics'

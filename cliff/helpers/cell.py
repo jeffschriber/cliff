@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Celle class. Define cell geometry.
+# Cell class. Define cell geometry.
 #
 # Tristan Bereau (2016)
 

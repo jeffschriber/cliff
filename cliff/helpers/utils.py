@@ -12,10 +12,14 @@ import copy
 import glob
 import os
 import cliff.helpers.constants as constants
+
 from numba import jit
 
 # Set logger
 logger = logging.getLogger(__name__)
+fh = logging.FileHandler('output.log')
+logger.addHandler(fh)
+logger.setLevel(20)
 
 def file_finder(jobdir = None):
     """
@@ -35,7 +39,7 @@ def file_finder(jobdir = None):
     if len(jobdirs) == 0:
         raise Exception("Cannot find job directories!")
     else:
-        print("    Found {} job directories".format(len(jobdirs)))        
+        logger.info("    Found {} job directories".format(len(jobdirs)))        
         
     master_xyzs = []
     filesum = 0
@@ -50,7 +54,7 @@ def file_finder(jobdir = None):
     if filesum == 0:
         raise Exception("Cannot find xyz files!")
     else:
-        print("    Found {} xyz files".format(filesum))        
+        logger.info("    Found {} xyz files".format(filesum))        
 
 
     return master_xyzs

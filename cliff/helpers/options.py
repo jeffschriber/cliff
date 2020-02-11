@@ -14,7 +14,8 @@ class Options:
 
     # Set logger
     logger = logging.getLogger(__name__)
-    logging.basicConfig()
+    fh = logging.FileHandler('output.log')
+    logger.addHandler(fh)
 
     def __init__(self, config_file="config.ini"):
         # Config parser

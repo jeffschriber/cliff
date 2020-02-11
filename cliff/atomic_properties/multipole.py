@@ -27,10 +27,12 @@ from qml.representations import get_slatm_mbtypes
 
 # Set logger
 logger = logging.getLogger(__name__)
+fh = logging.FileHandler('output.log')
+logger.addHandler(fh)
 
-class MultipoleMLBSet:
+class Multipole:
     '''
-    MultipoleMLBSet class. Predicts multipoles from machine learning.
+    Multipole class. Predicts multipoles from machine learning.
     No local axis system. Instead, basis set expansion along the pairwise vectors.
     '''
 
@@ -96,7 +98,7 @@ class MultipoleMLBSet:
         # Try many atoms and see which atoms we find
         if load_file != None:
             logger.info(
-                    "Reading multipole training from %s" % load_file)
+                    "    Loading multipole training from %s" % load_file)
             with open(load_file, 'rb') as f:
                 descr_train_at, alpha_train, norm_tgt_mean, \
                     norm_tgt_std, mbtypes = pickle.load(f)
@@ -116,7 +118,7 @@ class MultipoleMLBSet:
 
     def save_ml(self, save_file):
         '''Save machine learning model'''
-        logger.info("Saving multipole machine learning model to %s" %
+        logger.info("   Saving multipole machine learning model to %s" %
             save_file)
         with open(save_file, 'wb') as f:
             pickle.dump([self.descr_train, self.alpha_train,

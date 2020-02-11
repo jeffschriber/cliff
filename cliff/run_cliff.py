@@ -18,6 +18,7 @@ import os
 import glob
 import time
 import json
+import logging
 
 import cliff
 from cliff.helpers.options import Options
@@ -26,12 +27,15 @@ from cliff.helpers.system import System
 import cliff.helpers.utils as Utils
 from cliff.atomic_properties.hirshfeld import Hirshfeld
 from cliff.atomic_properties.atomic_density import AtomicDensity
-from cliff.atomic_properties.multipole_ml_bset import MultipoleMLBSet
+from cliff.atomic_properties.multipole import Multipole
 from cliff.components.cp_multipoles import CPMultipoleCalc
 from cliff.components.repulsion import Repulsion
 from cliff.components.induction_calc import InductionCalc
 from cliff.components.dispersion import Dispersion
 
+logger = logging.getLogger(__name__)
+fh = logging.FileHandler('output.log')
+logger.addHandler(fh)
 
 def init_args():
     parser = argparse.ArgumentParser(description="CLIFF: a Component-based Learned Intermolecular Force Field")
@@ -57,7 +61,6 @@ def get_infile(inpt):
         else:
             infile = inpt                
 
-    print("    Loading options from {}".format(infile))
     return infile
 
 def load_models(options):
@@ -70,7 +73,7 @@ def load_models(options):
     adens.load_ml()
 
     #load multipoles with aSLATM representation
-    mtp_ml  = MultipoleMLBSet(options, descriptor="slatm") 
+    mtp_ml  = Multipole(options, descriptor="slatm") 
 
     return [hirsh, adens, mtp_ml]
 
@@ -93,9 +96,9 @@ def get_energy(filenames, models, options, timer=None):
         xyzs.append(xyz)
     
 #    mtp_ml.predict_mols(mols)
+    logger.info("")
     for mol,xyz in zip(mols,xyzs):
-        print("")
-        print("    Predicting atomic properties for {}".format(xyz))
+        logger.info("    Predicting atomic properties for {}".format(xyz))
         #predicts monomer multipole moments for each monomer
         mtp_ml.predict_mol(mol)
         #predicts Hirshfeld ratios using KRR
@@ -166,7 +169,7 @@ def print_banner():
     ===================================================='''
 
     
-    print(title)
+    logger.info(title)
 
 def canvas(with_attribution=True):
     """
@@ -194,37 +197,42 @@ def print_ret(ret):
     '''
     Print out results from return dict
     '''
-    print("")
-    print("    Output summary (kcal/mol)")
-    print("    File Directory   |  Electrostatics |   Exchange   |   Induction   |   Dispersion  |   Total ")
-    print("    ----------------------------------------------------------------------------------------------") 
+    logger.info("")
+    logger.info("    Output summary (kcal/mol)")
+    logger.info("    File Directory   |  Electrostatics |   Exchange   |   Induction   |   Dispersion  |   Total ")
+    logger.info("    ----------------------------------------------------------------------------------------------") 
 
     with open('output.json','w') as out:
         json.dump(ret,out)
 
     for k,v in ret.items():
-        print("    %-17s%18.5f %14.5f %15.5f %15.5f %11.5f" % (k, v[0],v[1],v[2],v[3],v[4]))
+        logger.info("    %-17s%18.5f %14.5f %15.5f %15.5f %11.5f" % (k, v[0],v[1],v[2],v[3],v[4]))
 
 def print_timings(timer):
-    print("")
-    print("    Component Timings")
-    print("    Electrostatics:  %10.3f s" % timer['elst'])
-    print("    Exchange      :  %10.3f s" % timer['exch'])
-    print("    Induction     :  %10.3f s" % timer['ind'])
-    print("    Dispersion    :  %10.3f s" % timer['disp'])
+    logger.info("")
+    logger.info("    Component Timings")
+    logger.info("    Electrostatics:  %10.3f s" % timer['elst'])
+    logger.info("    Exchange      :  %10.3f s" % timer['exch'])
+    logger.info("    Induction     :  %10.3f s" % timer['ind'])
+    logger.info("    Dispersion    :  %10.3f s" % timer['disp'])
 
 def main(inpt=None, files=None):
     # Do something if this file is invoked on its own
-    print_banner()
 
     infile = get_infile(inpt)
+
+    #1. Initialize relevant variables
+    options = Options(infile) 
+    logger.setLevel(options.logger_level)
+
+    print_banner()
+    logger.info("    Loading options from {}".format(infile))
+
     job_list = Utils.file_finder(files)
 
     ret = {}
     timer = {}
 
-    #1. Initialize relevant variables
-    options = Options(infile) 
 
     models = load_models(options)
     for filenames in job_list:
@@ -243,5 +251,5 @@ if __name__ == "__main__":
     main(args.input, args.files)
     end = time.time()
 
-    print("    CLIFF ran in {} s".format(end-start))
+    logger.info("    CLIFF ran in {} s".format(end-start))
 

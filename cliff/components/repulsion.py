@@ -17,6 +17,8 @@ import logging
 
 # Set logger
 logger = logging.getLogger(__name__)
+fh = logging.FileHandler('output.log')
+logger.addHandler(fh)
 
 
 class Repulsion:
@@ -87,7 +89,7 @@ class Repulsion:
 #                        atom_coord[j], populations[j], valwidths[j], self.rep[atom_type[j]])) 
 
 
-        logger.info("Energy: %7.4f kcal/mol" % self.energy)
+        logger.debug("Energy: %7.4f kcal/mol" % self.energy)
         return self.energy
 
     def different_mols(self, i, j):
