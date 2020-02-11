@@ -6,7 +6,7 @@ from cliff.helpers.options import Options
 from cliff.helpers.cell import Cell
 from cliff.helpers.system import System
 from cliff.atomic_properties.hirshfeld import Hirshfeld
-from cliff.atomic_properties.multipole_ml_bset import MultipoleMLBSet
+from cliff.atomic_properties.multipole import Multipole
 from cliff.atomic_properties.atomic_density import AtomicDensity 
 from cliff.components.cp_multipoles import CPMultipoleCalc
 from cliff.components.induction_calc import InductionCalc
@@ -51,7 +51,7 @@ def get_energy(filename):
     adens.load_ml()
     
     #load multipoles with aSLATM representation
-    mtp_ml  = MultipoleMLBSet(options, descriptor="slatm") 
+    mtp_ml  = Multipole(options, descriptor="slatm") 
     
     #loads monomer geometries
     mols = []
@@ -142,4 +142,4 @@ def test_total():
     for k,v in current.items():
         r = refs[k]
         en = v[4]
-        assert abs(en - r[4]) < 1e-5
+        assert abs(en - r[4]) < 1e-4
