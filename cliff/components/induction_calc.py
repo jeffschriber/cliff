@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-#
-# InductionCalc class. Compute induction.
-#
 
 import numpy as np
 from cliff.helpers.system import System
@@ -28,7 +25,7 @@ class InductionCalc(CPMultipoleCalc):
         CPMultipoleCalc.__init__(self,options,sys,cell)
         logger.setLevel(options.logger_level)
         self.cell = cell
-        self.induced_dip = None
+        self.induced_dip = []
         self.energy_polarization = 0.0
         self.energy_shortranged = 0.0
         self.sys_comb = sys
@@ -59,67 +56,69 @@ class InductionCalc(CPMultipoleCalc):
         # Populate Hirshfeld ratios of combined systems
         # self.hirshfelds = ...
         # Setup list of atoms to sum over
-        atom_coord = [crd for sys in self.systems
-                            for _, crd in enumerate(sys.coords)]
+        nsys = len(self.systems)
+        
+        atom_coord = []    
+        atom_ele = []    
+        atom_typ = []    
+        pops = []
+        v_widths = []
+        atom_alpha_iso = []
+        ind_params = []
+        
+        for sys in self.systems:
+            atom_coord.append([crd for crd in sys.coords])
+            atom_ele.append([ele for ele in sys.elements])
+            atom_typ.append([typ for typ in sys.atom_types])
 
-        atom_ele   = [ele for sys in self.systems
-                            for _, ele in enumerate(sys.elements)]
-        atom_typ   = [typ for sys in self.systems
-                            for _,typ in enumerate(sys.atom_types)]
-        #print("Types", atom_typ)
-        populations = [p for _,p in enumerate(self.sys_comb.populations)]
-        valwidths   = [v/constants.a2b
-                       for _,v in enumerate(self.sys_comb.valence_widths)]
-        self.induced_dip = np.zeros((len(atom_ele),3))
-        # Atomic polarizabilities
-        atom_alpha_iso = [alpha for _, alpha in enumerate(
-                                Polarizability(self.scs_cutoff,self.pol_exponent,self.sys_comb).get_pol_scaled())]
+            pops.append([p for p in sys.populations])
+            v_widths.append([v/constants.a2b for v in sys.valence_widths])
 
-        # Short-range correction 
-        self.energy_shortranged = 0.0 #-0.0480131753842 #comes from linear coefficient
-        sr_start = time.time()
+            self.induced_dip.append(np.zeros((len(sys.elements),3)))
 
-        logger.debug("Overlap matrix:")
-        for i, c_i in enumerate(atom_coord):
-            for j, c_j in enumerate(atom_coord):
+            # Atomic polarizabilities
+            atom_alpha_iso.append([alpha for alpha in Polarizability(self.scs_cutoff,self.pol_exponent,sys).get_pol_scaled()])
+    
+            ind_params.append([self.ind_sr[i] for i in sys.atom_types]) 
 
-                if (self.different_mols(i,j) and i < j):
-                    #print "HERE", atom_typ[i], atom_typ[j]
-                    fmbis = utils.slater_mbis(self.cell,
-                    atom_coord[i], populations[i], valwidths[i],1.0, 
-                    atom_coord[j], populations[j], valwidths[j],1.0 )
-                   # atom_coord[i], populations[i], valwidths[i], self.ind_sr[atom_typ[i]],
-                   # atom_coord[j], populations[j], valwidths[j], self.ind_sr[atom_typ[j]])
- 
-                    self.energy_shortranged +=  self.ind_sr[atom_typ[i]] * self.ind_sr[atom_typ[j]] * fmbis #/ pair_count[pairs_key.index(pair)]
+        # Compute the short-range correction
+        # This is done with U_aU_b*S(a,b,r),
+        # which is the same formalism as exchange
+        self.energy_shortranged = 0.0 
+        start_sr = time.time()
+        for s1 in range(nsys):
+            for s2 in range(s1+1, nsys):
+                r = utils.build_r(atom_coord[s1], atom_coord[s2], self.cell)
+                ovp = utils.slater_ovp_mat(r,v_widths[s1],v_widths[s2])
+                self.energy_shortranged += np.dot(ind_params[s1], np.matmul(ovp,ind_params[s2]))
 
         end_sr = time.time()
+        print("short-range: %6.3f" % (end_sr - start_sr))
+        logger.debug("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
 
-        logger.info("Short range took  %7.4f s" % (end_sr - sr_start))
-        logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
+        ###  Compute the induction term using Thole's formalism
 
         start_pol = time.time()
-        # Intitial induced dipoles
         if smearing_coeff != None:
             self.smearing_coeff = smearing_coeff 
 
-        logger.debug("Permanent multipole interaction tensor:")
-        for i,_ in enumerate(atom_ele):
-            self.induced_dip[i] = sum([atom_alpha_iso[i] *
-                        self.interaction_permanent_multipoles(atom_coord[i],
-                            atom_coord[j], atom_alpha_iso[i], atom_alpha_iso[j],
-                            self.smearing_coeff, self.mtps_cart[j],i,j)
-                            for j,_ in enumerate(atom_ele)
-                            if self.different_mols(i,j)])
+        # Intitial induced dipoles
+        #for i,_ in enumerate(atom_ele):
+        #    self.induced_dip[i] = sum([atom_alpha_iso[i] *
+        #                self.interaction_permanent_multipoles(atom_coord[i],
+        #                    atom_coord[j], atom_alpha_iso[i], atom_alpha_iso[j],
+        #                    self.smearing_coeff, self.mtps_cart[j])
+        #                    for j,_ in enumerate(atom_ele)
+        #                    if self.different_mols(i,j)])
 
-        end_init = time.time()
-        logger.info("Initial induced dipoles took %7.4f s" % (end_init- start_pol))
-        logger.info("Initial induced dipoles [debye]:")
-        for i,_ in enumerate(atom_ele):
-            logger.info("Atom %d: %7.4f %7.4f %7.4f" % (i,
-                            self.induced_dip[i][0] * constants.au2debye,
-                            self.induced_dip[i][1] * constants.au2debye,
-                            self.induced_dip[i][2] * constants.au2debye))
+        for s1 in range(nsys):
+            for s2 in range(s1+1, nsys):
+                    
+                int_perm_mult = self.interaction_permanent_multipoles(atom_coord[s1],
+                                    atom_coord[s2], atom_alpha_iso[s1],atom_alpha_iso[s1],
+                                    self.smearing_coeff, self.mtps_cart[s2])
+                ind_dip = np.dot( atom_alpha_iso[s1], int_perm_mult)     
+
         # Self-consistent polarization
         mu_next = deepcopy(self.induced_dip)
         mu_prev = np.ones((len(atom_ele),3))
@@ -137,14 +136,14 @@ class InductionCalc(CPMultipoleCalc):
                                     for j,_ in enumerate(atom_ele) if i != j]))
             counter += 1
             if np.linalg.norm(mu_next-mu_prev) > diff_init*10 or counter > 2000:
-                print("Can't converge self-consistent equations. Exiting.")
+                logger.error("Can't converge self-consistent equations. Exiting.")
                 exit(1)
             if counter % 50 == 0 and self.omega > 0.2:
                 self.omega *= 0.8
         self.induced_dip = np.zeros((len(atom_ele),13))
-        logger.info("Converged induced dipoles [debye]:")
+        logger.debug("Converged induced dipoles [debye]:")
         for i,_ in enumerate(atom_ele):
-            logger.info("Atom %d: %7.4f %7.4f %7.4f" % (i,
+            logger.debug("Atom %d: %7.4f %7.4f %7.4f" % (i,
                             mu_next[i][0] * constants.au2debye,
                             mu_next[i][1] * constants.au2debye,
                             mu_next[i][2] * constants.au2debye))
@@ -160,17 +159,20 @@ class InductionCalc(CPMultipoleCalc):
                             for i in range(    len(atom_ele))
                             for j in range(i+1,len(atom_ele))
                             if self.different_mols(i,j) and j>i])
-        logger.info("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
+
+        end_pol = time.time()
+        print("Pol: %6.3f" % (end_pol - start_pol))
+        logger.debug("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
         #print("Polarization energy", self.energy_polarization)
         #print "Short range", self.energy_shortranged
         #print self.energy_polarization , self.energy_shortranged
         return self.energy_polarization - self.energy_shortranged
 
-    def different_mols(self, i, j):
-        """
-        Returns True if atom indices i and j belong to different systems.
-        """
-        return self.atom_in_system[i] is not self.atom_in_system[j]
+   # def different_mols(self, i, j):
+   #     """
+   #     Returns True if atom indices i and j belong to different systems.
+   #     """
+   #     return self.atom_in_system[i] is not self.atom_in_system[j]
 
     def interaction_permanent_multipoles(self, coord1, coord2, at_pol1, at_pol2,
         smearing, mtp_perm,I=None,J=None):
