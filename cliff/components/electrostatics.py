@@ -127,21 +127,20 @@ class Electrostatics:
 
                 # 3. MTP-MTP
                 for atom1 in range(len(atom_nums[s1])):
+                    crdi = atom_coord[s1][atom1]        
+                    alpha1 = alphas[s1][atom1]
+                    mi1 = mi[atom1,:] 
                     for atom2 in range(len(atom_nums[s2])):
-                        crdi = atom_coord[s1][atom1]        
                         crdj = atom_coord[s2][atom2]        
 
-                        alpha1 = alphas[s1][atom1]
                         alpha2 = alphas[s2][atom2]
 
-                        mi1 = mi[atom1,:] 
                         mj1 = mj[atom2,:] 
 
                         d_int = full_damped_interaction(crdi, crdj, alpha1, alpha2, self.cell)
 
                         elst3 += np.dot(mi1.T, np.dot(d_int, mj1)) 
 
-        print(elst0, elst1, elst2,  elst3)
         elst += (elst0 + elst1 + elst2 + elst3)
                     
 
