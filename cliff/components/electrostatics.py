@@ -96,7 +96,7 @@ class Electrostatics:
             atom_coord.append([crd for crd in sys.coords])
             atom_ele.append([ele for ele in sys.elements])
             atom_nums.append([constants.atomic_number[ele] for ele in sys.elements])
-            alphas.append([self.exp[ele]*constants.a2b for ele in sys.atom_types])
+            alphas.append([self.exp[ele]*constants.b2a for ele in sys.atom_types])
 
         elst = 0.0
         # Loop over unique interactions
@@ -113,10 +113,14 @@ class Electrostatics:
                 # 2. nuclear-MTP interaction
                 ## TODO: avoid this loop over atoms in sys
                 elst1 = 0.0
+                elst2 = 0.0
                 for ele, Z in enumerate(atom_nums[s1]):
                     elst1 += np.sum(np.matmul(Z * charge_mtp_damped_interaction(atom_coord[s1][ele], atom_coord[s2], alphas[s2], self.cell), mj.T))
+                
+
+
                 for ele, Z in enumerate(atom_nums[s2]):
-                    elst1 += np.sum(np.matmul(Z * charge_mtp_damped_interaction(atom_coord[s2][ele], atom_coord[s1], alphas[s1], self.cell), mi.T))
+                    elst2 += np.sum(np.matmul(Z * charge_mtp_damped_interaction(atom_coord[s2][ele], atom_coord[s1], alphas[s1], self.cell), mi.T))
 
                 # 3. MTP-MTP
                 elst3 = 0.0
@@ -135,8 +139,8 @@ class Electrostatics:
 
                         elst3 += np.dot(mi1.T, np.dot(d_int, mj1)) 
 
-                print(elst0, elst1, elst3)
-                elst += (elst0 + elst1 + elst3)
+                print(elst0, elst1, elst2,  elst3)
+                elst += (elst0 + elst1 + elst2 + elst3)
                     
 
         self.energy_elst = elst * constants.au2kcalmol
