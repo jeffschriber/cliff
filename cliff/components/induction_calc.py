@@ -2,7 +2,7 @@
 
 import numpy as np
 from cliff.helpers.system import System
-from cliff.components.cp_multipoles import CPMultipoleCalc, interaction_tensor
+from cliff.components.electrostatics import Electrostatics, interaction_tensor
 from cliff.atomic_properties.hirshfeld import Hirshfeld
 from cliff.atomic_properties.polarizability import Polarizability
 from cliff.helpers.cell import Cell
@@ -19,10 +19,10 @@ logger = logging.getLogger(__name__)
 fh = logging.FileHandler('output.log')
 logger.addHandler(fh)
 
-class InductionCalc(CPMultipoleCalc):
+class InductionCalc(Electrostatics):
 
     def __init__(self, options, sys, cell, ind_sr=None, hirshfeld_pred="krr", v1=False):
-        CPMultipoleCalc.__init__(self,options,sys,cell)
+        Electrostatics.__init__(self,options,sys,cell)
         logger.setLevel(options.logger_level)
         self.cell = cell
         self.induced_dip = []
@@ -38,7 +38,7 @@ class InductionCalc(CPMultipoleCalc):
         self.pol_exponent = options.pol_exponent
 
     def add_system(self, sys):
-        CPMultipoleCalc.add_system(self, sys)
+        Electrostatics.add_system(self, sys)
         self.sys_comb.hirshfeld_ratios = np.append(self.sys_comb.hirshfeld_ratios,
             sys.hirshfeld_ratios)
         self.sys_comb.populations, self.sys_comb.valence_widths = [], []
