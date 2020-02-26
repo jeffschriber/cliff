@@ -85,12 +85,19 @@ class InductionCalc(Electrostatics):
         # This is done with U_aU_b*S(a,b,r),
         # which is the same formalism as exchange
         self.energy_shortranged = 0.0 
+
+        r_list = []
+        u_list = []
+
         start_sr = time.time()
         for s1 in range(nsys):
             for s2 in range(s1+1, nsys):
                 r = utils.build_r(atom_coord[s1], atom_coord[s2], self.cell)
                 ovp = utils.slater_ovp_mat(r,v_widths[s1],v_widths[s2])
                 self.energy_shortranged += np.dot(ind_params[s1], np.matmul(ovp,ind_params[s2]))
+                r_list.append(r)
+
+                u = self.build_u(r, atom_alpha_iso[s1], atom_alpha_iso[s2])
 
         end_sr = time.time()
         print("short-range: %6.3f" % (end_sr - start_sr))
@@ -103,31 +110,53 @@ class InductionCalc(Electrostatics):
             self.smearing_coeff = smearing_coeff 
 
         # Intitial induced dipoles
-        #for i,_ in enumerate(atom_ele):
-        #    self.induced_dip[i] = sum([atom_alpha_iso[i] *
-        #                self.interaction_permanent_multipoles(atom_coord[i],
-        #                    atom_coord[j], atom_alpha_iso[i], atom_alpha_iso[j],
-        #                    self.smearing_coeff, self.mtps_cart[j])
-        #                    for j,_ in enumerate(atom_ele)
-        #                    if self.different_mols(i,j)])
+#        for i,_ in enumerate(atom_ele):
+#            self.induced_dip[i] = sum([atom_alpha_iso[i] *
+#                        self.interaction_permanent_multipoles(atom_coord[i],
+#                            atom_coord[j], atom_alpha_iso[i], atom_alpha_iso[j],
+#                            self.smearing_coeff, self.mtps_cart[j])
+#                            for j,_ in enumerate(atom_ele)
+#                            if self.different_mols(i,j)])
+#        print(self.induced_dip)
+#
+        # Compute the initial induced dipoles for each atom
+        # These correspond to: mu_i = alpha_i * sum_j(T^ij_a M_j) 
+        # where we damp T using Thole's formalism
 
+        ind_dip = []
         for s1 in range(nsys):
+            mtp1 = self.mtps_cart[s1]
             for s2 in range(s1+1, nsys):
-                    
-                int_perm_mult = self.interaction_permanent_multipoles(atom_coord[s1],
-                                    atom_coord[s2], atom_alpha_iso[s1],atom_alpha_iso[s1],
-                                    self.smearing_coeff, self.mtps_cart[s2])
-                ind_dip = np.dot( atom_alpha_iso[s1], int_perm_mult)     
+                mtp2 = self.mtps_cart[s2]
+                #r = r_list[s1*nsys + s2 -1] * constants.a2b  
+            
+                for i,atom in enumerate(atom_ele[s1]):
+                    T_1 = self.build_int_tensor(atom_coord[s1][i], atom_coord[s2], u[i,:], self.smearing_coeff)
+                    ind_dip.append(np.einsum("ijk,ki->j",T_1,mtp2.T) * atom_alpha_iso[s1][i])
 
+                for i,atom in enumerate(atom_ele[s2]):
+                    T_2 = self.build_int_tensor(atom_coord[s2][i], atom_coord[s1], u[i,:], self.smearing_coeff)
+                    ind_dip.append(np.einsum("ijk,ki->j",T_2,mtp1.T) * atom_alpha_iso[s2][i])
+
+                #int_perm_mult = self.interaction_permanent_multipoles(r, 
+                #                    atom_alpha_iso[s1],atom_alpha_iso[s2],
+                #                    self.smearing_coeff, self.mtps_cart[s2])
+
+        exit()
         # Self-consistent polarization
         mu_next = deepcopy(self.induced_dip)
         mu_prev = np.ones((len(atom_ele),3))
         diff_init = np.linalg.norm(mu_next-mu_prev)
         counter = 0
+
+        # build interaction tensor out of loop
+
+
+        # compute the induced dipoles
         while np.linalg.norm(mu_next-mu_prev) > self.conv:
             mu_prev = deepcopy(mu_next)
             for i,_ in enumerate(atom_ele):
-                mu_next[i] = (1-self.omega)*mu_prev[i] + self.omega * (self.induced_dip[i] + sum(
+                mu_next[i] = (1-self.omega)*mu_prev[i] + self.omega * (int_perm_mult + sum(
                                 [atom_alpha_iso[i] *
                                     product_smeared_ind_dip(atom_coord[i],
                                         atom_coord[j], self.cell,
@@ -142,6 +171,8 @@ class InductionCalc(Electrostatics):
                 self.omega *= 0.8
         self.induced_dip = np.zeros((len(atom_ele),13))
         logger.debug("Converged induced dipoles [debye]:")
+
+
         for i,_ in enumerate(atom_ele):
             logger.debug("Atom %d: %7.4f %7.4f %7.4f" % (i,
                             mu_next[i][0] * constants.au2debye,
@@ -168,23 +199,19 @@ class InductionCalc(Electrostatics):
         #print self.energy_polarization , self.energy_shortranged
         return self.energy_polarization - self.energy_shortranged
 
-   # def different_mols(self, i, j):
-   #     """
-   #     Returns True if atom indices i and j belong to different systems.
-   #     """
-   #     return self.atom_in_system[i] is not self.atom_in_system[j]
-
-    def interaction_permanent_multipoles(self, coord1, coord2, at_pol1, at_pol2,
-        smearing, mtp_perm,I=None,J=None):
+    def interaction_permanent_multipoles(self, r, at_pol1, at_pol2,
+        smearing, mtp_perm):
         """
         Returns product of smeared interaction tensor with permanent multipoles.
         Corresponds to the external field.
+    
+        Computes for all 
         """
 
         interac = np.zeros(3)
         # Permanent charge contribution + monopole charge penetration
         charge = mtp_perm[0]
-        vec = self.cell.pbc_distance(coord1, coord2) * constants.a2b
+
 
         interac += [interaction_tensor_first(vec, at_pol1,
                         at_pol2, smearing, i)*charge for i in range(3)]
@@ -201,6 +228,99 @@ class InductionCalc(Electrostatics):
                         for i in range(3)]
 
         return interac
+
+
+    def build_u(self,r, a1, a2): 
+
+        u = np.copy(r) 
+        a = np.outer(a1,a2)
+        a = np.power(a, (1/6))
+        u = np.divide(u,a)
+        return u
+
+    def build_int_tensor(self, coord1, coord2, u, smear):
+        """
+        Returns natom x 3 x 13 interaction tensor
+        Interaction of atom i with all atoms in other system
+        
+        @params
+    
+        coords, array
+            XYZ coords of ref element in reference system
+        
+        r, array
+            Distance vector of element i in sys1 and all in 
+    
+        u, array
+            Effective distance matrix weighted by element polarizabilities,
+            same dim as r
+    
+        smear, float
+            Smearing coefficient in Thole model 
+        """
+        r = np.zeros((len(coord2),3))
+        xyz = np.zeros((len(coord2),3))
+        exp = np.zeros((len(coord2),3))
+        l3 = np.zeros((len(coord2),3))
+        l5 = np.zeros((len(coord2),3))
+        l7 = np.zeros((len(coord2),3))
+
+        for n, coord in enumerate(coord2):
+            vec = constants.a2b*(self.cell.pbc_distance(coord1, coord))
+            xyz[n] = np.asarray(vec)
+            r[n] = np.asarray(np.linalg.norm(vec))
+
+            exp = np.multiply(np.power(u[n],3.0),-smear)
+            l3[n] = np.asarray(1.0 - np.exp(exp)) 
+            l5[n] = np.asarray(1.0 - (1 - exp)*np.exp(exp) )
+            l7[n] = np.asarray(1.0 - (1.0 - exp - 0.6*exp**2)*np.exp(exp))
+
+        #T = np.zeros([3,13,r.shape[0]])
+        T = np.zeros([r.shape[0],3,13])
+
+        # dipole-charge
+        dc = np.copy(xyz)
+        dc = np.multiply(dc, np.power(r,-3))    
+        dc = np.multiply(dc,l3)
+        T[:,:,0] = dc 
+
+        # dipole-dipole
+        r5 = np.power(r,-5.0)
+        for n in range(3):
+            dd = np.copy(xyz)
+            for m in range(3):
+                dd[:,m] = np.multiply(dd[:,m], 3*xyz[:,n])
+
+            dd = np.multiply(dd, r5)
+            T[:,:,n+1] = np.multiply(dd,l5)
+                
+            # diagonal term
+            T[:,n,n+1] -= np.multiply(l3[:,0], np.power(r[:,0],-3.0))
+
+        # dipole-quadripole
+        r7 = np.power(r,-7.0)
+        for m in range(3):
+            for n in range(3):
+                dq = np.multiply(xyz,r7) * -15.0
+                dq = np.multiply(dq,l7)
+                for p in range(3):
+                    dq[:,p] = np.asarray(np.multiply(dq[:,p], np.multiply(xyz[:,m],xyz[:,n])))
+                    
+                    num = np.zeros(len(coord2))
+                    if m == n:
+                        num += xyz[:,p]
+                    if m == p:
+                        num += xyz[:,n]
+                    if n == p:
+                        num += xyz[:,m]
+                    num *= 3
+                    dq[:,p] += np.multiply(np.multiply(num,l7[:,0]), r7[:,0])
+
+                T[:,:,4 + m*3 + n] = dq 
+                
+     #   print(T)    
+        return T
+
 
 def product_smeared_ind_dip(coord1, coord2, cell, at_pol1, at_pol2,
     smearing, ind_dip):
@@ -221,7 +341,8 @@ def interaction_tensor_first(vec, at_pol1, at_pol2, smearing, dir1):
     r = np.linalg.norm(vec)
     u = r/(at_pol1*at_pol2)**(1/6.)
     ri3 = 1./r**3
-    return -(1.-np.exp(-smearing*u**3))*vec[dir1]*ri3
+    ret =  -(1.-np.exp(-smearing*u**3))*vec[dir1]*ri3
+    return ret
 
 #@jit
 def interaction_tensor_second(vec, at_pol1, at_pol2, smearing,
