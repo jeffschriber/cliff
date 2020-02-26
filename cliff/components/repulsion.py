@@ -88,16 +88,5 @@ class Repulsion:
 #                        atom_coord[i], populations[i], valwidths[i], self.rep[atom_type[i]],
 #                        atom_coord[j], populations[j], valwidths[j], self.rep[atom_type[j]])) 
 
-
         logger.debug("Energy: %7.4f kcal/mol" % self.energy)
         return self.energy
-
-    def different_mols(self, i, j):
-        """
-        Returns True if atom indices i and j belong to different systems.
-        If there's only one system, don't distinguish between different molecules.
-        """
-        if len(self.systems) == 1:
-            return True
-        else:
-            return self.atom_in_system[i] is not self.atom_in_system[j]
