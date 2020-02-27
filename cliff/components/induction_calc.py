@@ -65,6 +65,7 @@ class InductionCalc(Electrostatics):
         v_widths = []
         atom_alpha_iso = []
         ind_params = []
+        induced_dip = []
         
         for sys in self.systems:
             atom_coord.append([crd for crd in sys.coords])
@@ -74,7 +75,7 @@ class InductionCalc(Electrostatics):
             pops.append([p for p in sys.populations])
             v_widths.append([v/constants.a2b for v in sys.valence_widths])
 
-            self.induced_dip.append(np.zeros((len(sys.elements),3)))
+            induced_dip.append(np.zeros((len(sys.elements),3)))
 
             # Atomic polarizabilities
             atom_alpha_iso.append([alpha for alpha in Polarizability(self.scs_cutoff,self.pol_exponent,sys).get_pol_scaled()])
@@ -93,15 +94,17 @@ class InductionCalc(Electrostatics):
         for s1 in range(nsys):
             for s2 in range(s1+1, nsys):
                 r = utils.build_r(atom_coord[s1], atom_coord[s2], self.cell)
-                ovp = utils.slater_ovp_mat(r,v_widths[s1],v_widths[s2])
+                ovp = utils.slater_ovp_mat(r,v_widths[s1],pops[s1],v_widths[s2], pops[s2])
+                print(ovp)
                 self.energy_shortranged += np.dot(ind_params[s1], np.matmul(ovp,ind_params[s2]))
-                r_list.append(r)
+                #r_list.append(r)
 
                 u = self.build_u(r, atom_alpha_iso[s1], atom_alpha_iso[s2])
 
         end_sr = time.time()
         print("short-range: %6.3f" % (end_sr - start_sr))
-        logger.debug("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
+        print("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
+        logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
 
         ###  Compute the induction term using Thole's formalism
 
@@ -109,21 +112,9 @@ class InductionCalc(Electrostatics):
         if smearing_coeff != None:
             self.smearing_coeff = smearing_coeff 
 
-        # Intitial induced dipoles
-#        for i,_ in enumerate(atom_ele):
-#            self.induced_dip[i] = sum([atom_alpha_iso[i] *
-#                        self.interaction_permanent_multipoles(atom_coord[i],
-#                            atom_coord[j], atom_alpha_iso[i], atom_alpha_iso[j],
-#                            self.smearing_coeff, self.mtps_cart[j])
-#                            for j,_ in enumerate(atom_ele)
-#                            if self.different_mols(i,j)])
-#        print(self.induced_dip)
-#
         # Compute the initial induced dipoles for each atom
         # These correspond to: mu_i = alpha_i * sum_j(T^ij_a M_j) 
         # where we damp T using Thole's formalism
-
-        ind_dip = []
         for s1 in range(nsys):
             mtp1 = self.mtps_cart[s1]
             for s2 in range(s1+1, nsys):
@@ -132,16 +123,20 @@ class InductionCalc(Electrostatics):
             
                 for i,atom in enumerate(atom_ele[s1]):
                     T_1 = self.build_int_tensor(atom_coord[s1][i], atom_coord[s2], u[i,:], self.smearing_coeff)
-                    ind_dip.append(np.einsum("ijk,ki->j",T_1,mtp2.T) * atom_alpha_iso[s1][i])
+                    induced_dip[s1][i] = np.einsum("ijk,ki->j",T_1,mtp2.T) * atom_alpha_iso[s1][i]
 
                 for i,atom in enumerate(atom_ele[s2]):
                     T_2 = self.build_int_tensor(atom_coord[s2][i], atom_coord[s1], u[i,:], self.smearing_coeff)
-                    ind_dip.append(np.einsum("ijk,ki->j",T_2,mtp1.T) * atom_alpha_iso[s2][i])
+                    induced_dip[s2][i] = np.einsum("ijk,ki->j",T_2,mtp1.T) * atom_alpha_iso[s2][i]
 
                 #int_perm_mult = self.interaction_permanent_multipoles(r, 
                 #                    atom_alpha_iso[s1],atom_alpha_iso[s2],
                 #                    self.smearing_coeff, self.mtps_cart[s2])
+        print(induced_dip[0])
+        print(induced_dip[1])
 
+        end_init = time.time()
+        print("init: %6.3f" % (end_init - start_pol))
         exit()
         # Self-consistent polarization
         mu_next = deepcopy(self.induced_dip)
