@@ -68,7 +68,7 @@ class InductionCalc(Electrostatics):
         induced_dip = []
         
         for sys in self.systems:
-            atom_coord.append([crd for crd in sys.coords])
+            atom_coord.append([crd*constants.a2b for crd in sys.coords])
             atom_ele.append([ele for ele in sys.elements])
             atom_typ.append([typ for typ in sys.atom_types])
 
@@ -122,13 +122,25 @@ class InductionCalc(Electrostatics):
             mtp1 = self.mtps_cart[s1]
             for s2 in range(s1+1, nsys):
                 mtp2 = self.mtps_cart[s2]
-                #r = r_list[s1*nsys + s2 -1] * constants.a2b  
             
                 for i,atom in enumerate(atom_ele[s1]):
                     T_1 = self.build_int_tensor(atom_coord[s1][i], atom_coord[s2], u[i,:], self.smearing_coeff)
+                    
+                    for j in range(len(atom_coord[s2])):
+                        logger.info("Interaction %d %d" %(i,j))
+                        for q in range(13):
+                            if q == 0:
+                                st = 'Tdc'
+                            elif q > 0 and q < 4:
+                                st = 'Tdd'
+                            else:
+                                st = 'Tdq'
+
+                            for z in range(3):
+                                logger.info("%s  %14.11f" % (st, T_1[j][z][q]))    
 
                     induced_dip[s1][i] = np.einsum("ijk,ki->j",T_1,mtp2.T) * atom_alpha_iso[s1][i]
-
+                    logger.info("%14.11f %14.11f %14.11f" % (induced_dip[s1][i][0], induced_dip[s1][i][1],induced_dip[s1][i][2]) )
                 for i,atom in enumerate(atom_ele[s2]):
                     T_2 = self.build_int_tensor(atom_coord[s2][i], atom_coord[s1], u[i,:], self.smearing_coeff)
                     induced_dip[s2][i] = np.einsum("ijk,ki->j",T_2,mtp1.T) * atom_alpha_iso[s2][i]
@@ -139,9 +151,11 @@ class InductionCalc(Electrostatics):
         logger.info("Initial induced dipole:")
         logger.info("Mol 1")
         for vec in induced_dip[0]:
+            vec *= constants.au2debye
             logger.info("%9.6f  %9.6f  %9.6f" %(vec[0],vec[1],vec[2]))
         logger.info("Mol 2")
-        for vec in induced_dip[0]:
+        for vec in induced_dip[1]:
+            vec *= constants.au2debye
             logger.info("%9.6f  %9.6f  %9.6f" %(vec[0],vec[1],vec[2]))
 
         end_init = time.time()
@@ -240,9 +254,10 @@ class InductionCalc(Electrostatics):
         a = np.outer(a1,a2)
         a = np.power(a, (1/6))
         u = np.divide(u,a)
+        print(u)
         return u
 
-    def build_int_tensor(self, coord1, coord2, u, smear):
+    def build_int_tensor(self, coord1, coord2, u_i, smear):
         """
         Returns natom x 3 x 13 interaction tensor
         Interaction of atom i with all atoms in other system
@@ -270,22 +285,21 @@ class InductionCalc(Electrostatics):
         l7 = np.zeros((len(coord2),3))
 
         for n, coord in enumerate(coord2):
-            vec = constants.a2b*(self.cell.pbc_distance(coord1, coord))
+            vec = self.cell.pbc_distance(coord1, coord)
             xyz[n] = np.asarray(vec)
             r[n] = np.asarray(np.linalg.norm(vec))
 
-            exp = np.multiply(np.power(u[n],3.0),-smear)
+            exp = np.multiply(np.power(u_i[n],3.0),-smear)
             l3[n] = np.asarray(1.0 - np.exp(exp)) 
             l5[n] = np.asarray(1.0 - (1 - exp)*np.exp(exp) )
-            l7[n] = np.asarray(1.0 - (1.0 - exp - 0.6*exp**2)*np.exp(exp))
-
+            l7[n] = np.asarray(1.0 - (1.0 - exp + 0.6*exp*exp)*np.exp(exp))
         #T = np.zeros([3,13,r.shape[0]])
         T = np.zeros([r.shape[0],3,13])
 
         # dipole-charge
         dc = np.copy(xyz)
         dc = np.multiply(dc, np.power(r,-3))    
-        dc = np.multiply(dc,l3)
+        dc = np.multiply(dc,-l3)
         T[:,:,0] = dc 
 
         # dipole-dipole
@@ -318,7 +332,7 @@ class InductionCalc(Electrostatics):
                     if n == p:
                         num += xyz[:,m]
                     num *= 3
-                    dq[:,p] += np.multiply(np.multiply(num,l7[:,0]), r7[:,0])
+                    dq[:,p] += np.multiply(np.multiply(num,l5[:,0]), r5[:,0])
 
                 T[:,:,4 + m*3 + n] = dq 
                 
