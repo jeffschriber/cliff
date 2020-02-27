@@ -95,14 +95,17 @@ class InductionCalc(Electrostatics):
             for s2 in range(s1+1, nsys):
                 r = utils.build_r(atom_coord[s1], atom_coord[s2], self.cell)
                 ovp = utils.slater_ovp_mat(r,v_widths[s1],pops[s1],v_widths[s2], pops[s2])
-                print(ovp)
+
+                for ov in ovp.flatten():
+                    logger.info("%13.12f"%ov)
+
                 self.energy_shortranged += np.dot(ind_params[s1], np.matmul(ovp,ind_params[s2]))
                 #r_list.append(r)
 
                 u = self.build_u(r, atom_alpha_iso[s1], atom_alpha_iso[s2])
 
         end_sr = time.time()
-        print("short-range: %6.3f" % (end_sr - start_sr))
+        logger.info("short-range: %6.3f" % (end_sr - start_sr))
         print("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
         logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
 
@@ -123,6 +126,7 @@ class InductionCalc(Electrostatics):
             
                 for i,atom in enumerate(atom_ele[s1]):
                     T_1 = self.build_int_tensor(atom_coord[s1][i], atom_coord[s2], u[i,:], self.smearing_coeff)
+
                     induced_dip[s1][i] = np.einsum("ijk,ki->j",T_1,mtp2.T) * atom_alpha_iso[s1][i]
 
                 for i,atom in enumerate(atom_ele[s2]):
@@ -132,11 +136,16 @@ class InductionCalc(Electrostatics):
                 #int_perm_mult = self.interaction_permanent_multipoles(r, 
                 #                    atom_alpha_iso[s1],atom_alpha_iso[s2],
                 #                    self.smearing_coeff, self.mtps_cart[s2])
-        print(induced_dip[0])
-        print(induced_dip[1])
+        logger.info("Initial induced dipole:")
+        logger.info("Mol 1")
+        for vec in induced_dip[0]:
+            logger.info("%9.6f  %9.6f  %9.6f" %(vec[0],vec[1],vec[2]))
+        logger.info("Mol 2")
+        for vec in induced_dip[0]:
+            logger.info("%9.6f  %9.6f  %9.6f" %(vec[0],vec[1],vec[2]))
 
         end_init = time.time()
-        print("init: %6.3f" % (end_init - start_pol))
+        logger.info("init: %6.3f" % (end_init - start_pol))
         exit()
         # Self-consistent polarization
         mu_next = deepcopy(self.induced_dip)
