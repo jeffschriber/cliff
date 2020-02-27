@@ -206,7 +206,7 @@ def product_smeared_ind_dip(coord1, coord2, cell, at_pol1, at_pol2,
                 for j in range(3)])
                 for i in range(3)])
 
-@jit
+#@jit
 def interaction_tensor_first(vec, at_pol1, at_pol2, smearing, dir1):
     """
     Returns smeared dipole-charge interaction tensor using Thole formalism.
@@ -214,9 +214,10 @@ def interaction_tensor_first(vec, at_pol1, at_pol2, smearing, dir1):
     r = np.linalg.norm(vec)
     u = r/(at_pol1*at_pol2)**(1/6.)
     ri3 = 1./r**3
+    logger.debug('Tdc: %14.11f'%(-(1.-np.exp(-smearing*u**3))*vec[dir1]*ri3))
     return -(1.-np.exp(-smearing*u**3))*vec[dir1]*ri3
 
-@jit
+#@jit
 def interaction_tensor_second(vec, at_pol1, at_pol2, smearing,
             dir1, dir2):
     """
@@ -230,9 +231,10 @@ def interaction_tensor_second(vec, at_pol1, at_pol2, smearing,
     lambda3 = 1.-np.exp(-smearing*u**3)
     lambda5 = 1.-(1+smearing*u**3) * np.exp(-smearing*u**3)
     diag = lambda3*ri3 if dir1 is dir2 else 0.
+    logger.debug("Tdd: %14.11f"%(lambda5*3*vec[dir1]*vec[dir2]*ri5 - diag))
     return lambda5*3*vec[dir1]*vec[dir2]*ri5 - diag
 
-@jit
+#@jit
 def interaction_tensor_third(vec, at_pol1, at_pol2, smearing,
             dir1, dir2, dir3):
     """
@@ -248,6 +250,9 @@ def interaction_tensor_third(vec, at_pol1, at_pol2, smearing,
     coeff1 = vec[dir1] if dir2 is dir3 else 0.
     coeff2 = vec[dir2] if dir1 is dir3 else 0.
     coeff3 = vec[dir3] if dir1 is dir2 else 0.
-    return - lambda7*15*vec[dir1]*vec[dir2]*vec[dir3]*ri7 \
+    ret =  - lambda7*15*vec[dir1]*vec[dir2]*vec[dir3]*ri7 \
             + lambda5*3*(coeff1+coeff2+coeff3)*ri5
+    logger.debug("Tdq: %14.11f" % ret)
+    return ret
+
 
