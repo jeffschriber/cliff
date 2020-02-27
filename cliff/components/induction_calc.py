@@ -78,14 +78,18 @@ class InductionCalc(CPMultipoleCalc):
         # Short-range correction 
         self.energy_shortranged = 0.0 #-0.0480131753842 #comes from linear coefficient
 
+        logger.debug("Overlap matrix:")
         for i, c_i in enumerate(atom_coord):
             for j, c_j in enumerate(atom_coord):
 
                 if (self.different_mols(i,j) and i < j):
                     #print "HERE", atom_typ[i], atom_typ[j]
                     fmbis = utils.slater_mbis(self.cell,
-                    atom_coord[i], populations[i], valwidths[i], self.ind_sr[atom_typ[i]],
-                    atom_coord[j], populations[j], valwidths[j], self.ind_sr[atom_typ[j]])
+                    atom_coord[i], populations[i], valwidths[i],1.0, 
+                    atom_coord[j], populations[j], valwidths[j],1.0 )
+                   # atom_coord[i], populations[i], valwidths[i], self.ind_sr[atom_typ[i]],
+                   # atom_coord[j], populations[j], valwidths[j], self.ind_sr[atom_typ[j]])
+                    logger.debug("%d  %d  %14.12f" % (i,j,fmbis))
  
                     self.energy_shortranged +=  self.ind_sr[atom_typ[i]] * self.ind_sr[atom_typ[j]] * fmbis #/ pair_count[pairs_key.index(pair)]
         logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
@@ -93,11 +97,12 @@ class InductionCalc(CPMultipoleCalc):
         if smearing_coeff != None:
             self.smearing_coeff = smearing_coeff 
 
+        logger.debug("Permanent multipole interaction tensor:")
         for i,_ in enumerate(atom_ele):
             self.induced_dip[i] = sum([atom_alpha_iso[i] *
                         self.interaction_permanent_multipoles(atom_coord[i],
                             atom_coord[j], atom_alpha_iso[i], atom_alpha_iso[j],
-                            self.smearing_coeff, self.mtps_cart[j])
+                            self.smearing_coeff, self.mtps_cart[j],i,j)
                             for j,_ in enumerate(atom_ele)
                             if self.different_mols(i,j)])
         logger.info("Initial induced dipoles [debye]:")
@@ -159,11 +164,13 @@ class InductionCalc(CPMultipoleCalc):
         return self.atom_in_system[i] is not self.atom_in_system[j]
 
     def interaction_permanent_multipoles(self, coord1, coord2, at_pol1, at_pol2,
-        smearing, mtp_perm):
+        smearing, mtp_perm,I=None,J=None):
         """
         Returns product of smeared interaction tensor with permanent multipoles.
         Corresponds to the external field.
         """
+
+        logger.debug("Interaction for %d  %d" %(I,J))
         interac = np.zeros(3)
         # Permanent charge contribution + monopole charge penetration
         charge = mtp_perm[0]
@@ -182,6 +189,10 @@ class InductionCalc(CPMultipoleCalc):
                         for j in range(3)
                         for k in range(3)])
                         for i in range(3)]
+
+        for t in interac:
+            logger.debug("%15.13f" %(t))
+
         return interac
 
 def product_smeared_ind_dip(coord1, coord2, cell, at_pol1, at_pol2,
