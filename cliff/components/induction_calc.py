@@ -86,27 +86,17 @@ class InductionCalc(Electrostatics):
         # This is done with U_aU_b*S(a,b,r),
         # which is the same formalism as exchange
         self.energy_shortranged = 0.0 
-
-        r_list = []
-        u_list = []
-
         start_sr = time.time()
         for s1 in range(nsys):
             for s2 in range(s1+1, nsys):
                 r = utils.build_r(atom_coord[s1], atom_coord[s2], self.cell)
                 ovp = utils.slater_ovp_mat(r,v_widths[s1],pops[s1],v_widths[s2], pops[s2])
-
-                for ov in ovp.flatten():
-                    logger.info("%13.12f"%ov)
-
                 self.energy_shortranged += np.dot(ind_params[s1], np.matmul(ovp,ind_params[s2]))
-                #r_list.append(r)
-
                 u = self.build_u(r, atom_alpha_iso[s1], atom_alpha_iso[s2])
 
         end_sr = time.time()
         logger.info("short-range: %6.3f" % (end_sr - start_sr))
-        print("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
+        #print("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
         logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
 
         ###  Compute the induction term using Thole's formalism
@@ -118,6 +108,12 @@ class InductionCalc(Electrostatics):
         # Compute the initial induced dipoles for each atom
         # These correspond to: mu_i = alpha_i * sum_j(T^ij_a M_j) 
         # where we damp T using Thole's formalism
+
+        # fix the charges
+        for s,sys in enumerate(self.systems):
+            for i in range(sys.num_atoms):
+                self.mtps_cart[s][i][0] += constants.atomic_number[atom_ele[s][i]]
+
         for s1 in range(nsys):
             mtp1 = self.mtps_cart[s1]
             for s2 in range(s1+1, nsys):
@@ -126,21 +122,21 @@ class InductionCalc(Electrostatics):
                 for i,atom in enumerate(atom_ele[s1]):
                     T_1 = self.build_int_tensor(atom_coord[s1][i], atom_coord[s2], u[i,:], self.smearing_coeff)
                     
-                    for j in range(len(atom_coord[s2])):
-                        logger.info("Interaction %d %d" %(i,j))
-                        for q in range(13):
-                            if q == 0:
-                                st = 'Tdc'
-                            elif q > 0 and q < 4:
-                                st = 'Tdd'
-                            else:
-                                st = 'Tdq'
+                #    for j in range(len(atom_coord[s2])):
+                #        logger.info("Interaction %d %d" %(i,j))
+                #        for q in range(13):
+                #            if q == 0:
+                #                st = 'Tdc'
+                #            elif q > 0 and q < 4:
+                #                st = 'Tdd'
+                #            else:
+                #                st = 'Tdq'
 
-                            for z in range(3):
-                                logger.info("%s  %14.11f" % (st, T_1[j][z][q]))    
+                #            for z in range(3):
+                #                logger.info("%s  %14.11f" % (st, T_1[j][z][q]))    
 
                     induced_dip[s1][i] = np.einsum("ijk,ki->j",T_1,mtp2.T) * atom_alpha_iso[s1][i]
-                    logger.info("%14.11f %14.11f %14.11f" % (induced_dip[s1][i][0], induced_dip[s1][i][1],induced_dip[s1][i][2]) )
+                #    logger.info("%14.11f %14.11f %14.11f" % (induced_dip[s1][i][0], induced_dip[s1][i][1],induced_dip[s1][i][2]) )
                 for i,atom in enumerate(atom_ele[s2]):
                     T_2 = self.build_int_tensor(atom_coord[s2][i], atom_coord[s1], u[i,:], self.smearing_coeff)
                     induced_dip[s2][i] = np.einsum("ijk,ki->j",T_2,mtp1.T) * atom_alpha_iso[s2][i]
@@ -148,6 +144,7 @@ class InductionCalc(Electrostatics):
                 #int_perm_mult = self.interaction_permanent_multipoles(r, 
                 #                    atom_alpha_iso[s1],atom_alpha_iso[s2],
                 #                    self.smearing_coeff, self.mtps_cart[s2])
+        end_init = time.time()
         logger.info("Initial induced dipole:")
         logger.info("Mol 1")
         for vec in induced_dip[0]:
@@ -158,7 +155,6 @@ class InductionCalc(Electrostatics):
             vec *= constants.au2debye
             logger.info("%9.6f  %9.6f  %9.6f" %(vec[0],vec[1],vec[2]))
 
-        end_init = time.time()
         logger.info("init: %6.3f" % (end_init - start_pol))
         exit()
         # Self-consistent polarization
