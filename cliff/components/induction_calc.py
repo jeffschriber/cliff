@@ -2,7 +2,6 @@
 #
 # InductionCalc class. Compute induction.
 #
-# Tristan Bereau (2017)
 
 import numpy as np
 from cliff.helpers.system import System
@@ -16,6 +15,7 @@ import logging
 import cliff.helpers.constants as constants
 import cliff.helpers.utils as utils
 from numba import jit
+import time
 
 # Set logger
 logger = logging.getLogger(__name__)
@@ -77,6 +77,7 @@ class InductionCalc(CPMultipoleCalc):
 
         # Short-range correction 
         self.energy_shortranged = 0.0 #-0.0480131753842 #comes from linear coefficient
+        sr_start = time.time()
 
         logger.debug("Overlap matrix:")
         for i, c_i in enumerate(atom_coord):
@@ -89,10 +90,15 @@ class InductionCalc(CPMultipoleCalc):
                     atom_coord[j], populations[j], valwidths[j],1.0 )
                    # atom_coord[i], populations[i], valwidths[i], self.ind_sr[atom_typ[i]],
                    # atom_coord[j], populations[j], valwidths[j], self.ind_sr[atom_typ[j]])
-                    logger.debug("%d  %d  %14.12f" % (i,j,fmbis))
  
                     self.energy_shortranged +=  self.ind_sr[atom_typ[i]] * self.ind_sr[atom_typ[j]] * fmbis #/ pair_count[pairs_key.index(pair)]
+
+        end_sr = time.time()
+
+        logger.info("Short range took  %7.4f s" % (end_sr - sr_start))
         logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
+
+        start_pol = time.time()
         # Intitial induced dipoles
         if smearing_coeff != None:
             self.smearing_coeff = smearing_coeff 
@@ -105,6 +111,9 @@ class InductionCalc(CPMultipoleCalc):
                             self.smearing_coeff, self.mtps_cart[j],i,j)
                             for j,_ in enumerate(atom_ele)
                             if self.different_mols(i,j)])
+
+        end_init = time.time()
+        logger.info("Initial induced dipoles took %7.4f s" % (end_init- start_pol))
         logger.info("Initial induced dipoles [debye]:")
         for i,_ in enumerate(atom_ele):
             logger.info("Atom %d: %7.4f %7.4f %7.4f" % (i,
@@ -170,7 +179,6 @@ class InductionCalc(CPMultipoleCalc):
         Corresponds to the external field.
         """
 
-        logger.debug("Interaction for %d  %d" %(I,J))
         interac = np.zeros(3)
         # Permanent charge contribution + monopole charge penetration
         charge = mtp_perm[0]
@@ -189,9 +197,6 @@ class InductionCalc(CPMultipoleCalc):
                         for j in range(3)
                         for k in range(3)])
                         for i in range(3)]
-
-        for t in interac:
-            logger.debug("%15.13f" %(t))
 
         return interac
 
@@ -214,7 +219,6 @@ def interaction_tensor_first(vec, at_pol1, at_pol2, smearing, dir1):
     r = np.linalg.norm(vec)
     u = r/(at_pol1*at_pol2)**(1/6.)
     ri3 = 1./r**3
-    logger.debug('Tdc: %14.11f'%(-(1.-np.exp(-smearing*u**3))*vec[dir1]*ri3))
     return -(1.-np.exp(-smearing*u**3))*vec[dir1]*ri3
 
 #@jit
@@ -231,7 +235,6 @@ def interaction_tensor_second(vec, at_pol1, at_pol2, smearing,
     lambda3 = 1.-np.exp(-smearing*u**3)
     lambda5 = 1.-(1+smearing*u**3) * np.exp(-smearing*u**3)
     diag = lambda3*ri3 if dir1 is dir2 else 0.
-    logger.debug("Tdd: %14.11f"%(lambda5*3*vec[dir1]*vec[dir2]*ri5 - diag))
     return lambda5*3*vec[dir1]*vec[dir2]*ri5 - diag
 
 #@jit
@@ -252,7 +255,6 @@ def interaction_tensor_third(vec, at_pol1, at_pol2, smearing,
     coeff3 = vec[dir3] if dir1 is dir2 else 0.
     ret =  - lambda7*15*vec[dir1]*vec[dir2]*vec[dir3]*ri7 \
             + lambda5*3*(coeff1+coeff2+coeff3)*ri5
-    logger.debug("Tdq: %14.11f" % ret)
     return ret
 
 
