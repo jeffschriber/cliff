@@ -90,11 +90,13 @@ class InductionCalc(Electrostatics):
         for s1 in range(nsys):
             for s2 in range(s1+1, nsys):
                 r = utils.build_r(atom_coord[s1], atom_coord[s2], self.cell)
+                r1 = utils.build_r(atom_coord[s1], atom_coord[s1], self.cell)
+                r2 = utils.build_r(atom_coord[s2], atom_coord[s2], self.cell)
                 ovp = utils.slater_ovp_mat(r,v_widths[s1],pops[s1],v_widths[s2], pops[s2])
                 self.energy_shortranged += np.dot(ind_params[s1], np.matmul(ovp,ind_params[s2]))
                 u = self.build_u(r, atom_alpha_iso[s1], atom_alpha_iso[s2])
-                u_1 = self.build_u(r, atom_alpha_iso[s1], atom_alpha_iso[s1])
-                u_2 = self.build_u(r, atom_alpha_iso[s2], atom_alpha_iso[s2])
+                u_1 = self.build_u(r1, atom_alpha_iso[s1], atom_alpha_iso[s1])
+                u_2 = self.build_u(r2, atom_alpha_iso[s2], atom_alpha_iso[s2])
 
         end_sr = time.time()
         logger.info("short-range: %6.3f" % (end_sr - start_sr))
@@ -136,6 +138,7 @@ class InductionCalc(Electrostatics):
 
                     T_dd_1_self.append(self.build_self_dip_int_tensor(atom_coord[s1][i], atom_coord[s1], u_1[i,:], self.smearing_coeff))
 
+
                 for i,atom in enumerate(atom_ele[s2]):
                     T_2 = self.build_int_tensor(atom_coord[s2][i], atom_coord[s1], u[i,:], self.smearing_coeff)
                     induced_dip[s2][i] = np.einsum("ijk,ki->j",T_2,mtp1.T) * atom_alpha_iso[s2][i]
@@ -172,27 +175,13 @@ class InductionCalc(Electrostatics):
                 for s2 in range(s1+1,nsys):
                     mp_2 = mu_prev[s2]
 
-                   # tmp  = np.einsum("nijk,ki,n->nj", T_dd_1, mp_2, atom_alpha_iso[s1]) + \
-                   #        np.einsum("nijk,ki,n->nj", T_dd_1_self, mp_1, atom_alpha_iso[s1])
-                    for i,atom1 in enumerate(atom_ele[s1]):
-                        tmp  = np.einsum("ijk,ki->j", T_dd_1[i], mp_2.T)
-                        tmp += np.einsum("ijk,ki->j", T_dd_1_self[i], mp_1.T)
-                        tmp *= atom_alpha_iso[s1][i] 
-                        mu_next[s1][i] += (tmp + induced_dip[s1][i])*self.omega
+                    tmp = np.einsum("nijk,ki,n->nj", T_dd_1, mp_2.T, atom_alpha_iso[s1]) + \
+                          np.einsum("nijk,ki,n->nj", T_dd_1_self, mp_1.T, atom_alpha_iso[s1])
+                    mu_next[s1] += (tmp + induced_dip[s1])*self.omega
 
-                   # tmp2  = np.einsum("nijk,ki,n->nj", T_dd_2, mp_1, atom_alpha_iso[s2]) + \
-                   #         np.einsum("nijk,ki,n->nj", T_dd_2_self, mp_2, atom_alpha_iso[s2])
-                   # mu_next[s2] += (tmp2 + induced_dip[s2])*self.omega
-                    for i,atom1 in enumerate(atom_ele[s2]):
-                        tmp  = np.einsum("ijk,ki->j", T_dd_2[i], mp_1.T)# + \
-#                        print(i,tmp)
-                        tmp += np.einsum("ijk,ki->j", T_dd_2_self[i], mp_2.T)
-#                        print(i,tmp)
-                        tmp *= atom_alpha_iso[s2][i] 
-                        mu_next[s2][i] += (tmp + induced_dip[s2][i])*self.omega
-
-                    print(mu_next)
-                    print (np.linalg.norm(mu_next-mu_prev))
+                    tmp = np.einsum("nijk,ki,n->nj", T_dd_2, mp_1.T, atom_alpha_iso[s2]) + \
+                          np.einsum("nijk,ki,n->nj", T_dd_2_self, mp_2.T, atom_alpha_iso[s2])
+                    mu_next[s2] += (tmp + induced_dip[s2])*self.omega
 
             counter += 1
             if np.linalg.norm(mu_next-mu_prev) > diff_init*10 or counter > 2000:
@@ -202,35 +191,56 @@ class InductionCalc(Electrostatics):
                 self.omega *= 0.8
 
 
-        self.induced_dip = np.zeros((len(atom_ele),13))
+        self.induced_dip = np.zeros(np.shape(self.mtps_cart))
         logger.debug("Converged induced dipoles [debye]:")
-        logger.info("Mol 1")
-        for vec in mu_next[0]:
-            vec *= constants.au2debye
-            logger.info("%9.6f  %9.6f  %9.6f" %(vec[0],vec[1],vec[2]))
-        logger.info("Mol 2")
-        for vec in mu_next[1]:
-            vec *= constants.au2debye
-            logger.info("%9.6f  %9.6f  %9.6f" %(vec[0],vec[1],vec[2]))
+        for s in range(nsys):
+            logger.info("Mol %d" % s)
+            for n,vec in enumerate(mu_next[s]):
+                self.induced_dip[s][n][1:4] = vec            
+                tmp_vec = vec * constants.au2debye
+                logger.info("%9.6f  %9.6f  %9.6f" %(tmp_vec[0],tmp_vec[1],tmp_vec[2]))
 
-        exit()
-        self.energy_polarization = 0.5 * constants.au2kcalmol * sum([np.dot(
-                    self.induced_dip[i].T,
-                    np.dot(interaction_tensor(atom_coord[i], atom_coord[j], self.cell),
-                        self.mtps_cart[j])) + np.dot(
-                        self.mtps_cart[i].T,
-                        np.dot(interaction_tensor(atom_coord[i], atom_coord[j], self.cell),
-                            self.induced_dip[j]))
-                            for i in range(    len(atom_ele))
-                            for j in range(i+1,len(atom_ele))
-                            if self.different_mols(i,j) and j>i])
+        e_pol = 0.0
+        for s1 in range(nsys):
+            for s2 in range(s1+1,nsys):
+                for atom1 in range(len(atom_ele[s1])):
+                    crdi = atom_coord[s1][atom1]        
+                    mi1 = self.mtps_cart[s1][atom1,:] 
+                    mind_1 = self.induced_dip[s1][atom1,:]
+                    for atom2 in range(len(atom_ele[s2])):
+                        crdj = atom_coord[s2][atom2]        
+                        mj2 = self.mtps_cart[s2][atom2,:] 
+                        mind_2 = self.induced_dip[s2][atom2,:]
+                        T = interaction_tensor(crdi, crdj,self.cell)
+
+                        e_pol += np.dot(mind_1.T,np.dot(T, mj2))
+                        e_pol += np.dot(mi1.T,np.dot(T, mind_2))
+
+                        #e_pol += np.dot(mind_2.T,np.dot(T, mi1))
+                        #e_pol += np.dot(mj2.T,np.dot(T, mind_1))
+                        
+
+        self.energy_polarization = 0.5 * constants.au2kcalmol * e_pol
+
+        #self.energy_polarization = 0.5 * constants.au2kcalmol * sum([np.dot(
+        #            self.induced_dip[i].T,
+        #            np.dot(interaction_tensor(atom_coord[i], atom_coord[j], self.cell),
+        #                self.mtps_cart[j])) + np.dot(
+        #                self.mtps_cart[i].T,
+        #                np.dot(interaction_tensor(atom_coord[i], atom_coord[j], self.cell),
+        #                    self.induced_dip[j]))
+        #                    for i in range(    len(atom_ele))
+        #                    for j in range(i+1,len(atom_ele))
+        #                    if self.different_mols(i,j) and j>i])
 
         end_pol = time.time()
         print("Pol: %6.3f" % (end_pol - start_pol))
         logger.debug("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
+        print("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
         #print("Polarization energy", self.energy_polarization)
         #print "Short range", self.energy_shortranged
         #print self.energy_polarization , self.energy_shortranged
+        exit()
         return self.energy_polarization - self.energy_shortranged
 
     def build_u(self,r, a1, a2): 
@@ -365,64 +375,4 @@ class InductionCalc(Electrostatics):
                 
      #   print(T)    
         return T
-
-
-def product_smeared_ind_dip(coord1, coord2, cell, at_pol1, at_pol2,
-    smearing, ind_dip):
-    """
-    Returns product of smeared interaction tensor with induced dipole.
-    """
-    vec = cell.pbc_distance(coord1, coord2) * constants.a2b
-    return np.array([sum([interaction_tensor_second(vec, at_pol1,
-                at_pol2, smearing, i, j)*ind_dip[j]
-                for j in range(3)])
-                for i in range(3)])
-
-#@jit
-def interaction_tensor_first(vec, at_pol1, at_pol2, smearing, dir1):
-    """
-    Returns smeared dipole-charge interaction tensor using Thole formalism.
-    """
-    r = np.linalg.norm(vec)
-    u = r/(at_pol1*at_pol2)**(1/6.)
-    ri3 = 1./r**3
-    ret =  -(1.-np.exp(-smearing*u**3))*vec[dir1]*ri3
-    return ret
-
-#@jit
-def interaction_tensor_second(vec, at_pol1, at_pol2, smearing,
-            dir1, dir2):
-    """
-    Returns smeared dipole-dipole interaction tensor using Thole formalism.
-    """
-    r = np.linalg.norm(vec)
-    u = r/(at_pol1*at_pol2)**(1/6.)
-    ri  = 1./r
-    ri3 = ri**3
-    ri5 = ri**5
-    lambda3 = 1.-np.exp(-smearing*u**3)
-    lambda5 = 1.-(1+smearing*u**3) * np.exp(-smearing*u**3)
-    diag = lambda3*ri3 if dir1 is dir2 else 0.
-    return lambda5*3*vec[dir1]*vec[dir2]*ri5 - diag
-
-#@jit
-def interaction_tensor_third(vec, at_pol1, at_pol2, smearing,
-            dir1, dir2, dir3):
-    """
-    Returns smeared dipole-quadrupole interaction tensor using Thole formalism.
-    """
-    r = np.linalg.norm(vec)
-    u = r/(at_pol1*at_pol2)**(1/6.)
-    ri  = 1./r
-    ri5 = ri**5
-    ri7 = ri**7
-    lambda5 = 1.-(1+smearing*u**3) * np.exp(-smearing*u**3)
-    lambda7 = 1.-(1+smearing*u**3+3/5.*smearing**2*u**6) * np.exp(-smearing*u**3)
-    coeff1 = vec[dir1] if dir2 is dir3 else 0.
-    coeff2 = vec[dir2] if dir1 is dir3 else 0.
-    coeff3 = vec[dir3] if dir1 is dir2 else 0.
-    ret =  - lambda7*15*vec[dir1]*vec[dir2]*vec[dir3]*ri7 \
-            + lambda5*3*(coeff1+coeff2+coeff3)*ri5
-    return ret
-
 

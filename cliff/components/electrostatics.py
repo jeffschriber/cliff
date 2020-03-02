@@ -106,7 +106,7 @@ class Electrostatics:
         for s1 in range(nsys):
             # this is a matrix, natom x 13
             # contains ALL multipoles for sys 1
-            mi = self.mtps_cart[s1]
+            mi = self.mtps_cart[ s1]
             for s2 in range(s1+1, nsys):
                 mj = self.mtps_cart[s2]
 
@@ -132,13 +132,9 @@ class Electrostatics:
                     mi1 = mi[atom1,:] 
                     for atom2 in range(len(atom_nums[s2])):
                         crdj = atom_coord[s2][atom2]        
-
                         alpha2 = alphas[s2][atom2]
-
                         mj1 = mj[atom2,:] 
-
                         d_int = full_damped_interaction(crdi, crdj, alpha1, alpha2, self.cell)
-
                         elst3 += np.dot(mi1.T, np.dot(d_int, mj1)) 
 
         elst += (elst0 + elst1 + elst2 + elst3)
