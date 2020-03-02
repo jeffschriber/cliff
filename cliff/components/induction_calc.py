@@ -200,7 +200,7 @@ class InductionCalc(Electrostatics):
                 tmp_vec = vec * constants.au2debye
                 logger.info("%9.6f  %9.6f  %9.6f" %(tmp_vec[0],tmp_vec[1],tmp_vec[2]))
 
-        e_pol = 0.0
+        self.energy_polarization = 0.0
         for s1 in range(nsys):
             for s2 in range(s1+1,nsys):
                 for atom1 in range(len(atom_ele[s1])):
@@ -213,25 +213,11 @@ class InductionCalc(Electrostatics):
                         mind_2 = self.induced_dip[s2][atom2,:]
                         T = interaction_tensor(crdi, crdj,self.cell)
 
-                        e_pol += np.dot(mind_1.T,np.dot(T, mj2))
-                        e_pol += np.dot(mi1.T,np.dot(T, mind_2))
-
-                        #e_pol += np.dot(mind_2.T,np.dot(T, mi1))
-                        #e_pol += np.dot(mj2.T,np.dot(T, mind_1))
+                        self.energy_polarization += np.dot(mind_1.T,np.dot(T, mj2)) + np.dot(mi1.T,np.dot(T, mind_2))
                         
 
-        self.energy_polarization = 0.5 * constants.au2kcalmol * e_pol
+        self.energy_polarization *= 0.5 * constants.au2kcalmol 
 
-        #self.energy_polarization = 0.5 * constants.au2kcalmol * sum([np.dot(
-        #            self.induced_dip[i].T,
-        #            np.dot(interaction_tensor(atom_coord[i], atom_coord[j], self.cell),
-        #                self.mtps_cart[j])) + np.dot(
-        #                self.mtps_cart[i].T,
-        #                np.dot(interaction_tensor(atom_coord[i], atom_coord[j], self.cell),
-        #                    self.induced_dip[j]))
-        #                    for i in range(    len(atom_ele))
-        #                    for j in range(i+1,len(atom_ele))
-        #                    if self.different_mols(i,j) and j>i])
 
         end_pol = time.time()
         print("Pol: %6.3f" % (end_pol - start_pol))
@@ -240,7 +226,6 @@ class InductionCalc(Electrostatics):
         #print("Polarization energy", self.energy_polarization)
         #print "Short range", self.energy_shortranged
         #print self.energy_polarization , self.energy_shortranged
-        exit()
         return self.energy_polarization - self.energy_shortranged
 
     def build_u(self,r, a1, a2): 

@@ -361,7 +361,7 @@ def interaction_tensor(coord1, coord2, cell):
     # Indices for MTP moments:
     # 00  01  02  03  04  05  06  07  08  09  10  11  12
     #  .,  x,  y,  z, xx, xy, xz, yx, yy, yz, zx, zy, zz
-    vec = constants.a2b*(cell.pbc_distance(coord1, coord2))
+    vec = cell.pbc_distance(coord1, coord2)
     r = np.linalg.norm(vec)
     r2 = r**2
     r4 = r2**2
