@@ -150,16 +150,20 @@ class InductionCalc(CPMultipoleCalc):
                             mu_next[i][2] * constants.au2debye))
             self.induced_dip[i][1:4] = mu_next[i]
 
-        self.energy_polarization = 0.5 * constants.au2kcalmol * sum([np.dot(
-                    self.induced_dip[i].T,
-                    np.dot(interaction_tensor(atom_coord[i], atom_coord[j], self.cell),
-                        self.mtps_cart[j])) + np.dot(
-                        self.mtps_cart[i].T,
-                        np.dot(interaction_tensor(atom_coord[i], atom_coord[j], self.cell),
-                            self.induced_dip[j]))
-                            for i in range(    len(atom_ele))
-                            for j in range(i+1,len(atom_ele))
-                            if self.different_mols(i,j) and j>i])
+
+        self.energy_polarization = 0.0
+        for i in range(len(atom_ele)):
+            for j in range(i+1,len(atom_ele)):
+                if self.different_mols(i,j) and j>i:
+                    Tij = interaction_tensor(atom_coord[i], atom_coord[j], self.cell)
+
+                    epol = np.dot(self.induced_dip[i].T,np.dot(Tij,self.mtps_cart[j]))
+                    epol += np.dot(self.mtps_cart[i].T,np.dot(Tij,self.induced_dip[j]))
+#                    print(i,j,Tij,epol)
+
+                    self.energy_polarization += epol
+
+        self.energy_polarization *= constants.au2kcalmol * 0.5
         logger.info("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
         #print("Polarization energy", self.energy_polarization)
         #print "Short range", self.energy_shortranged
