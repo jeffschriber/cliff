@@ -97,8 +97,8 @@ class Hirshfeld:
                         # Some reference files include coordinates
                         if len(line) == 6:
                             h_ratios.append(float(line[4])) 
-                        #else:
-                        #    h_ratios.append(float(line[0]))
+                        else:
+                            h_ratios.append(float(line[0]))
 
             _system.hirshfeld_ratios = h_ratios
 

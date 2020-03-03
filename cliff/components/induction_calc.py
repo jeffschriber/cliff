@@ -85,10 +85,11 @@ class InductionCalc(CPMultipoleCalc):
                     atom_coord[i], populations[i], valwidths[i], self.ind_sr[atom_typ[i]],
                     atom_coord[j], populations[j], valwidths[j], self.ind_sr[atom_typ[j]])
  
-                    self.energy_shortranged +=  self.ind_sr[atom_typ[i]] * self.ind_sr[atom_typ[j]] * fmbis #/ pair_count[pairs_key.index(pair)]
+                    #self.energy_shortranged +=  self.ind_sr[atom_typ[i]] * self.ind_sr[atom_typ[j]] * fmbis #/ pair_count[pairs_key.index(pair)]
+                    self.energy_shortranged += fmbis #/ pair_count[pairs_key.index(pair)]
         logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
         # Intitial induced dipoles
-        if smearing_coeff != None:
+        if smearing_coeff:
             self.smearing_coeff = smearing_coeff 
 
         for i,_ in enumerate(atom_ele):
@@ -98,12 +99,6 @@ class InductionCalc(CPMultipoleCalc):
                             self.smearing_coeff, self.mtps_cart[j])
                             for j,_ in enumerate(atom_ele)
                             if self.different_mols(i,j)])
-        logger.info("Initial induced dipoles [debye]:")
-        for i,_ in enumerate(atom_ele):
-            logger.info("Atom %d: %7.4f %7.4f %7.4f" % (i,
-                            self.induced_dip[i][0] * constants.au2debye,
-                            self.induced_dip[i][1] * constants.au2debye,
-                            self.induced_dip[i][2] * constants.au2debye))
         # Self-consistent polarization
         mu_next = deepcopy(self.induced_dip)
         mu_prev = np.ones((len(atom_ele),3))

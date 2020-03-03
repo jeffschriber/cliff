@@ -60,6 +60,7 @@ class Options:
         self.multipole_ref_path = ""
         self.multipole_save_to_disk = False
         self.multipole_save_path = ""
+        self.multipole_rcut = 4.8
 
         # Defaults for electrostatics
         self.elst_type = "damped_mtp"
@@ -277,6 +278,10 @@ class Options:
             self.multipole_krr_lambda = self.Config.getfloat("multipoles","krr_lambda")
         except:
             pass
+        try:
+            self.multipole_rcut = self.Config.getfloat("multipoles","rcut")
+        except:
+            pass
 
         try:
             val = self.Config.get("multipoles","correct_charge")
@@ -342,6 +347,8 @@ class Options:
 
     def set_multipole_save_path(self, val):
         self.multipole_save_path = val
+    def set_multipole_rcut(self, val):
+        self.multipole_rcut = val
 
     ### Options for Electrostatics
     
