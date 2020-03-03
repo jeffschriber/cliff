@@ -69,10 +69,12 @@ class InductionCalc(Electrostatics):
         
         for sys in self.systems:
             atom_coord.append([crd*constants.a2b for crd in sys.coords])
+           # atom_coord.append([crd for crd in sys.coords])
             atom_ele.append([ele for ele in sys.elements])
             atom_typ.append([typ for typ in sys.atom_types])
             pops.append([p for p in sys.populations])
-            v_widths.append([v/constants.a2b for v in sys.valence_widths])
+            #v_widths.append([v/constants.a2b for v in sys.valence_widths])
+            v_widths.append([v for v in sys.valence_widths])
             induced_dip.append(np.zeros((len(sys.elements),3)))
 
             # Atomic polarizabilities

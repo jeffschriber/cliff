@@ -53,10 +53,10 @@ class Repulsion:
         params = []
         for sys in self.systems:
             atom_coord.append([crd*constants.a2b for crd in sys.coords])
-            params.append([self.rep[typ] for typ in sys.atom_types])
+            #params.append([self.rep[typ] for typ in sys.atom_types])
+            params.append([1.0 for typ in sys.atom_types])
             pops.append([p for p in sys.populations])
-            #v_widths.append([v for v in sys.valence_widths])
-            v_widths.append([v/constants.a2b for v in sys.valence_widths])
+            v_widths.append([v for v in sys.valence_widths])
  
         nsys = len(self.systems)
         self.energy = 0.0
@@ -66,5 +66,6 @@ class Repulsion:
                 ovp = utils.slater_ovp_mat(r,v_widths[s1],pops[s1],v_widths[s2], pops[s2])
                 self.energy += np.dot(params[s1], np.matmul(ovp,params[s2]))
 
+        self.energy *= constants.au2kcalmol
         logger.debug("Energy: %7.4f kcal/mol" % self.energy)
         return self.energy
