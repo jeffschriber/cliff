@@ -41,52 +41,30 @@ class Repulsion:
 
     def add_system(self, sys):
         self.systems.append(sys)
-        last_system_id = self.atom_in_system[-1]
-        self.atom_in_system += [last_system_id+1]*len(sys.elements)
-        self.sys_comb = self.sys_comb + sys
-        self.sys_comb.populations, self.sys_comb.valence_widths = [], []
-        # Refinement
-        for s in self.systems:
-            self.sys_comb.populations    = np.append(self.sys_comb.populations,
-                                                        s.populations)
-            self.sys_comb.valence_widths = np.append(self.sys_comb.valence_widths,
-                    s.valence_widths)
         return None
 
     def compute_repulsion(self, inter_type):
         'Compute repulsive interaction'
         # Setup list of atoms to sum over
-        atom_coord  = [crd for sys in self.systems
-                        for _,crd in enumerate(sys.coords)]
-       # atom_ele    = [ele for sys in self.systems
-       #                 for _,ele in enumerate(sys.elements)]
-       # atom_bnd   = [bnd for sys in self.systems
-       #                     for _,bnd in enumerate(sys.bonded_atoms)]
-        atom_type  = [typ for sys in self.systems
-                            for _,typ in enumerate(sys.atom_types)]
-        #print("Types", atom_typ)# for getting U
-        populations = [p for _,p in enumerate(self.sys_comb.populations)]
-        valwidths   = [v/constants.a2b for sys in self.systems
-                        for _,v in enumerate(sys.valence_widths)]
+
+        atom_coord = []    
+        pops = []
+        v_widths = []
+        params = []
+        for sys in self.systems:
+            atom_coord.append([crd*constants.a2b for crd in sys.coords])
+            params.append([self.rep[typ] for typ in sys.atom_types])
+            pops.append([p for p in sys.populations])
+            #v_widths.append([v for v in sys.valence_widths])
+            v_widths.append([v/constants.a2b for v in sys.valence_widths])
  
-        #self.energy = sum([utils.slater_mbis(self.cell,
-        #        atom_coord[i], populations[i], valwidths[i], self.rep[atom_typ[i]],
-        #        atom_coord[j], populations[j], valwidths[j], self.rep[atom_typ[j]])
-        #        for i,_ in enumerate(atom_coord)
-        #        for j,_ in enumerate(atom_coord)
-        #        if self.different_mols(i,j) and i<j])
+        nsys = len(self.systems)
         self.energy = 0.0
-        for i,_ in enumerate(atom_coord):
-            for j,_ in enumerate(atom_coord):
-                if self.different_mols(i,j) and i<j :
-                    self.energy += utils.slater_mbis(self.cell, 
-                    atom_coord[i], populations[i], valwidths[i], self.rep[atom_type[i]],
-                    atom_coord[j], populations[j], valwidths[j], self.rep[atom_type[j]])
-
-
-#                    print(atom_type[i],i,atom_type[j],j, utils.slater_mbis(self.cell,
-#                        atom_coord[i], populations[i], valwidths[i], self.rep[atom_type[i]],
-#                        atom_coord[j], populations[j], valwidths[j], self.rep[atom_type[j]])) 
+        for s1 in range(nsys):
+            for s2 in range(s1+1, nsys):
+                r = utils.build_r(atom_coord[s1], atom_coord[s2], self.cell)
+                ovp = utils.slater_ovp_mat(r,v_widths[s1],pops[s1],v_widths[s2], pops[s2])
+                self.energy += np.dot(params[s1], np.matmul(ovp,params[s2]))
 
         logger.debug("Energy: %7.4f kcal/mol" % self.energy)
         return self.energy

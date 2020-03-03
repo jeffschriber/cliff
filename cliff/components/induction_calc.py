@@ -39,15 +39,15 @@ class InductionCalc(Electrostatics):
 
     def add_system(self, sys):
         Electrostatics.add_system(self, sys)
-        self.sys_comb.hirshfeld_ratios = np.append(self.sys_comb.hirshfeld_ratios,
-            sys.hirshfeld_ratios)
-        self.sys_comb.populations, self.sys_comb.valence_widths = [], []
-        # Refinement
-        for s in self.systems:
-            self.sys_comb.populations    = np.append(self.sys_comb.populations,
-                                                        s.populations)
-            self.sys_comb.valence_widths = np.append(self.sys_comb.valence_widths,
-                    s.valence_widths)
+#        self.sys_comb.hirshfeld_ratios = np.append(self.sys_comb.hirshfeld_ratios,
+#            sys.hirshfeld_ratios)
+#        self.sys_comb.populations, self.sys_comb.valence_widths = [], []
+#        # Refinement
+#        for s in self.systems:
+#            self.sys_comb.populations    = np.append(self.sys_comb.populations,
+#                                                        s.populations)
+#            self.sys_comb.valence_widths = np.append(self.sys_comb.valence_widths,
+#                    s.valence_widths)
         return None
 
     def polarization_energy(self,options, smearing_coeff=None, stone_convention=False):
@@ -71,15 +71,12 @@ class InductionCalc(Electrostatics):
             atom_coord.append([crd*constants.a2b for crd in sys.coords])
             atom_ele.append([ele for ele in sys.elements])
             atom_typ.append([typ for typ in sys.atom_types])
-
             pops.append([p for p in sys.populations])
             v_widths.append([v/constants.a2b for v in sys.valence_widths])
-
             induced_dip.append(np.zeros((len(sys.elements),3)))
 
             # Atomic polarizabilities
             atom_alpha_iso.append([alpha for alpha in Polarizability(self.scs_cutoff,self.pol_exponent,sys).get_pol_scaled()])
-    
             ind_params.append([self.ind_sr[i] for i in sys.atom_types]) 
 
         # Compute the short-range correction
@@ -94,10 +91,12 @@ class InductionCalc(Electrostatics):
                 r2 = utils.build_r(atom_coord[s2], atom_coord[s2], self.cell)
                 ovp = utils.slater_ovp_mat(r,v_widths[s1],pops[s1],v_widths[s2], pops[s2])
                 self.energy_shortranged += np.dot(ind_params[s1], np.matmul(ovp,ind_params[s2]))
+
                 u = self.build_u(r, atom_alpha_iso[s1], atom_alpha_iso[s2])
                 u_1 = self.build_u(r1, atom_alpha_iso[s1], atom_alpha_iso[s1])
                 u_2 = self.build_u(r2, atom_alpha_iso[s2], atom_alpha_iso[s2])
 
+        self.energy_shortranged *= constants.au2kcalmol
         end_sr = time.time()
         logger.info("short-range: %6.3f" % (end_sr - start_sr))
         #print("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
@@ -220,9 +219,8 @@ class InductionCalc(Electrostatics):
 
 
         end_pol = time.time()
-        print("Pol: %6.3f" % (end_pol - start_pol))
         logger.debug("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
-        print("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
+        #print("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
         #print("Polarization energy", self.energy_polarization)
         #print "Short range", self.energy_shortranged
         #print self.energy_polarization , self.energy_shortranged

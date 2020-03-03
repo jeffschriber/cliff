@@ -252,17 +252,16 @@ def build_r(c1, c2, cell):
 def slater_ovp_mat(r,v1,p1,v2,p2):
 
     # simpler method:
-    #out = np.ones((len(v1),len(v2)))
-    #B = np.sqrt(1.0 / np.outer(v1,v2))
-    #out += (1/3.)*B*B*r*r
-    #out += B*r
-    #out *= np.exp(-B*r)
+#    out = np.ones((len(v1),len(v2)))
+ #   B = np.sqrt(1.0 / np.outer(v1,v2))
+ #   out += (1/3.)*B*B*r*r
+ #   out += B*r
+ #   out *= np.exp(-B*r)
     
     out = np.ones((len(v1),len(v2)))
     for i in range(len(v1)): 
         for j in range(len(v2)): 
             out[i][j] = slater_mbis_funcform(r[i][j],p1[i],v1[i],p2[j],v2[j])
-    
     return out
 
 @jit
