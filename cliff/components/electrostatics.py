@@ -18,16 +18,16 @@ logger = logging.getLogger(__name__)
 fh = logging.FileHandler('output.log')
 logger.addHandler(fh)
 
-class CPMultipoleCalc:
-    'Mulitpole_calc class computes cp-corrected multipole electrostatics'
+class Electrostatics:
+    'Electrostatic class computes cp-corrected multipole electrostatics'
 
     def __init__(self, options,sys, cell):
         self.systems = [sys]
         self.atom_in_system = [0]*len(sys.elements)
         logger.setLevel(options.logger_level)
         self.cell = cell
-        self.mtps_cart = None
-        self.mtps_cart_elec = None
+        self.mtps_cart = []
+        self.mtps_cart_elec = []
         self.energy_elst = 0.0
 
         # Combined system for combined valence-width prediction
@@ -47,100 +47,107 @@ class CPMultipoleCalc:
 
         return None
 
- #   @jit
     def convert_mtps_to_cartesian(self, stone_convention):
         'Convert spherical MTPs to cartesian'
-        num_atoms = sum(sys.num_atoms for sys in self.systems)
-        # q={0,1,2} => 1+3+9 = 13 parameters
-        self.mtps_cart = np.zeros((num_atoms,13))
-        self.mtps_cart_elec = np.zeros((num_atoms,13))
-        atom_ele   = [ele for sys in self.systems
-                            for _, ele in enumerate(sys.elements)]
+        num_atoms = [sys.num_atoms for sys in self.systems]
+        atom_ele = []
 
-        idx = 0
-        for sys in self.systems:
+        # q={0,1,2} => 1+3+9 = 13 parameters
+        for sys in range(len(self.systems)):
+            self.mtps_cart.append(np.zeros((num_atoms[sys],13)))
+       #     self.mtps_cart_elec.append(np.zeros((num_atoms[sys],13))
+            atom_ele.append([ele for ele in self.systems[sys].elements])
+        for s1,sys in enumerate(self.systems):
             if len(sys.multipoles) == 0:
                 logger.error("Multipoles not initialized for system %s!"
                     % sys)
                 exit(1)
+
             for i in range(sys.num_atoms):
-                self.mtps_cart[idx][0] = sys.multipoles[i][0]# - constants.atomic_number[atom_ele[i]] 
-                self.mtps_cart[idx][1] = sys.multipoles[i][1]
-                self.mtps_cart[idx][2] = sys.multipoles[i][2]
-                self.mtps_cart[idx][3] = sys.multipoles[i][3]
+                self.mtps_cart[s1][i][0] = sys.multipoles[i][0] - constants.atomic_number[atom_ele[s1][i]] 
+                self.mtps_cart[s1][i][1] = sys.multipoles[i][1]
+                self.mtps_cart[s1][i][2] = sys.multipoles[i][2]
+                self.mtps_cart[s1][i][3] = sys.multipoles[i][3]
                 # Convert spherical quadrupole
                 cart_quad = utils.spher_to_cart(
                                 sys.multipoles[i][4:9], stone_convention)
                 # xx, xy, xz, yx, yy, yz, zx, zy, zz
-                self.mtps_cart[idx][4:13] = cart_quad.reshape((1,9))
+                self.mtps_cart[s1][i][4:13] = cart_quad.reshape((1,9))
 
-                # print some spherical mtps for ref
-                #print()                
-            
-                idx += 1
+       # self.mtps_cart_elec[:] = self.mtps_cart
 
-        self.mtps_cart_elec[:] = self.mtps_cart
-
-        for n, atom in enumerate(atom_ele):
-            self.mtps_cart_elec[n][0] -= constants.atomic_number[atom]
+       # for n, atom in enumerate(atom_ele):
+       #     self.mtps_cart_elec[n][0] -= constants.atomic_number[atom]
 
         return None
 
     def mtp_energy(self, stone_convention=False):
         'Convert multipole interactions'
+
+        nsys = len(self.systems)
         self.convert_mtps_to_cartesian(stone_convention)
         # Setup list of atoms to sum over
-        atom_coord = [crd for sys in self.systems
-                            for _, crd in enumerate(sys.coords)]
-        atom_ele   = [ele for sys in self.systems
-                            for _, ele in enumerate(sys.elements)]
-        atom_types  = [ele for sys in self.systems
-                            for _, ele in enumerate(sys.atom_types)]
-        # Loop over all pairs (au) -- hbohr2kcalmol
+        atom_coord = []
+        atom_ele = []
+        atom_nums = []
+        alphas = []
+
+        for sys in self.systems:
+            atom_coord.append([crd for crd in sys.coords])
+            atom_ele.append([ele for ele in sys.elements])
+            atom_nums.append([constants.atomic_number[ele] for ele in sys.elements])
+            alphas.append([self.exp[ele]*constants.b2a for ele in sys.atom_types])
 
         elst = 0.0
-        for i, crdi in enumerate(atom_coord):
-            atom_i = atom_ele[i]
-            atyp_i = atom_types[i]
-            alpha1 = self.exp[atyp_i]*constants.b2a
-            mi = self.mtps_cart_elec[i]
-            for j, crdj in enumerate(atom_coord):
-                atom_j = atom_ele[j]
-                atyp_j = atom_types[j]
-                if self.different_mols(i,j) and j>i:
+        elst1 = 0.0
+        elst2 = 0.0
+        elst3 = 0.0
+        # Loop over unique interactions
+        for s1 in range(nsys):
+            # this is a matrix, natom x 13
+            # contains ALL multipoles for sys 1
+            mi = self.mtps_cart[ s1]
+            for s2 in range(s1+1, nsys):
+                mj = self.mtps_cart[s2]
 
-                    alpha2 = self.exp[atyp_j]*constants.b2a 
-                    mj = self.mtps_cart_elec[j]
+                # 1. nuclear-nuclear int
+                elst0 = nuclear_rep(atom_coord[s1], atom_coord[s2], atom_nums[s1], atom_nums[s2], self.cell) 
 
-                    # 1. nuclear-nuclear int
-                    elst0 = nuclear_rep(crdi, crdj, atom_i, atom_j, self.cell) 
+                # 2. nuclear-MTP interaction
+                ## TODO: avoid this loop over atoms in sys
+                for ele, Z in enumerate(atom_nums[s1]):
+                    zm_int = charge_mtp_damped_interaction(atom_coord[s1][ele], atom_coord[s2], alphas[s2], self.cell)
+                    i1 = Z*np.einsum('ij,ij->i', zm_int,mj)
+                    elst1 += np.sum(i1)
 
-                    # 2. nuclear-MTP interaction
-                    elst1 = constants.atomic_number[atom_i] * np.dot(charge_mtp_damped_interaction(crdi, crdj, alpha2, self.cell), mj)
-                    elst2 = constants.atomic_number[atom_j] * np.dot(charge_mtp_damped_interaction(crdj, crdi, alpha1, self.cell), mi)
+                for ele, Z in enumerate(atom_nums[s2]):
+                    zm_int = charge_mtp_damped_interaction(atom_coord[s2][ele], atom_coord[s1], alphas[s1], self.cell)
+                    i1 = Z*np.einsum('ij,ij->i', zm_int,mi)
+                    elst2 += np.sum(i1)
 
-                    # 3. MTP-MTP
-                    d_int = full_damped_interaction(crdi, crdj, alpha1, alpha2, self.cell)
+                # 3. MTP-MTP
+                for atom1 in range(len(atom_nums[s1])):
+                    crdi = atom_coord[s1][atom1]        
+                    alpha1 = alphas[s1][atom1]
+                    mi1 = mi[atom1,:] 
+                    for atom2 in range(len(atom_nums[s2])):
+                        crdj = atom_coord[s2][atom2]        
+                        alpha2 = alphas[s2][atom2]
+                        mj1 = mj[atom2,:] 
+                        d_int = full_damped_interaction(crdi, crdj, alpha1, alpha2, self.cell)
+                        elst3 += np.dot(mi1.T, np.dot(d_int, mj1)) 
 
-                    elst3 = np.dot(mi.T, np.dot(d_int, mj)) 
-
-                    elst += (elst0 + elst1 + elst2 + elst3)
+        elst += (elst0 + elst1 + elst2 + elst3)
                     
 
         self.energy_elst = elst * constants.au2kcalmol
         return self.energy_elst
 
-    def different_mols(self, i, j):
-        """
-        Returns True if atom indices i and j belong to different systems.
-        """
-        return self.atom_in_system[i] is not self.atom_in_system[j]
-
 def nuclear_rep(coord1, coord2, ele1, ele2, cell):
-    vec = constants.a2b*(cell.pbc_distance(coord1, coord2))
-    r = np.linalg.norm(vec)
 
-    return constants.atomic_number[ele1] * constants.atomic_number[ele2] / r
+    r = constants.a2b * utils.build_r(coord1,coord2,cell)
+    r = 1.0 / r
+    return np.dot(ele1, np.matmul(r,ele2))
 
 def full_damped_interaction(coord1, coord2, alpha1, alpha2, cell):
     """Full damped interaction tensor"""
@@ -301,9 +308,15 @@ def full_damped_interaction(coord1, coord2, alpha1, alpha2, cell):
 def charge_mtp_damped_interaction(coord1, coord2, alpha2, cell):
     """Return interaction vector for charge-mtp (up to quadripoles) with damping"""
     """First pass will be damping from Rackers PCCP 2017"""
+    
+    # Gets rs between 1 and all in 2
 
-    vec = constants.a2b*(cell.pbc_distance(coord1, coord2))
-    r = np.linalg.norm(vec)
+    r = np.zeros(len(coord2))
+    xyz = np.zeros((len(coord2),3))
+    for n, coord in enumerate(coord2):
+        vec = constants.a2b*(cell.pbc_distance(coord1, coord))
+        xyz[n] = np.asarray(vec)
+        r[n] = np.linalg.norm(vec)
 
     # Some intermediates
     r2 = r**2
@@ -311,36 +324,36 @@ def charge_mtp_damped_interaction(coord1, coord2, alpha2, cell):
     ri2 = ri**2
     ri3 = ri**3
     ri5 = ri**5
-    x = vec[0]
-    y = vec[1]
-    z = vec[2]
+    x = xyz[::,0]
+    y = xyz[::,1]
+    z = xyz[::,2]
     x2 = x**2
     y2 = y**2
     z2 = z**2
 
-    lam_1 = 1.0 - np.exp(-1.0 * alpha2 *r)
-    lam_3 = 1.0 - (1.0 + alpha2*r) * np.exp(-1.0*alpha2*r) 
-    lam_5 = 1.0 - (1.0 + alpha2*r + (1.0/3.0)*alpha2*alpha2*r2) * np.exp(-1.0*alpha2*r)
+    lam_1 = 1.0 - np.exp(-1.0 * np.multiply(alpha2,r))
+    lam_3 = 1.0 - (1.0 + np.multiply(alpha2,r)) * np.exp(-1.0*np.multiply(alpha2,r)) 
+    lam_5 = 1.0 - (1.0 + np.multiply(alpha2,r) + (1.0/3.0)*np.multiply(np.square(alpha2),r2)) * np.exp(-1.0*np.multiply(alpha2,r))
 
-    it = np.zeros((13))
-
+    it = np.zeros((len(coord2),(13)))
     # Charge charge
-    it[0] = ri*lam_1
+    it[:,0] = ri*lam_1
     # Charge dipole
-    it[1] = -x*ri3 * lam_3 
-    it[2] = -y*ri3 * lam_3
-    it[3] = -z*ri3 * lam_3
+    it[:,1] = -x*ri3 * lam_3 
+    it[:,2] = -y*ri3 * lam_3
+    it[:,3] = -z*ri3 * lam_3
     # Charge quadrupole
-    it[4] = 3*x2*ri5*lam_5 - ri3*lam_3   # xx
-    it[5] = 3*x*y*ri5*lam_5  # xy
-    it[6] = 3*x*z*ri5*lam_5  # xz
-    it[7] = it[5]  # yx
-    it[8] = 3*y2*ri5*lam_5 - ri3*lam_3 # yy
-    it[9] = 3*y*z*ri5*lam_5  # yz
-    it[10] = it[6]   # zx
-    it[11] = it[9]   # zy
-    it[12] = 3*z2*ri5*lam_5 - ri3*lam_3  # zz
+    it[:,4] = 3*x2*ri5*lam_5 - ri3*lam_3   # xx
+    it[:,5] = 3*x*y*ri5*lam_5  # xy
+    it[:,6] = 3*x*z*ri5*lam_5  # xz
+    it[:,7] = it[:,5]  # yx
+    it[:,8] = 3*y2*ri5*lam_5 - ri3*lam_3 # yy
+    it[:,9] = 3*y*z*ri5*lam_5  # yz
+    it[:,10] = it[:,6]   # zx
+    it[:,11] = it[:,9]   # zy
+    it[:,12] = 3*z2*ri5*lam_5 - ri3*lam_3  # zz
 
+   # print(it)
     return it
 
 def interaction_tensor(coord1, coord2, cell):
@@ -348,7 +361,7 @@ def interaction_tensor(coord1, coord2, cell):
     # Indices for MTP moments:
     # 00  01  02  03  04  05  06  07  08  09  10  11  12
     #  .,  x,  y,  z, xx, xy, xz, yx, yy, yz, zx, zy, zz
-    vec = constants.a2b*(cell.pbc_distance(coord1, coord2))
+    vec = cell.pbc_distance(coord1, coord2)
     r = np.linalg.norm(vec)
     r2 = r**2
     r4 = r2**2
