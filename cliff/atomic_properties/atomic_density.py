@@ -77,7 +77,6 @@ class AtomicDensity:
                 pairwise_dists = squareform(pdist(self.descr_train[ele], 'cityblock'))
 
                 kmat = np.exp(- pairwise_dists / self.krr_sigma )
-
                 kmat += self.krr_lambda*np.identity(len(self.target_train[ele]))
                 self.alpha_train[ele] = np.linalg.solve(kmat,self.target_train[ele])
         #print("Training finished")
@@ -178,7 +177,6 @@ class AtomicDensity:
             mol = qml.Compound(new_system.xyz[0])  
 
         self.qml_mols.append(mol)
-
         # build slatm representation
         mol.generate_slatm(self.mbtypes, local=True)
 
