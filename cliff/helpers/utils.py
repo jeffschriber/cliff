@@ -254,7 +254,6 @@ def slater_ovp_mat(r,v1,p1,v2,p2):
     # simpler method:
     out = np.ones((len(v1),len(v2)))
     B = np.sqrt(1.0 / np.outer(v1,v2))
-    print(B)
     out += (1/3.)*B*B*r*r
     out += B*r
     out *= np.exp(-B*r)

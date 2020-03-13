@@ -244,11 +244,11 @@ class System:
             elif at_ele == 'S':
                 self.atom_types.append('S'+str(len(bonded)))
             elif at_ele == 'Cl' or at_ele == 'CL':
-                self.atom_types.append('Cl'+str(len(bonded)))
+                self.atom_types.append('Cl')
             elif at_ele == 'F':
-                self.atom_types.append('F'+str(len(bonded)))
+                self.atom_types.append('F')
             elif at_ele == 'BR' or at_ele == 'Br':
-                self.atom_types.append('Br'+str(len(bonded)))
+                self.atom_types.append('Br')
         return None
 
     def load_mtp_from_hipart(self, txt, rotate=False):
