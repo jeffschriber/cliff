@@ -14,6 +14,7 @@ import operator
 import os
 import qml
 from qml.representations import get_slatm_mbtypes
+import glob
 
 import cliff.tests as t
 testpath = os.path.abspath(t.__file__).split('__init__')[0]
@@ -39,6 +40,7 @@ class AtomicDensity:
         self.mbtypes = None
         self.qml_mols = []
         self.kernel = 'laplacian'
+        self.training_dir = options.atomicdensity_training
 
         self.use_ref_density = options.atomicdensity_ref_adens
         self.refpath = options.atomicdensity_refpath
@@ -51,14 +53,30 @@ class AtomicDensity:
 
     def load_ml(self):
         logger.info(
-            "    Loading atomic-density training from %s" % self.training_file)
-
+            "    Loading atomic-density training from %s" % self.training_dir)
         if self.use_ref_density:
             return
-        
-        with open(self.training_file, 'rb') as f:
-            #self.descr_train, self.alpha_train = pickle.load(f)
-            self.descr_train, self.alpha_train = pickle.load(f, encoding='latin1')
+
+        adens_models = glob.glob(self.training_dir + '/*.pkl') 
+        for model in adens_models:
+            with open(model, 'rb') as f:
+                #self.descr_train, self.alpha_train = pickle.load(f)
+                d_train,a_train, self.mbtypes = pickle.load(f, encoding='latin1')
+
+                for ele in self.descr_train.keys():
+                    if ele in d_train.keys() and len(d_train[ele]) > 0:
+                        self.descr_train[ele] = d_train[ele]
+                        self.alpha_train[ele] = a_train[ele]
+        return None
+
+
+    def save_ml(self, save_file):
+        '''save the model'''
+
+        with open (save_file, 'wb') as f:
+            pickle.dump([self.descr_train,self.alpha_train,self.mbtypes],f,protocol=2)
+
+        return None
 
     def train_ml(self):
         '''Train machine learning model.'''

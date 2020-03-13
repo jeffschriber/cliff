@@ -51,7 +51,7 @@ class Hirshfeld:
         if options.test_mode:
             self.filepath = testpath + self.filepath
         
-        self.training_file = options.hirsh_training
+        self.training_dir = options.hirsh_training
 
 
     def load_ml(self):
@@ -60,9 +60,26 @@ class Hirshfeld:
             return
 
         logger.info(
-            "    Loading Hirshfeld training from %s" % self.training_file)
-        with open(self.training_file, 'rb') as f:
-            self.descr_train, self.alpha_train = pickle.load(f, encoding='bytes')
+            "    Loading Hirshfeld training from %s" % self.training_dir)
+        hirsh_models = glob.glob(self.training_dir + '/*.pkl') 
+        for model in hirsh_models:
+            with open(model, 'rb') as f:
+                #self.descr_train, self.alpha_train = pickle.load(f)
+                d_train,a_train, self.mbtypes = pickle.load(f, encoding='latin1')
+
+                for ele in self.descr_train.keys():
+                    if ele in d_train.keys() and len(d_train[ele]) > 0:
+                        self.descr_train[ele] = d_train[ele]
+                        self.alpha_train[ele] = a_train[ele]
+        return None
+
+    def save_ml(self, save_file):
+        '''save the model'''
+
+        with open (save_file, 'wb') as f:
+            pickle.dump([self.descr_train,self.alpha_train,self.mbtypes],f,protocol=2)
+
+        return None
 
     def train_ml(self):
         '''Train machine learning model.'''
