@@ -12,6 +12,7 @@ import copy
 import glob
 import os
 import cliff.helpers.constants as constants
+import cliff.helpers.cell as Cell
 
 from numba import jit
 
@@ -19,7 +20,7 @@ from numba import jit
 logger = logging.getLogger(__name__)
 fh = logging.FileHandler('output.log')
 logger.addHandler(fh)
-logger.setLevel(20)
+#logger.setLevel(20)
 
 def file_finder(jobdir = None):
     """
@@ -231,7 +232,8 @@ def slater_mbis(cell, coord_i, N_i, v_i, U_i, coord_j, N_j, v_j, U_j):
     vec = cell.pbc_distance(coord_i, coord_j)
     rij = np.linalg.norm(vec)
     # Call function externally to enable jit
-    return U_i * U_j * slater_mbis_funcform(rij, N_i, v_i, N_j, v_j) 
+    return slater_mbis_funcform(rij, N_i, v_i, N_j, v_j) 
+    #return U_i * U_j * slater_mbis_funcform(rij, N_i, v_i, N_j, v_j) 
     #return U_i * U_j * slater_mbis_funcform(rij, v_i, v_j) 
 
 #@jit
@@ -239,6 +241,28 @@ def slater_mbis(cell, coord_i, N_i, v_i, U_i, coord_j, N_j, v_j, U_j):
 #    Bij = np.sqrt(1.0/(vi*vj))
 #
 #    return ((1./3)*Bij*Bij*rij*rij + Bij*rij + 1) * np.exp(-Bij*rij) 
+
+def build_r(c1, c2, cell):
+    out = np.zeros((len(c1), len(c2)))
+    for i,a in enumerate(c1):
+        for j,b in enumerate(c2):
+            out[i][j] = np.linalg.norm(cell.pbc_distance(a,b))
+    return out
+
+def slater_ovp_mat(r,v1,p1,v2,p2):
+
+    # simpler method:
+    out = np.ones((len(v1),len(v2)))
+    B = np.sqrt(1.0 / np.outer(v1,v2))
+    out += (1/3.)*B*B*r*r
+    out += B*r
+    out *= np.exp(-B*r)
+    
+ #   out = np.ones((len(v1),len(v2)))
+ #   for i in range(len(v1)): 
+ #       for j in range(len(v2)): 
+ #           out[i][j] = slater_mbis_funcform(r[i][j],p1[i],v1[i],p2[j],v2[j])
+    return out
 
 @jit
 def slater_mbis_funcform(rij, N_i, v_i, N_j, v_j):

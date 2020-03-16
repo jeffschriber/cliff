@@ -66,6 +66,8 @@ class System:
         self.bonded_atoms = None
         if len(self.xyz) == 1:
             self.load_xyz()
+        self.coulomb_mat = []
+        self.atom_reorder = []
     
         self.mtp_to_disk = options.multipole_save_to_disk
 
@@ -100,6 +102,13 @@ class System:
         self.elements = [str(line.split()[0])
                         for i,line in enumerate(extract_file)
                         if i>1 and i<self.num_atoms+2]
+
+        for i in range(len(self.elements)):
+            ele = self.elements[i]
+            if ele == "CL":
+                self.elements[i] = "Cl"
+            if ele == "BR":
+                self.elements[i] = "Br"
         iterable = (float(line.split()[j])
                         for i,line in enumerate(extract_file)
                         for j in range(1,4)
@@ -116,14 +125,16 @@ class System:
         logger.debug('Elements %s' % ', '.join(self.elements))
         return None
 
-    def build_coulomb_matrices(self, max_neighbors, direction=None):
+    def build_coulomb_matrices(self, max_neighbors, atom, direction=None):
         self.coulomb_mat = []
         self.atom_reorder = []
-        for at in range(len(self.elements)):
-            coul_mat, reorder_atoms = utils.build_coulomb_matrix(
-                self.coords, self.elements, at, max_neighbors, direction)
-            self.coulomb_mat.append(coul_mat)
-            self.atom_reorder.append(reorder_atoms)
+        #for at in range(len(self.elements)):
+            # Only do one atom at a time
+        #if self.elements[at] == atom or (atom is None):
+        coul_mat, reorder_atoms = utils.build_coulomb_matrix(
+            self.coords, self.elements, atom, max_neighbors, direction)
+        self.coulomb_mat.append(coul_mat)
+        self.atom_reorder.append(reorder_atoms)
         return None
 
     def build_slatm(self, mbtypes, xyz=None):
@@ -233,9 +244,11 @@ class System:
             elif at_ele == 'S':
                 self.atom_types.append('S'+str(len(bonded)))
             elif at_ele == 'Cl' or at_ele == 'CL':
-                self.atom_types.append('Cl'+str(len(bonded)))
+                self.atom_types.append('Cl')
             elif at_ele == 'F':
-                self.atom_types.append('F'+str(len(bonded)))
+                self.atom_types.append('F')
+            elif at_ele == 'BR' or at_ele == 'Br':
+                self.atom_types.append('Br')
         return None
 
     def load_mtp_from_hipart(self, txt, rotate=False):
