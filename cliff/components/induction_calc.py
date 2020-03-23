@@ -189,7 +189,6 @@ class InductionCalc(Electrostatics):
             if counter % 50 == 0 and self.omega > 0.2:
                 self.omega *= 0.8
 
-
         self.induced_dip = np.zeros(np.shape(self.mtps_cart))
         logger.debug("Converged induced dipoles [debye]:")
         for s in range(nsys):
@@ -221,7 +220,6 @@ class InductionCalc(Electrostatics):
         end_pol = time.time()
         logger.debug("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
         #print("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
-        #print("Polarization energy", self.energy_polarization)
         #print "Short range", self.energy_shortranged
         #print self.energy_polarization , self.energy_shortranged
         return self.energy_polarization - self.energy_shortranged
