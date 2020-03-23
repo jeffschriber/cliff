@@ -38,24 +38,22 @@ class Repulsion:
         # Load variables from config file
 
         self.rep = options.exch_int_params
+        
 
     def add_system(self, sys):
         self.systems.append(sys)
         return None
 
-    def compute_repulsion(self, inter_type):
+    def compute_repulsion(self):
         'Compute repulsive interaction'
         # Setup list of atoms to sum over
 
         atom_coord = []    
-        pops = []
         v_widths = []
         params = []
         for sys in self.systems:
             atom_coord.append([crd*constants.a2b for crd in sys.coords])
-            #params.append([self.rep[typ] for typ in sys.atom_types])
-            params.append([1.0 for typ in sys.atom_types])
-            pops.append([p for p in sys.populations])
+            params.append([self.rep[typ] for typ in sys.atom_types])
             v_widths.append([v for v in sys.valence_widths])
  
         nsys = len(self.systems)
@@ -63,7 +61,7 @@ class Repulsion:
         for s1 in range(nsys):
             for s2 in range(s1+1, nsys):
                 r = utils.build_r(atom_coord[s1], atom_coord[s2], self.cell)
-                ovp = utils.slater_ovp_mat(r,v_widths[s1],pops[s1],v_widths[s2], pops[s2])
+                ovp = utils.slater_ovp_mat(r,v_widths[s1]],v_widths[s2])
                 self.energy += np.dot(params[s1], np.matmul(ovp,params[s2]))
 
         self.energy *= constants.au2kcalmol

@@ -36,7 +36,7 @@ class Multipole:
     No local axis system. Instead, basis set expansion along the pairwise vectors.
     '''
 
-    def __init__(self, options, descriptor="coulombmatrix"):
+    def __init__(self, options):
         logger.setLevel(options.logger_level)
         self.multipoles = None
         self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[]}
@@ -55,8 +55,6 @@ class Multipole:
         self.norm_tgt_mean = {'H':np.zeros((3)),'C':np.zeros((3)),'O':np.zeros((3)), 'N':np.zeros((3)), 'S':np.zeros((3)), 'Cl':np.zeros((3)), 'F':np.zeros((3))}
         self.norm_tgt_std  = {'H':np.ones((3)), 'C':np.ones((3)), 'O':np.ones((3)), 'N':np.ones((3)), 'S':np.ones((3)), 'Cl':np.ones((1)), 'F':np.zeros((3))}
         self.num_mols_train = {'H':0, 'C':0, 'O':0, 'N':0, 'S':0, 'Cl':0, 'F':0}
-        # Descriptor either coulombmatrix or slatm
-        self.descriptor = descriptor
         # Set of qml mols. Used for SLATM
         self.qml_mols = []
         self.qml_filter_ele = []

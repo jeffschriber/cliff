@@ -61,7 +61,6 @@ class InductionCalc(Electrostatics):
         atom_coord = []    
         atom_ele = []    
         atom_typ = []    
-        pops = []
         v_widths = []
         atom_alpha_iso = []
         ind_params = []
@@ -72,7 +71,6 @@ class InductionCalc(Electrostatics):
            # atom_coord.append([crd for crd in sys.coords])
             atom_ele.append([ele for ele in sys.elements])
             atom_typ.append([typ for typ in sys.atom_types])
-            pops.append([p for p in sys.populations])
             #v_widths.append([v/constants.a2b for v in sys.valence_widths])
             v_widths.append([v for v in sys.valence_widths])
             induced_dip.append(np.zeros((len(sys.elements),3)))
@@ -91,7 +89,7 @@ class InductionCalc(Electrostatics):
                 r = utils.build_r(atom_coord[s1], atom_coord[s2], self.cell)
                 r1 = utils.build_r(atom_coord[s1], atom_coord[s1], self.cell)
                 r2 = utils.build_r(atom_coord[s2], atom_coord[s2], self.cell)
-                ovp = utils.slater_ovp_mat(r,v_widths[s1],pops[s1],v_widths[s2], pops[s2])
+                ovp = utils.slater_ovp_mat(r,v_widths[s1],v_widths[s2])
                 self.energy_shortranged += np.dot(ind_params[s1], np.matmul(ovp,ind_params[s2]))
 
                 u = self.build_u(r, atom_alpha_iso[s1], atom_alpha_iso[s2])

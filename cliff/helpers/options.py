@@ -42,7 +42,7 @@ class Options:
 
         # Atomic Density options
         self.atomicdensity_training = "" 
-        self.atomicdensity_max_neighbors = 12
+        self.atomicdensity_cutoff = 4.8
         self.atomicdensity_krr_kernel = 'laplacian'
         self.atomicdensity_krr_sigma = 1000.0
         self.atomicdensity_krr_lambda = 1e-9
@@ -194,7 +194,7 @@ class Options:
             pass
 
         try:
-            self.atomicdensity_max_neighbors = self.Config.getint("atomicdensity","max_neighbors")
+            self.atomicdensity_cutoff = self.Config.getfloat("atomicdensity","cutoff")
         except:
             pass
 
@@ -228,8 +228,8 @@ class Options:
     def set_atomicdensity_training(self, val):
         self.atomicdensity_training = val
 
-    def set_atomicdensity_max_neighbors(self, val):
-        self.atomicdensity_max_neighbors = val
+    def set_atomicdensity_cutoff(self, val):
+        self.atomicdensity_cutoff = val
 
     def set_atomicdensity_krr_kernel(self, val):
         self.atomicdensity_krr_kernel = val

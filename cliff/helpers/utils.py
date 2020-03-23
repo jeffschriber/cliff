@@ -249,7 +249,7 @@ def build_r(c1, c2, cell):
             out[i][j] = np.linalg.norm(cell.pbc_distance(a,b))
     return out
 
-def slater_ovp_mat(r,v1,p1,v2,p2):
+def slater_ovp_mat(r,v1,v2):
 
     # simpler method:
     out = np.ones((len(v1),len(v2)))

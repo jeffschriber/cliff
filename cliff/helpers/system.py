@@ -137,7 +137,7 @@ class System:
         self.atom_reorder.append(reorder_atoms)
         return None
 
-    def build_slatm(self, mbtypes, xyz=None):
+    def build_slatm(self, mbtypes, cutoff, xyz=None):
         self.slatm = []
         # Need xyz
         if len(self.xyz) == 0:
@@ -147,7 +147,7 @@ class System:
                 raise ValueError("Missing xyz file")
         else:
             mol = qml.Compound(self.xyz[0])
-        mol.generate_slatm(mbtypes, local=True)
+        mol.generate_slatm(mbtypes, rcut=cutoff,local=True)
         self.slatm = mol.representation
         return None
 
