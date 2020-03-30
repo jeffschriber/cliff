@@ -33,12 +33,13 @@ class Options:
 
         # Hirshfeld train/learn options
         self.hirsh_training = "" 
-        self.hirsh_max_neighbors = 12
         self.hirsh_krr_kernel = 'laplacian'
         self.hirsh_krr_sigma = 1000.0
         self.hirsh_krr_lambda = 1e-9
         self.hirsh_filepath = ""
         self.hirsh_file_read = False
+        self.hirsh_cutoff = 4.8
+    
 
         # Atomic Density options
         self.atomicdensity_training = "" 
@@ -121,12 +122,6 @@ class Options:
         except:
             pass
 
-        # neighbors for hirsh training
-        try:
-            self.hirsh_max_neighbors = self.Config.getint("hirshfeld","max_neighbors")
-        except:
-            pass
-
         # Return type of kernel
         try:
             self.hirsh_krr_kernel =  self.Config.get("hirshfeld","krr_kernel")
@@ -142,6 +137,12 @@ class Options:
         # Return sigma parameter for machinelearning
         try:
             self.hirsh_krr_lambda = self.Config.getfloat("hirshfeld","krr_lambda")
+        except:
+            pass
+
+        # cutoff for ml descriptor
+        try:
+            self.hirsh_cutoff = self.Config.getfloat("hirshfeld","cutoff")
         except:
             pass
 
@@ -185,6 +186,9 @@ class Options:
 
     def set_hirshfeld_filepath(self, val):
         self.hirsh_filepath = val
+
+    def set_hirshfeld_cutoff(self, val):
+        self.hirsh_cutoff = val
 
     ### Options for atomic density computations 
     def load_atomic_density_options(self):

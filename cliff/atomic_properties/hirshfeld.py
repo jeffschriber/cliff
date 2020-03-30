@@ -35,7 +35,7 @@ class Hirshfeld:
         # support vector regression
         self.clf = None
         logger.setLevel(options.logger_level)
-        self.max_neighbors = options.hirsh_max_neighbors
+        self.cutoff = options.hirsh_cutoff
         self.krr_kernel = options.hirsh_krr_kernel
         self.krr_sigma  = options.hirsh_krr_sigma
         self.krr_lambda = options.hirsh_krr_lambda
@@ -145,7 +145,7 @@ class Hirshfeld:
         else:
 
             _system.hirshfeld_ratios = np.zeros(_system.num_atoms)
-            _system.build_slatm(self.mbtypes) # pass xyz here?
+            _system.build_slatm(self.mbtypes, self.cutoff) # pass xyz here?
 
             prefactor = constants.ml_prefactor[self.kernel]
             power = constants.ml_power[self.kernel]
@@ -174,7 +174,7 @@ class Hirshfeld:
        # print("    Time spent predicting Hirshfeld ratios:               %8.3f s" % (time.time()-t1))
         return None
 
-    def add_mol_to_training(self, new_system, ref_ratios, atom = None):
+    def add_mol_to_training(self, new_system, ref_ratios,atom = None):
         'Add molecule to training set'
 
         if self.mbtypes is None:
@@ -192,7 +192,7 @@ class Hirshfeld:
 
         self.qml_mols.append(mol)
         # build slatm representation
-        mol.generate_slatm(self.mbtypes, local=True)
+        mol.generate_slatm(self.mbtypes, rcut = self.cutoff, local=True)
 
         natom = 0
         for i in range(len(new_system.elements)):
