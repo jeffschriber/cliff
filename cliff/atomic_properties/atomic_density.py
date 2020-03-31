@@ -73,7 +73,7 @@ class AtomicDensity:
         '''save the model'''
 
         with open (save_file, 'wb') as f:
-            pickle.dump([self.descr_train,self.alpha_train,self.mbtypes],f,protocol=2)
+            pkl.dump([self.descr_train,self.alpha_train,self.mbtypes],f,protocol=2)
 
         return None
 
