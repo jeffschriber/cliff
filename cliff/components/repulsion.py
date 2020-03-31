@@ -61,7 +61,7 @@ class Repulsion:
         for s1 in range(nsys):
             for s2 in range(s1+1, nsys):
                 r = utils.build_r(atom_coord[s1], atom_coord[s2], self.cell)
-                ovp = utils.slater_ovp_mat(r,v_widths[s1]],v_widths[s2])
+                ovp = utils.slater_ovp_mat(r,v_widths[s1],v_widths[s2])
                 self.energy += np.dot(params[s1], np.matmul(ovp,params[s2]))
 
         self.energy *= constants.au2kcalmol
