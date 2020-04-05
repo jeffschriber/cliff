@@ -139,7 +139,7 @@ class InductionCalc(Electrostatics):
 
 
                 for i,atom in enumerate(atom_ele[s2]):
-                    T_2 = self.build_int_tensor(atom_coord[s2][i], atom_coord[s1], u[i,:], self.smearing_coeff)
+                    T_2 = self.build_int_tensor(atom_coord[s2][i], atom_coord[s1], u[:,i], self.smearing_coeff)
                     induced_dip[s2][i] = np.einsum("ijk,ki->j",T_2,mtp1.T) * atom_alpha_iso[s2][i]
                     T_dd_2.append(T_2[:,:,1:4])
 
@@ -160,13 +160,23 @@ class InductionCalc(Electrostatics):
         logger.info("init: %6.3f" % (end_init - start_pol))
         # Self-consistent polarization
         mu_next = np.copy(induced_dip)
-        mu_prev = np.zeros(np.shape(mu_next))
-        diff_init = np.linalg.norm(mu_next-mu_prev)
+        #mu_prev = np.zeros(np.shape(mu_next))
+        #mu_prev = np.zeros(np.shape(induced_dip))
+        mu_prev = []
+        for i in induced_dip:
+            mu_prev.append(np.zeros(np.shape(i)))
+
+       # diff_init = np.linalg.norm(mu_next-mu_prev)
+        diff_init = 0.0
+        for n in range(nsys):
+            diff_init += np.linalg.norm(mu_next[n]-mu_prev[n])
+    
         counter = 0
 
         # Compute the induced dipoles
         # We already have the interaction tensors
-        while np.linalg.norm(mu_next-mu_prev) > self.conv:
+        diff = diff_init
+        while diff > self.conv:
             mu_prev = np.copy(mu_next)
             mu_next = (1.0 - self.omega) * mu_prev
             for s1 in range(nsys):
@@ -183,13 +193,21 @@ class InductionCalc(Electrostatics):
                     mu_next[s2] += (tmp + induced_dip[s2])*self.omega
 
             counter += 1
-            if np.linalg.norm(mu_next-mu_prev) > diff_init*10 or counter > 2000:
+            diff = 0.0
+            for n in range(nsys):
+                diff += np.linalg.norm(mu_next[n]-mu_prev[n])
+            if diff > diff_init*10 or counter > 2000:
                 logger.error("Can't converge self-consistent equations. Exiting.")
                 exit(1)
             if counter % 50 == 0 and self.omega > 0.2:
                 self.omega *= 0.8
 
-        self.induced_dip = np.zeros(np.shape(self.mtps_cart))
+        #self.induced_dip = np.zeros(np.shape(self.mtps_cart))
+        self.induced_dip = []
+        for i in self.mtps_cart:
+            self.induced_dip.append(np.zeros(np.shape(i)))
+
+
         logger.debug("Converged induced dipoles [debye]:")
         for s in range(nsys):
             logger.info("Mol %d" % s)
