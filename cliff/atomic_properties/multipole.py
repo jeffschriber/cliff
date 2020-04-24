@@ -39,27 +39,29 @@ class Multipole:
     def __init__(self, options):
         logger.setLevel(options.logger_level)
         self.multipoles = None
-        self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[]}
-        self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[]}
+        self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
+        self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
         # support vector regression
         self.clf = None
         # alpha_train has size 1,3,9
         self.max_coeffs = [1, 3, 9]
         self.offset_mtp = [0, 1, 4]
-        self.alpha_train = {'H':None, 'C':None, 'O':None, 'N':None, 'S':None, 'Cl':None, 'F':None}
+        self.alpha_train = {'H':None, 'C':None, 'O':None, 'N':None, 'S':None, 'Cl':None, 'F':None, 'Br':None}
         self.ml_method  = options.multipole_ml_method
         self.kernel     = options.multipole_kernel
         self.krr_sigma  = options.multipole_krr_sigma
         self.krr_lambda = options.multipole_krr_lambda
         # Normalization of the target data - mean and std for each MTP component
-        self.norm_tgt_mean = {'H':np.zeros((3)),'C':np.zeros((3)),'O':np.zeros((3)), 'N':np.zeros((3)), 'S':np.zeros((3)), 'Cl':np.zeros((3)), 'F':np.zeros((3))}
-        self.norm_tgt_std  = {'H':np.ones((3)), 'C':np.ones((3)), 'O':np.ones((3)), 'N':np.ones((3)), 'S':np.ones((3)), 'Cl':np.ones((1)), 'F':np.zeros((3))}
-        self.num_mols_train = {'H':0, 'C':0, 'O':0, 'N':0, 'S':0, 'Cl':0, 'F':0}
+        self.norm_tgt_mean = {'H':np.zeros((3)),'C':np.zeros((3)),'O':np.zeros((3)), 'N':np.zeros((3)), 'S':np.zeros((3)), 'Cl':np.zeros((3)), 'F':np.zeros((3)), 'Br':np.zeros((3))}
+        self.norm_tgt_std  = {'H':np.ones((3)), 'C':np.ones((3)), 'O':np.ones((3)), 'N':np.ones((3)), 'S':np.ones((3)), 'Cl':np.ones((1)), 'F':np.zeros((3)), 'Br':np.zeros((3))}
+        self.num_mols_train = {'H':0, 'C':0, 'O':0, 'N':0, 'S':0, 'Cl':0, 'F':0, 'Br':0}
         # Set of qml mols. Used for SLATM
         self.qml_mols = []
         self.qml_filter_ele = []
         self.mbtypes = None
         self.ref_mtp = options.multipole_ref_mtp
+
+        self.cutoff = options.multipole_rcut
 
         self.ref_path = ""
         if self.ref_mtp:
@@ -78,7 +80,8 @@ class Multipole:
             mtp_s = time.time()
             mtp_models = glob.glob(options.multipole_training + '/*.pkl') 
             for model in mtp_models:
-                self.load_ml(model)
+                if not self.ref_mtp:
+                    self.load_ml(model)
             mtp_e = time.time() 
         #    print("    Loaded {} multipole models in:\n\t\t {}".format(len(mtp_models), options.multipole_training))
          #   print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
@@ -97,10 +100,11 @@ class Multipole:
         if load_file != None:
             logger.info(
                     "    Loading multipole training from %s" % load_file)
+            print(load_file)
             with open(load_file, 'rb') as f:
                 descr_train_at, alpha_train, norm_tgt_mean, \
-                    norm_tgt_std, mbtypes = pickle.load(f)
-                    #norm_tgt_std, mbtypes = pickle.load(f, encoding='latin1') #try for old pickles
+                norm_tgt_std, mbtypes = pickle.load(f)
+                #norm_tgt_std, mbtypes = pickle.load(f, encoding='latin1') #try for old pickles
                 for e in self.descr_train.keys():
                     if e in descr_train_at.keys() and len(descr_train_at[e]) > 0:
                         # Update
@@ -134,7 +138,7 @@ class Multipole:
         if self.mbtypes is None:
             raise ValueError("mbtypes missing")
         for i,mol in enumerate(self.qml_mols):
-            mol.generate_slatm(self.mbtypes, local=True)
+            mol.generate_slatm(self.mbtypes, rcut = self.cutoff, local=True)
             for j,at in enumerate(self.qml_filter_ele[i]):
                 if at == 1:
                     # Do include the descriptor
@@ -227,8 +231,8 @@ class Multipole:
 
         if self.ref_mtp:
             xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
-            tail = '.' + xyz.split('.')[-1]
-            xyz = xyz.replace('gold.','', 1)
+            #tail = '.' + xyz.split('.')[-1]
+            #xyz = xyz.replace('gold.','', 1)
             reffile = self.ref_path + xyz + '-mtp.txt'
             extract_file = utils.read_file(reffile)
             _system.multipoles = [np.array([
@@ -254,7 +258,7 @@ class Multipole:
            #                 float(extract_file[i].split()[12])])
            #                     for i in range(4,len(extract_file))]
         elif self.ml_method == "KRR" :
-            _system.build_slatm(self.mbtypes, xyz=xyz)
+            _system.build_slatm(self.mbtypes,self.cutoff, xyz=xyz)
             power  = constants.ml_power[self.kernel]
             prefac = constants.ml_prefactor[self.kernel]
             for e in self.alpha_train.keys():
