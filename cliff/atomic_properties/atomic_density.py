@@ -114,7 +114,6 @@ class AtomicDensity:
                     line = line.split()
                     vws.append(float(line[0]))
                 
-            #_system.populations, _system.valence_widths = pops, vws
             _system.valence_widths = vws
 
         else:
@@ -123,7 +122,6 @@ class AtomicDensity:
             #    if self.alpha_train[ele] is not None:
 
             # allocate the result
-            #_system.populations = np.zeros(_system.num_atoms)
             _system.valence_widths = np.zeros(_system.num_atoms)
             
             _system.build_slatm(self.mbtypes, self.cutoff) # pass xyz here?
@@ -145,6 +143,12 @@ class AtomicDensity:
                             #_system.valence_widths[i] = pred.T[1][i]
                             _system.valence_widths[i] = pred.T[i]
 
+            xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
+            reffile = self.refpath + xyz + '-atmdns.txt'
+            with open(reffile,'w') as ref:
+                for vw in _system.valence_widths:
+                    ref.write("%10.8f \n" % vw)
+            
        # print("    Time spent predicting valence-widths and populations: %8.3f s" % (time.time() - t1))
         return None
 

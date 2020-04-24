@@ -39,6 +39,8 @@ class Options:
         self.hirsh_filepath = ""
         self.hirsh_file_read = False
         self.hirsh_cutoff = 4.8
+        self.hirsh_save_to_disk = False
+        self.hirsh_save_path = ""
     
 
         # Atomic Density options
@@ -49,6 +51,8 @@ class Options:
         self.atomicdensity_krr_lambda = 1e-9
         self.atomicdensity_ref_adens = False
         self.atomicdensity_refpath = ""
+        self.atomicdensity_save_to_disk = False
+        self.atomicdensity_save_path = ""
 
         # Defaults for multipoles
         self.multipole_training = ""
@@ -189,6 +193,8 @@ class Options:
 
     def set_hirshfeld_cutoff(self, val):
         self.hirsh_cutoff = val
+    def set_hirshfeld_ref_hirsh(self, val):
+        self.hirsh_file_read = val
 
     ### Options for atomic density computations 
     def load_atomic_density_options(self):

@@ -15,6 +15,7 @@ import pickle
 import numpy as np
 import os
 import time
+import glob
 import qml
 from qml.representations import get_slatm_mbtypes
 
@@ -172,6 +173,11 @@ class Hirshfeld:
         #    _system.hirshfeld_ratios = np.dot(kmat,self.alpha_train)
 
        # print("    Time spent predicting Hirshfeld ratios:               %8.3f s" % (time.time()-t1))
+#            xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
+#            reffile = self.filepath + xyz + '-h.txt'
+#            with open(reffile,'w') as ref:
+#                for hr in _system.hirshfeld_ratios:
+#                    ref.write("%10.8f \n" % hr)
         return None
 
     def add_mol_to_training(self, new_system, ref_ratios,atom = None):
