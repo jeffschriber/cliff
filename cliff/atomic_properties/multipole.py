@@ -80,6 +80,7 @@ class Multipole:
             mtp_s = time.time()
             mtp_models = glob.glob(options.multipole_training + '/*.pkl') 
             for model in mtp_models:
+               # print(model)
                 if not self.ref_mtp:
                     self.load_ml(model)
             mtp_e = time.time() 
@@ -100,7 +101,6 @@ class Multipole:
         if load_file != None:
             logger.info(
                     "    Loading multipole training from %s" % load_file)
-            print(load_file)
             with open(load_file, 'rb') as f:
                 descr_train_at, alpha_train, norm_tgt_mean, \
                 norm_tgt_std, mbtypes = pickle.load(f)

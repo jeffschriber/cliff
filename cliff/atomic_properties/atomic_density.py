@@ -46,6 +46,9 @@ class AtomicDensity:
 
         self.cutoff = options.atomicdensity_cutoff
 
+        self.save_to_disk = options.atomicdensity_save_to_disk
+        self.save_path = options.atomicdensity_save_path
+
         # A dict of element types for training/predicting
         self.ele_train = {} 
 
@@ -60,6 +63,7 @@ class AtomicDensity:
 
         adens_models = glob.glob(self.training_dir + '/*.pkl') 
         for model in adens_models:
+            print(model)
             with open(model, 'rb') as f:
                 d_train,a_train, self.mbtypes = pkl.load(f)
                 for ele in self.descr_train.keys():
@@ -143,11 +147,12 @@ class AtomicDensity:
                             #_system.valence_widths[i] = pred.T[1][i]
                             _system.valence_widths[i] = pred.T[i]
 
-            xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
-            reffile = self.refpath + xyz + '-atmdns.txt'
-            with open(reffile,'w') as ref:
-                for vw in _system.valence_widths:
-                    ref.write("%10.8f \n" % vw)
+            if self.save_to_disk:
+                xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
+                reffile = self.save_path + xyz + '-atmdns.txt'
+                with open(reffile,'w') as ref:
+                    for vw in _system.valence_widths:
+                        ref.write("%10.8f \n" % vw)
             
        # print("    Time spent predicting valence-widths and populations: %8.3f s" % (time.time() - t1))
         return None
