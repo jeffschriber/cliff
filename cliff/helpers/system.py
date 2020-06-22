@@ -189,7 +189,7 @@ class System:
         if self.mtp_to_disk:
             xyz = self.xyz[0].split('/')[-1].strip('.xyz')
             reffile = self.mtp_save_path + xyz + '-mtp.txt'
-            print(reffile) 
+          #  print(reffile) 
             #if os.path.exists(reffile):
             #    return None
 
@@ -224,7 +224,10 @@ class System:
             bonded = []
             for i,at in enumerate(self.coords):
                 at_i = self.elements[i]
-                thrsld = 1.6 if at_ele == 'H' or at_i == 'H' else 2.0
+                thrsld = 2.0
+
+                if at_ele == 'H' or at_i == 'H':
+                    thrsld = 1.5
             
                 if at_ele == 'S' or at_i == 'S':
                     thrsld = 2.2
@@ -234,7 +237,13 @@ class System:
                     bonded.append((at_i,at,dist))
             self.bonded_atoms.append(bonded)
             if at_ele == 'H':
+                #print(bonded)
                 self.atom_types.append('H'+bonded[0][0])
+
+                # pick the shortest non-hydrogen
+             #   if len(bonded) == 1:
+             #       self.atom_types.append('H'+bonded[0][0])
+             #   else:
             elif at_ele == 'O':
                 self.atom_types.append('O'+str(len(bonded)))
             elif at_ele == 'N':
