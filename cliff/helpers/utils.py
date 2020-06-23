@@ -125,7 +125,13 @@ def reorder_atoms(coords, atom_types, central_atom_id, max_neighbors):
     '''Reorder list of atoms from the central atom and by its distance'''
     distMain = sum([(coords[central_atom_id][j] - coords[:,j])**2
                     for j in range(3)])
+
+    distMain = np.around(distMain, decimals=5)
     reorder = np.argsort(distMain)
+    #reorder = [0,1,2]
+    # keep canonical ordering if distances are equivalent
+
+
     cart_ord = np.zeros((max_neighbors,3))
     for i in range(min(len(coords),max_neighbors)):
         cart_ord[i,:] = coords[reorder[i],:]

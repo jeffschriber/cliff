@@ -39,6 +39,8 @@ class Options:
         self.hirsh_filepath = ""
         self.hirsh_file_read = False
         self.hirsh_cutoff = 4.8
+        self.hirsh_save_to_disk = False
+        self.hirsh_save_path = ""
     
 
         # Atomic Density options
@@ -49,6 +51,8 @@ class Options:
         self.atomicdensity_krr_lambda = 1e-9
         self.atomicdensity_ref_adens = False
         self.atomicdensity_refpath = ""
+        self.atomicdensity_save_to_disk = False
+        self.atomicdensity_save_path = ""
 
         # Defaults for multipoles
         self.multipole_training = ""
@@ -189,6 +193,13 @@ class Options:
 
     def set_hirshfeld_cutoff(self, val):
         self.hirsh_cutoff = val
+    def set_hirshfeld_ref_hirsh(self, val):
+        self.hirsh_file_read = val
+
+    def set_hirsh_save_to_disk(self,val):
+        self.hirsh_save_to_disk = val
+    def set_hirsh_save_path(self,val):
+        self.hirsh_save_path = val
 
     ### Options for atomic density computations 
     def load_atomic_density_options(self):
@@ -249,6 +260,12 @@ class Options:
 
     def set_atomicdensity_refpath(self, val):
         self.atomicdensity_refpath = val
+
+    def set_atomicdensity_save_to_disk(self,val):
+        self.atomicdensity_save_to_disk = val
+    def set_atomicdensity_save_path(self,val):
+        self.atomicdensity_save_path = val
+
 
     ### Options for multipoles
 
@@ -364,7 +381,7 @@ class Options:
         
         try:
             ret = {}
-            at_types = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
+            at_types = ['Cl', 'F', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2','Br']  
             # Grab exponents from config if provided
             for at in at_types:
                 ret[at] = self.Config.getfloat("electrostatics", "exp["+at+"]")
@@ -382,7 +399,7 @@ class Options:
     def load_indu_options(self):
             
         try:
-            at_types = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
+            at_types = ['Cl', 'F', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2', 'Br']  
             ret = {}
             # Grab exponents from config if provided
             for at in at_types:
@@ -421,7 +438,7 @@ class Options:
     ### Options for Exchange
     def load_exch_options(self):
         try:
-            at_types = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
+            at_types = ['Cl', 'F', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2', 'Br']  
             ret = {}
             # Grab exponents from config if provided
             for at in at_types:
@@ -461,7 +478,7 @@ class Options:
             pass
 
         try:
-            at_types = ['Cl1', 'F1', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2']  
+            at_types = ['Cl', 'F', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2',  'N3', 'N2', 'N1', 'O1', 'O2', 'Br']  
             ret = {}
             # Grab exponents from config if provided
             for at in at_types:

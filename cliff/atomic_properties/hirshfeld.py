@@ -15,6 +15,7 @@ import pickle
 import numpy as np
 import os
 import time
+import glob
 import qml
 from qml.representations import get_slatm_mbtypes
 
@@ -45,6 +46,9 @@ class Hirshfeld:
 
         self.from_file = options.hirsh_file_read
         self.filepath  = options.hirsh_filepath
+            
+        self.save_to_disk = options.hirsh_save_to_disk
+        self.save_path = options.hirsh_save_path
 
         # A dict of element types for training/predicting
         self.ele_train = {} 
@@ -172,6 +176,12 @@ class Hirshfeld:
         #    _system.hirshfeld_ratios = np.dot(kmat,self.alpha_train)
 
        # print("    Time spent predicting Hirshfeld ratios:               %8.3f s" % (time.time()-t1))
+        if self.save_to_disk:
+            xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
+            reffile = self.save_path + xyz + '-h.txt'
+            with open(reffile,'w') as ref:
+                for hr in _system.hirshfeld_ratios:
+                    ref.write("%10.8f \n" % hr)
         return None
 
     def add_mol_to_training(self, new_system, ref_ratios,atom = None):
