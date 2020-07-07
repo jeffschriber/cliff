@@ -73,7 +73,7 @@ def load_models(options):
     adens.load_ml()
 
     #load multipoles with aSLATM representation
-    mtp_ml  = Multipole(options, descriptor="slatm") 
+    mtp_ml  = Multipole(options) 
 
     return [hirsh, adens, mtp_ml]
 

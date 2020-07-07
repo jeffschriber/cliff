@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 #
-# Utils Class. All sorts of random functions.
-#
-# Tristan Bereau (2017)
 
 import numpy as np
 import re
