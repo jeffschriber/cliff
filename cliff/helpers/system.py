@@ -36,14 +36,14 @@ class System:
         self.elements = None
         self.hirshfeld_ref = None
         # Coulomb matrix
-        self.coulomb_mat = None
+        #self.coulomb_mat = None
         self.atom_reorder = None
         # slatm
         self.slatm = None
         # Predict ratios
         self.hirshfeld_ratios = None
         # Atomic populations
-        self.populations = None
+        #self.populations = None
         # Atomic valence widths
         self.valence_widths = None
         # Core charge
@@ -66,7 +66,7 @@ class System:
         self.bonded_atoms = None
         if len(self.xyz) == 1:
             self.load_xyz()
-        self.coulomb_mat = []
+        #self.coulomb_mat = []
         self.atom_reorder = []
     
         self.mtp_to_disk = options.multipole_save_to_disk
@@ -220,10 +220,11 @@ class System:
         self.bonded_atoms = []
         for at_id in range(self.num_atoms):
             at_ele = self.elements[at_id]
-            at_crd = self.coords[at_id]
+            at_crd = np.asarray(self.coords[at_id])
             bonded = []
             for i,at in enumerate(self.coords):
                 at_i = self.elements[i]
+                i_crd = np.asarray(self.coords[i])
                 thrsld = 2.0
 
                 if at_ele == 'H' or at_i == 'H':
@@ -232,7 +233,7 @@ class System:
                 if at_ele == 'S' or at_i == 'S':
                     thrsld = 2.2
 
-                dist = np.linalg.norm(at_crd-self.coords[i])
+                dist = np.linalg.norm(np.subtract(at_crd,i_crd))
                 if dist < thrsld and i != at_id:
                     bonded.append((at_i,at,dist))
             self.bonded_atoms.append(bonded)
