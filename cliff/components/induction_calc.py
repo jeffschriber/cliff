@@ -88,9 +88,9 @@ class InductionCalc(Electrostatics):
 
         self.energy_shortranged *= constants.au2kcalmol
         end_sr = time.time()
-        logger.info("short-range: %6.3f" % (end_sr - start_sr))
+        #logger.info("short-range: %6.3f" % (end_sr - start_sr))
         #print("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
-        logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
+        #logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
 
         ###  Compute the induction term using Thole's formalism
 
@@ -147,7 +147,7 @@ class InductionCalc(Electrostatics):
 #            tmp_vec = vec * constants.au2debye
 #            logger.info("%9.6f  %9.6f  %9.6f" %(tmp_vec[0],tmp_vec[1],tmp_vec[2]))
 
-        logger.info("init: %6.3f" % (end_init - start_pol))
+        #logger.info("init: %6.3f" % (end_init - start_pol))
         # Self-consistent polarization
         mu_next = np.copy(induced_dip)
         #mu_prev = np.zeros(np.shape(mu_next))
@@ -200,7 +200,7 @@ class InductionCalc(Electrostatics):
 
 #        logger.debug("Converged induced dipoles [debye]:")
         for s in range(nsys):
-            logger.info("Mol %d" % s)
+ #           logger.info("Mol %d" % s)
             for n,vec in enumerate(mu_next[s]):
                 self.induced_dip[s][n][1:4] = vec            
 #                tmp_vec = vec * constants.au2debye
@@ -226,7 +226,7 @@ class InductionCalc(Electrostatics):
 
 
         end_pol = time.time()
-        logger.debug("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
+        #logger.debug("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
         #print("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
         #print "Short range", self.energy_shortranged
         #print(self.sys_comb,self.energy_polarization , self.energy_shortranged)
