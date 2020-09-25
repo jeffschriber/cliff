@@ -103,7 +103,7 @@ class Multipole:
                     "    Loading multipole training from %s" % load_file)
             with open(load_file, 'rb') as f:
                 descr_train_at, alpha_train, norm_tgt_mean, \
-                norm_tgt_std, mbtypes = pickle.load(f)
+                norm_tgt_std, mbtypes = pickle.load(f,encoding="ISO-8859-1")
                 #norm_tgt_std, mbtypes = pickle.load(f, encoding='latin1') #try for old pickles
                 for e in self.descr_train.keys():
                     if e in descr_train_at.keys() and len(descr_train_at[e]) > 0:

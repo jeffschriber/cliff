@@ -70,7 +70,8 @@ class Hirshfeld:
             with open(model, 'rb') as f:
                 #self.descr_train, self.alpha_train = pickle.load(f)
                 #d_train,a_train, self.mbtypes = pickle.load(f, encoding='latin1')
-                d_train,a_train, self.mbtypes = pickle.load(f)
+                d_train,a_train, self.mbtypes = pickle.load(f, encoding="ISO-8859-1")
+                #d_train,a_train, self.mbtypes = pickle.load(f)
 
                 for ele in self.descr_train.keys():
                     if ele in d_train.keys() and len(d_train[ele]) > 0:
