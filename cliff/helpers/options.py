@@ -73,7 +73,7 @@ class Options:
 
         # Defaults for Induction
         self.indu_sr_params = constants.indu_sr_params
-        self.indu_smearing_coeff = 0.5478502
+        self.indu_smearing_coeff = 0.38539063
         self.indu_omega = 0.75 
         self.indu_conv = 1e-5
 

@@ -128,7 +128,7 @@ def get_energy(filenames, models, options, timer=None):
     ind_time = time.time() - t2
 
     t3 = time.time()
-    exch = rep.compute_repulsion("slater_mbis")
+    exch = rep.compute_repulsion()
     rep_time = time.time() - t3
     
     #use Hirshfeld ratios in the computation of dispersion energy
