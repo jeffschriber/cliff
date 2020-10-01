@@ -25,10 +25,6 @@ from qml.representations import get_slatm_mbtypes
 # for NNs
 #from atomicmultipole import Molecule, MultipoleModel
 
-# Set logger
-logger = logging.getLogger(__name__)
-fh = logging.FileHandler('output.log')
-logger.addHandler(fh)
 
 class Multipole:
     '''
@@ -37,7 +33,13 @@ class Multipole:
     '''
 
     def __init__(self, options):
-        logger.setLevel(options.logger_level)
+    
+        name = options.name
+        # Set logger
+        self.logger = logging.getLogger(__name__)
+        fh = logging.FileHandler(name + '.log')
+        self.logger.addHandler(fh)
+        self.logger.setLevel(options.logger_level)
         self.multipoles = None
         self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
         self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
@@ -99,11 +101,12 @@ class Multipole:
         '''Load machine learning model'''
         # Try many atoms and see which atoms we find
         if load_file != None:
-            logger.info(
+            self.logger.info(
                     "    Loading multipole training from %s" % load_file)
             with open(load_file, 'rb') as f:
                 descr_train_at, alpha_train, norm_tgt_mean, \
                 norm_tgt_std, mbtypes = pickle.load(f,encoding="ISO-8859-1")
+                #norm_tgt_std, mbtypes = pickle.load(f) #try for old pickles
                 #norm_tgt_std, mbtypes = pickle.load(f, encoding='latin1') #try for old pickles
                 for e in self.descr_train.keys():
                     if e in descr_train_at.keys() and len(descr_train_at[e]) > 0:
@@ -114,13 +117,13 @@ class Multipole:
                         self.norm_tgt_std[e] = norm_tgt_std[e]
                 self.mbtypes = mbtypes
         else:
-            logger.error("Missing load file name")
+            self.logger.error("Missing load file name")
             exit(1)
         return None
 
     def save_ml(self, save_file):
         '''Save machine learning model'''
-        logger.info("   Saving multipole machine learning model to %s" %
+        self.logger.info("   Saving multipole machine learning model to %s" %
             save_file)
         with open(save_file, 'wb') as f:
             pickle.dump([self.descr_train, self.alpha_train,
@@ -147,7 +150,7 @@ class Multipole:
             size_training = len(self.target_train[e])
             # self.normalize(e)
             if len(self.descr_train[e]) > 0:
-                logger.info("Training set size: %d atoms; %d molecules" % (size_training,
+                self.logger.info("Training set size: %d atoms; %d molecules" % (size_training,
                     self.num_mols_train[e]))
                 #print("Training set size: %d atoms; %d molecules" % (size_training,
                 #    self.num_mols_train[e]))
@@ -157,7 +160,7 @@ class Multipole:
                             for i in range(len(self.target_train[e]))]
                 pairwise_dists = squareform(pdist(self.descr_train[e],
                     constants.ml_metric[self.kernel]))
-                logger.info("building kernel matrix of size (%d,%d); %7.4f Gbytes" \
+                self.logger.info("building kernel matrix of size (%d,%d); %7.4f Gbytes" \
                     % (size_training, size_training, 8*size_training**2/1e9))
                 #print("building kernel matrix of size (%d,%d); %7.4f Gbytes" \
                 #    % (size_training, size_training, 8*size_training**2/1e9))
@@ -168,7 +171,7 @@ class Multipole:
                 kmat.flat[::len(self.target_train[e])+1] += self.krr_lambda 
 
                 self.alpha_train[e] = np.linalg.solve(kmat,tgt_prop)
-        logger.info("training of multipoles finished.")
+        self.logger.info("training of multipoles finished.")
         return None
 
     #def predict_mols(self, systems, charge=0, xyzs=None):
@@ -336,7 +339,7 @@ class Multipole:
     #        print("    Multipole ML method not available!")
 
 
-        logger.debug("Predicted multipole expansion for %s" % ( _system.xyz[0]))
+        self.logger.debug("Predicted multipole expansion for %s" % ( _system.xyz[0]))
 
        # print("    Time spent predicting multipoles:                     %8.3f s" % (time.time() - tp))
         return None
@@ -390,6 +393,6 @@ class Multipole:
                 self.target_train[ele_i].append(new_target_train)
             if atom in new_system.elements or atom is None:
                 self.num_mols_train[ele_i] += 1
-        logger.info("Added file to training set: %s" % new_system)
+        self.logger.info("Added file to training set: %s" % new_system)
         return None
 

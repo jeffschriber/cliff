@@ -13,18 +13,21 @@ import cliff.helpers.constants as constants
 import cliff.helpers.utils as utils
 from numba import jit
 
-# Set logger
-logger = logging.getLogger(__name__)
-fh = logging.FileHandler('output.log')
-logger.addHandler(fh)
 
 class Electrostatics:
     'Electrostatic class computes cp-corrected multipole electrostatics'
 
     def __init__(self, options,sys, cell):
+        # Set logger
+
+        name = options.name
+        self.logger = logging.getLogger(__name__)
+        fh = logging.FileHandler(name + '.log')
+        self.logger.addHandler(fh)
+
         self.systems = [sys]
         self.atom_in_system = [0]*len(sys.elements)
-        logger.setLevel(options.logger_level)
+        self.logger.setLevel(options.logger_level)
         self.cell = cell
         self.mtps_cart = []
         self.mtps_cart_elec = []
@@ -59,7 +62,7 @@ class Electrostatics:
             atom_ele.append([ele for ele in self.systems[sys].elements])
         for s1,sys in enumerate(self.systems):
             if len(sys.multipoles) == 0:
-                logger.error("Multipoles not initialized for system %s!"
+                self.logger.error("Multipoles not initialized for system %s!"
                     % sys)
                 exit(1)
 

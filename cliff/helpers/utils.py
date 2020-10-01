@@ -13,19 +13,15 @@ import cliff.helpers.cell as Cell
 
 from numba import jit
 
-# Set logger
-logger = logging.getLogger(__name__)
-fh = logging.FileHandler('output.log')
-logger.addHandler(fh)
-#logger.setLevel(20)
 
-def file_finder(jobdir = None):
+name = ""
+def file_finder(fname, jobdir = None):
     """
     Compiles xyz files for multiple computations
     
     dirs points to directories, one for each computation
     """
-    
+    name = fname
     # check current directory if none is passed
     if jobdir == None:
         jobdir = './'
@@ -57,6 +53,10 @@ def file_finder(jobdir = None):
 
     return master_xyzs
 
+# Set logger
+logger = logging.getLogger(__name__)
+fh = logging.FileHandler(name + '.log')
+logger.addHandler(fh)
 
 def read_file(infile):
     'Read file and return content'
@@ -72,6 +72,7 @@ def read_file(infile):
     while len(str(s[0].rstrip())) == 0:
         s = s[1:]
     return s
+
 
 def set_logger_level(level):
     logger.setLevel(level)

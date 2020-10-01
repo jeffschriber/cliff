@@ -12,19 +12,25 @@ class Options:
 
     """
 
-    # Set logger
-    logger = logging.getLogger(__name__)
-    fh = logging.FileHandler('output.log')
-    logger.addHandler(fh)
 
-    def __init__(self, config_file="config.ini"):
+    def __init__(self, config_file="config.ini", name=None):
         # Config parser
         self.Config = configparser.ConfigParser()
         # Load config file
         self.Config.read(config_file)
+        # Set logger
+        self.name = "output"
+        if name is not None:
+            self.name = name
+
+        logger = logging.getLogger(__name__)
+        fh = logging.FileHandler(self.name + '.log')
+        logger.addHandler(fh)
+
+
         # Logger level
         self.logger_level = 50
-        self.logger.setLevel(self.logger_level)
+        logger.setLevel(self.logger_level)
         util.set_logger_level(self.logger_level)
 
         self.test_mode = False
@@ -504,5 +510,8 @@ class Options:
     
     def set_disp_method(self, val):
         self.disp_method = val
+
+    def set_name(self, name):
+        self.name = name
 
 

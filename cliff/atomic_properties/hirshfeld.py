@@ -21,21 +21,24 @@ from qml.representations import get_slatm_mbtypes
 
 import cliff.tests as t
 testpath = os.path.abspath(t.__file__).split('__init__')[0]
-# Set logger
-logger = logging.getLogger(__name__)
-fh = logging.FileHandler('output.log')
-logger.addHandler(fh)
 
 class Hirshfeld:
     'Hirshfeld class. Predicts Hirshfeld ratios.'
 
     def __init__(self, options):
+        # Set logger4yy
+        self.logger = logging.getLogger(__name__)
+        fh = logging.FileHandler(options.name + '.log')
+        self.logger.addHandler(fh)
+
+
+        self.name = options.name
         self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
         self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
         self.alpha_train = {'H':None, 'C':None, 'O':None, 'N':None, 'S':None, 'Cl':None, 'F':None, 'Br':None}
         # support vector regression
         self.clf = None
-        logger.setLevel(options.logger_level)
+        self.logger.setLevel(options.logger_level)
         self.cutoff = options.hirsh_cutoff
         self.krr_kernel = options.hirsh_krr_kernel
         self.krr_sigma  = options.hirsh_krr_sigma
@@ -63,7 +66,7 @@ class Hirshfeld:
         if self.from_file:
             return
 
-        logger.info(
+        self.logger.info(
             "    Loading Hirshfeld training from %s" % self.training_dir)
         hirsh_models = glob.glob(self.training_dir + '/*.pkl') 
         for model in hirsh_models:
@@ -92,7 +95,7 @@ class Hirshfeld:
 
         if len(self.descr_train) == 0:
             print("No molecule in the training set.")
-            logger.error("No molecule in the training set.")
+            self.logger.error("No molecule in the training set.")
             exit(1)
         for ele in self.descr_train.keys():
             size_training = len(self.target_train[ele])
@@ -100,7 +103,7 @@ class Hirshfeld:
             # We've already got the descriptors
             if len(self.descr_train[ele]) > 0:
 
-                logger.info("Training set size: %d atoms" % size_training)                
+                self.logger.info("Training set size: %d atoms" % size_training)                
                 pairwise_dists = squareform(pdist(self.descr_train[ele], 'cityblock'))
                 kmat = np.exp(- pairwise_dists / self.krr_sigma )
                 kmat += self.krr_lambda*np.identity(len(self.target_train[ele]))

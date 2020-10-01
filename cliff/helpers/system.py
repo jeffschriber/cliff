@@ -252,7 +252,11 @@ class System:
             elif at_ele == 'C':
                 self.atom_types.append('C'+str(len(bonded)))
             elif at_ele == 'S':
-                self.atom_types.append('S'+str(len(bonded)))
+                if len(bonded) >= 2:
+                    s_at = 'S2'
+                else:
+                    s_at = 'S'+str(len(bonded))
+                self.atom_types.append(s_at)
             elif at_ele == 'Cl' or at_ele == 'CL':
                 self.atom_types.append('Cl')
             elif at_ele == 'F':

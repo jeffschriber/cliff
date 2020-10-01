@@ -33,15 +33,14 @@ from cliff.components.repulsion import Repulsion
 from cliff.components.induction_calc import InductionCalc
 from cliff.components.dispersion import Dispersion
 
-logger = logging.getLogger(__name__)
-fh = logging.FileHandler('output.log')
-logger.addHandler(fh)
 
 def init_args():
     parser = argparse.ArgumentParser(description="CLIFF: a Component-based Learned Intermolecular Force Field")
     parser.add_argument('-i','--input', type=str, help='Location of input configuration file')
 
     parser.add_argument('-f','--files', type=str, help='Directory of monomer xyz files')
+
+    parser.add_argument('-n','--name', type=str, help='Output job name')
 
     return parser.parse_args()
 
@@ -216,19 +215,20 @@ def print_timings(timer):
     logger.info("    Induction     :  %10.3f s" % timer['ind'])
     logger.info("    Dispersion    :  %10.3f s" % timer['disp'])
 
-def main(inpt=None, files=None):
+def main(inpt=None, files=None, name=None):
     # Do something if this file is invoked on its own
 
     infile = get_infile(inpt)
 
     #1. Initialize relevant variables
-    options = Options(infile) 
+    options = Options(infile,name) 
+    options.set_name(name) 
     logger.setLevel(options.logger_level)
 
     print_banner()
     logger.info("    Loading options from {}".format(infile))
 
-    job_list = Utils.file_finder(files)
+    job_list = Utils.file_finder(options.name, files)
 
     ret = {}
     timer = {}
@@ -248,7 +248,16 @@ def main(inpt=None, files=None):
 if __name__ == "__main__":
     start = time.time()
     args = init_args()
-    main(args.input, args.files)
+
+    name = 'output'
+    if args.name is not None:
+        name = args.name
+
+    logger = logging.getLogger(__name__)
+    fh = logging.FileHandler(name + '.log')
+    logger.addHandler(fh)
+
+    main(args.input, args.files, args.name)
     end = time.time()
 
     logger.info("    CLIFF ran in {} s".format(end-start))

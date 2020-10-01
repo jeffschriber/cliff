@@ -11,16 +11,16 @@ import cliff.helpers.constants as constants
 import math
 import logging
 
-# Set logger
-logger = logging.getLogger(__name__)
-fh = logging.FileHandler('output.log')
-logger.addHandler(fh)
 
 class Dispersion():
     'Dispersion class. Computes many-body dispersion'
 
     def __init__(self, options, _system, cell):
-        logger.setLevel(options.logger_level)
+        # Set logger
+        self.logger = logging.getLogger(__name__)
+        fh = logging.FileHandler(options.name + '.log')
+        self.logger.addHandler(fh)
+        self.logger.setLevel(options.logger_level)
 
         self.method = options.disp_method
         self.systems = [_system]
@@ -54,14 +54,14 @@ class Dispersion():
             disp = 0.0
             for i, mol in enumerate([dimer] + self.systems):
                 fac = 1.0 if i == 0 else -1.0
-                pol = Polarizability(self.scs_cutoff,self.pol_exponent,mol)
+                pol = Polarizability(self.name, self.scs_cutoff,self.pol_exponent,mol)
                 pol.compute_freq_pol()
                 #compute anisotropic characteristic frequencies
                 pol.compute_freq_scaled_anisotropic()
                 #execute MBD protocol
                 disp += fac * self.mbd_protocol(pol,None,None,None)
 
-            logger.info("  Dispersion energy: %8.4f" % disp)
+            self.logger.info("  Dispersion energy: %8.4f" % disp)
             return disp
             
     def compute_tang_toennies(self):
@@ -301,16 +301,16 @@ class Dispersion():
         # print np.array([sum(aggr.reshape((self.num_atoms,3))[i][j] for j in range(3))/3. for i in range(self.num_atoms)])
         # Molecular polarizability
         pol.pol_mol_iso = sum(amol)/3.
-        logger.info("isotropic molecular polarizability: %7.4f" % \
+        self.logger.info("isotropic molecular polarizability: %7.4f" % \
             pol.pol_mol_iso)
         pol.pol_mol_vec = np.array([amol[0],amol[1],amol[2]])
-        logger.info("molecular polarizability tensor: %7.4f %7.4f %7.4f" % \
+        self.logger.info("molecular polarizability tensor: %7.4f %7.4f %7.4f" % \
             (pol.pol_mol_vec[0],pol.pol_mol_vec[1],pol.pol_mol_vec[2]))
         # Fractional anisotropy
         pol.pol_mol_fracaniso = math.sqrt(0.5 * ((amol[0]-amol[1])**2 + \
             (amol[0]-amol[2])**2 + (amol[1]-amol[2])**2) \
             / (amol[0]**2 + amol[1]**2 + amol[2]**2))
-        logger.info("Fractional anisotropy: %7.4f" % pol.pol_mol_fracaniso)
+        self.logger.info("Fractional anisotropy: %7.4f" % pol.pol_mol_fracaniso)
         # print eigvals
         # print self.freq_scaled, 3.*sum(self.freq_scaled)
         # print sum([math.sqrt(eigvals[i]) for i in range(len(eigvals))]), \
@@ -319,5 +319,5 @@ class Dispersion():
         energy = .5*(sum([math.sqrt(eigvals[i]) for i in \
             range(len(eigvals))]) - \
             3*sum(pol.freq_scaled)) * constants.au2kcalmol
-        logger.info("energy: %7.4f kcal/mol" % self.energy)
+        self.logger.info("energy: %7.4f kcal/mol" % self.energy)
         return energy

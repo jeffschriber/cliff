@@ -9,16 +9,18 @@ import logging
 import math
 import cliff.helpers.constants as constants
 
-# Set logger
-logger = logging.getLogger(__name__)
-fh = logging.FileHandler('output.log')
-logger.addHandler(fh)
 
 
 class Polarizability:
     'Polarizability class. Compute atomic and molecular polarizabilities.'
 
-    def __init__(self, scs_cutoff, pol_exponent, sys):
+    def __init__(self, name, scs_cutoff, pol_exponent, sys):
+
+        # Set logger
+        self.logger = logging.getLogger(__name__)
+        fh = logging.FileHandler(name + '.log')
+        self.logger.addHandler(fh)
+
         self.system = sys
         self.num_atoms = self.system.num_atoms
         self.elements = self.system.elements
@@ -39,7 +41,7 @@ class Polarizability:
         'Compute characteristic frequency and static polarizabilities'
         hirshfeld_ratios = self.system.hirshfeld_ratios
         if hirshfeld_ratios is None:
-            logger.error("Assign Hirshfeld ratios first")
+            self.logger.error("Assign Hirshfeld ratios first")
         self.freq_free_atom = np.zeros(self.num_atoms)
         self.freq_scaled = np.zeros(self.num_atoms)
         self.freq_scaled_vec = np.empty((self.num_atoms,3))
@@ -56,9 +58,9 @@ class Polarizability:
             self.freq_scaled_vec[i] = np.array([self.freq_scaled[i],
                 self.freq_scaled[i], self.freq_scaled[i]])
 
-        logger.info("Scaled isotropic polarizability:   %s" % self.pol_scaled)
-        logger.info("Characteristic frequencies free:   %s" % self.freq_free_atom)
-        logger.info("Characteristic frequencies scaled: %s" % self.freq_scaled)
+        self.logger.info("Scaled isotropic polarizability:   %s" % self.pol_scaled)
+        self.logger.info("Characteristic frequencies free:   %s" % self.freq_free_atom)
+        self.logger.info("Characteristic frequencies scaled: %s" % self.freq_scaled)
         return None
 
     def compute_freq_scaled_anisotropic(self):
@@ -91,7 +93,7 @@ class Polarizability:
                 self.pol_scaled[i]**2 / \
                 np.multiply(self.pol_scaled_vec[i],
                             self.pol_scaled_vec[i])
-            logger.info(
+            self.logger.info(
                 "atomic polarizability tensor of atom %d: %7.4f %7.4f %7.4f" %
                 (i,self.pol_scaled_vec[i][0],
                     self.pol_scaled_vec[i][1],

@@ -12,14 +12,7 @@ import cliff.helpers.utils as utils
 from cliff.helpers.system import System
 from cliff.helpers.cell import Cell
 from cliff.atomic_properties.hirshfeld import Hirshfeld
-from cliff.atomic_properties.polarizability import Polarizability
 import logging
-
-# Set logger
-logger = logging.getLogger(__name__)
-fh = logging.FileHandler('output.log')
-logger.addHandler(fh)
-
 
 class Repulsion:
     '''
@@ -27,9 +20,14 @@ class Repulsion:
     '''
 
     def __init__(self,options, sys, cell, reps=None, v1=False):
+        name = options.name
+        # Set logger
+        self.logger = logging.getLogger(__name__)
+        fh = logging.FileHandler(name + '.log')
+        self.logger.addHandler(fh)
         self.systems = [sys]
         self.atom_in_system = [0]*len(sys.elements)
-        logger.setLevel(options.logger_level)
+        self.logger.setLevel(options.logger_level)
         # Need a unit cell for distance calculations
         self.cell = cell
         # energy
@@ -65,5 +63,5 @@ class Repulsion:
                 self.energy += np.dot(params[s1], np.matmul(ovp,params[s2]))
 
         self.energy *= constants.au2kcalmol
-        logger.debug("Energy: %7.4f kcal/mol" % self.energy)
+        self.logger.debug("Energy: %7.4f kcal/mol" % self.energy)
         return self.energy

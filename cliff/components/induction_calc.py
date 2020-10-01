@@ -15,16 +15,18 @@ import cliff.helpers.utils as utils
 from numba import jit
 import time
 
-# Set logger
-logger = logging.getLogger(__name__)
-fh = logging.FileHandler('output.log')
-logger.addHandler(fh)
 
 class InductionCalc(Electrostatics):
 
     def __init__(self, options, sys, cell, ind_sr=None, hirshfeld_pred="krr", v1=False):
+        # Set logger
+        name = options.name
+        self.logger = logging.getLogger(__name__)
+        fh = logging.FileHandler(name + '.log')
+        self.logger.addHandler(fh)
+
         Electrostatics.__init__(self,options,sys,cell)
-        logger.setLevel(options.logger_level)
+        self.logger.setLevel(options.logger_level)
         self.cell = cell
         self.induced_dip = []
         self.energy_polarization = 0.0
@@ -66,7 +68,7 @@ class InductionCalc(Electrostatics):
             induced_dip.append(np.zeros((len(sys.elements),3)))
 
             # Atomic polarizabilities
-            atom_alpha_iso.append([alpha for alpha in Polarizability(self.scs_cutoff,self.pol_exponent,sys).get_pol_scaled()])
+            atom_alpha_iso.append([alpha for alpha in Polarizability(options.name, self.scs_cutoff,self.pol_exponent,sys).get_pol_scaled()])
             ind_params.append([self.ind_sr[i] for i in sys.atom_types]) 
 
         # Compute the short-range correction

@@ -18,21 +18,24 @@ import glob
 
 import cliff.tests as t
 testpath = os.path.abspath(t.__file__).split('__init__')[0]
-# Set logger
-logger = logging.getLogger(__name__)
-fh = logging.FileHandler('output.log')
-logger.addHandler(fh)
 
 
 class AtomicDensity:
     'AtomicDensity class. Predicts atomic populations and valence widths.'
 
     def __init__(self,options):
+        name = options.name
+        # Set logger
+        self.logger = logging.getLogger(__name__)
+        fh = logging.FileHandler(name + '.log')
+        self.logger.addHandler(fh)
+
+        self.name = name
         self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
         self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
         self.alpha_train = {'H':None, 'C':None, 'O':None, 'N':None, 'S':None, 'Cl':None, 'F':None, 'Br':None}
         # kernel ridge regression
-        logger.setLevel(options.logger_level)
+        self.logger.setLevel(options.logger_level)
         self.krr_sigma = options.atomicdensity_krr_sigma
         self.krr_lambda = options.atomicdensity_krr_lambda
         self.training_file = options.atomicdensity_training
@@ -56,14 +59,13 @@ class AtomicDensity:
             self.refpath = testpath + self.refpath
 
     def load_ml(self):
-        logger.info(
+        self.logger.info(
             "    Loading atomic-density training from %s" % self.training_dir)
         if self.use_ref_density:
             return
 
         adens_models = glob.glob(self.training_dir + '/*.pkl') 
         for model in adens_models:
-            print(model)
             with open(model, 'rb') as f:
                 d_train,a_train, self.mbtypes = pkl.load(f)
                 for ele in self.descr_train.keys():
@@ -85,7 +87,7 @@ class AtomicDensity:
         '''Train machine learning model.'''
         if len(self.descr_train) == 0:
             print("No molecule in the training set.")
-            logger.error("No molecule in the training set.")
+            self.logger.error("No molecule in the training set.")
             exit(1)
 
         for ele in self.descr_train.keys():
