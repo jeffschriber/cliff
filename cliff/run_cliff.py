@@ -52,8 +52,6 @@ def get_infile(inpt):
         # If no input provided, look for the default
         if os.path.exists('config.ini'):
             infile = 'config.ini'            
-        else:
-            raise Exception("Cannot find input file")
     else:
         if not os.path.exists(inpt):
             raise Exception("File {} does not exist!".format(inpt))
@@ -67,7 +65,7 @@ def load_models(options):
     hirsh = Hirshfeld(options) 
     adens = AtomicDensity(options)
 
-    #load KRR model for Hirshfeld as specified in the config.init file
+    #load KRR model for Hirshfeld as specified in the config.ini file
     hirsh.load_ml() 
     adens.load_ml()
 
@@ -209,7 +207,7 @@ def print_ret(name, ret):
         cout.write("# (kcal/mol) Electrostatics, Exchange, Induction, Dispersion, Total")
         for k,v in ret.items():
             logger.info("    %-17s%18.5f %14.5f %15.5f %15.5f %11.5f" % (k, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
-            cout.write("\n%-17s,%18.5f,%14.5f,%15.5f,%15.5f,%11.5f" % (k, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
+            cout.write("\n%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (k, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
 
 def print_timings(timer):
     logger.info("")

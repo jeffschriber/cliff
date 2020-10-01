@@ -297,8 +297,8 @@ ml_chg_correct_error = {
 ## Default damping parameters 
 ##for CP-corrected electrostatics
 elst_cp_exp = {
-'Cl' :  3.44010743 ,
-'F'  :  4.31542815 ,
+'Cl'  :  3.44010743 ,
+'F'   :  4.31542815 ,
 'S1'  :  3.0618362  ,
 'S2'  :  3.10341896 ,
 'HS'  :  3.59745201 ,

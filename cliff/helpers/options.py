@@ -5,6 +5,7 @@ import logging
 import cliff.helpers.utils as util
 import cliff.helpers.constants as constants
 import configparser
+import os
 
 class Options:
     """
@@ -29,7 +30,7 @@ class Options:
 
 
         # Logger level
-        self.logger_level = 50
+        self.logger_level = 20
         logger.setLevel(self.logger_level)
         util.set_logger_level(self.logger_level)
 
@@ -37,21 +38,23 @@ class Options:
 
         # The options and default values
 
+        models_path = os.path.dirname(os.path.realpath(__file__))
+        models_path += "/../models/large/"
         # Hirshfeld train/learn options
-        self.hirsh_training = "" 
+        self.hirsh_training = models_path + "hirsh/"
         self.hirsh_krr_kernel = 'laplacian'
         self.hirsh_krr_sigma = 1000.0
         self.hirsh_krr_lambda = 1e-9
         self.hirsh_filepath = ""
         self.hirsh_file_read = False
-        self.hirsh_cutoff = 4.8
+        self.hirsh_cutoff = 4.0
         self.hirsh_save_to_disk = False
         self.hirsh_save_path = ""
     
 
         # Atomic Density options
-        self.atomicdensity_training = "" 
-        self.atomicdensity_cutoff = 4.8
+        self.atomicdensity_training = models_path + "adens/" 
+        self.atomicdensity_cutoff = 4.0
         self.atomicdensity_krr_kernel = 'laplacian'
         self.atomicdensity_krr_sigma = 1000.0
         self.atomicdensity_krr_lambda = 1e-9
@@ -61,7 +64,7 @@ class Options:
         self.atomicdensity_save_path = ""
 
         # Defaults for multipoles
-        self.multipole_training = ""
+        self.multipole_training = models_path + "mtp/"
         self.multipole_ml_method = "KRR"
         self.multipole_kernel = 'laplacian'
         self.multipole_krr_sigma = 10.0
@@ -71,7 +74,7 @@ class Options:
         self.multipole_ref_path = ""
         self.multipole_save_to_disk = False
         self.multipole_save_path = ""
-        self.multipole_rcut = 4.8
+        self.multipole_rcut = 4.5
 
         # Defaults for electrostatics
         self.elst_type = "damped_mtp"
