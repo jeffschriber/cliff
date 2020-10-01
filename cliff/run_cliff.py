@@ -204,7 +204,7 @@ def print_ret(name, ret):
         json.dump(ret,out)
 
     with open(name + '.csv','w') as cout:
-        cout.write("# (kcal/mol) Electrostatics, Exchange, Induction, Dispersion, Total")
+        cout.write("# Dimer, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
         for k,v in ret.items():
             logger.info("    %-17s%18.5f %14.5f %15.5f %15.5f %11.5f" % (k, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
             cout.write("\n%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (k, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
@@ -259,7 +259,7 @@ if __name__ == "__main__":
     fh = logging.FileHandler(name + '.log')
     logger.addHandler(fh)
 
-    main(args.input, args.files, args.name)
+    main(args.input, args.files, name)
     end = time.time()
 
     logger.info("    CLIFF ran in {} s".format(end-start))

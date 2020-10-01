@@ -26,7 +26,7 @@ class Hirshfeld:
     'Hirshfeld class. Predicts Hirshfeld ratios.'
 
     def __init__(self, options):
-        # Set logger4yy
+        # Set logger
         self.logger = logging.getLogger(__name__)
         fh = logging.FileHandler(options.name + '.log')
         self.logger.addHandler(fh)
