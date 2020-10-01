@@ -142,7 +142,8 @@ def get_energy(filenames, models, options, timer=None):
     timer['disp'] =  disp_time
 
     # for printing
-    return elst, exch, indu, disp_en,  elst+exch+indu+disp_en
+    ret = {'elst':elst, 'exch':exch, 'indu':indu, 'disp':disp_en, 'total':elst+exch+indu+disp_en}
+    return ret
 
 def print_banner(): 
     title = r''' 
@@ -192,7 +193,7 @@ def canvas(with_attribution=True):
         quote += "\n\t    - Adapted from Henry David Thoreau"
     return quote
 
-def print_ret(ret):
+def print_ret(name, ret):
     '''
     Print out results from return dict
     '''
@@ -201,11 +202,14 @@ def print_ret(ret):
     logger.info("    File Directory   |  Electrostatics |   Exchange   |   Induction   |   Dispersion  |   Total ")
     logger.info("    ----------------------------------------------------------------------------------------------") 
 
-    with open('output.json','w') as out:
+    with open(name + '.json','w') as out:
         json.dump(ret,out)
 
-    for k,v in ret.items():
-        logger.info("    %-17s%18.5f %14.5f %15.5f %15.5f %11.5f" % (k, v[0],v[1],v[2],v[3],v[4]))
+    with open(name + '.csv','w') as cout:
+        cout.write("# (kcal/mol) Electrostatics, Exchange, Induction, Dispersion, Total")
+        for k,v in ret.items():
+            logger.info("    %-17s%18.5f %14.5f %15.5f %15.5f %11.5f" % (k, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
+            cout.write("\n%-17s,%18.5f,%14.5f,%15.5f,%15.5f,%11.5f" % (k, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
 
 def print_timings(timer):
     logger.info("")
@@ -240,7 +244,7 @@ def main(inpt=None, files=None, name=None):
         en = get_energy(filenames, models, options, timer)
         ret[dirname] = en
 
-    print_ret(ret)
+    print_ret(name, ret)
     print_timings(timer)
 
     return ret
