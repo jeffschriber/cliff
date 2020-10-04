@@ -17,10 +17,7 @@ class Dispersion():
 
     def __init__(self, options, _system, cell):
         # Set logger
-        self.logger = logging.getLogger(__name__)
-        fh = logging.FileHandler(options.name + '.log')
-        self.logger.addHandler(fh)
-        self.logger.setLevel(options.logger_level)
+        self.logger = options.logger 
 
         self.method = options.disp_method
         self.systems = [_system]
@@ -54,7 +51,7 @@ class Dispersion():
             disp = 0.0
             for i, mol in enumerate([dimer] + self.systems):
                 fac = 1.0 if i == 0 else -1.0
-                pol = Polarizability(self.name, self.scs_cutoff,self.pol_exponent,mol)
+                pol = Polarizability(self.name,self.logger, self.scs_cutoff,self.pol_exponent,mol)
                 pol.compute_freq_pol()
                 #compute anisotropic characteristic frequencies
                 pol.compute_freq_scaled_anisotropic()

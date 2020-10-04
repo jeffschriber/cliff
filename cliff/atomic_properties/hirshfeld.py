@@ -27,10 +27,7 @@ class Hirshfeld:
 
     def __init__(self, options):
         # Set logger
-        self.logger = logging.getLogger(__name__)
-        fh = logging.FileHandler(options.name + '.log')
-        self.logger.addHandler(fh)
-
+        self.logger = options.logger 
 
         self.name = options.name
         self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
@@ -38,7 +35,6 @@ class Hirshfeld:
         self.alpha_train = {'H':None, 'C':None, 'O':None, 'N':None, 'S':None, 'Cl':None, 'F':None, 'Br':None}
         # support vector regression
         self.clf = None
-        self.logger.setLevel(options.logger_level)
         self.cutoff = options.hirsh_cutoff
         self.krr_kernel = options.hirsh_krr_kernel
         self.krr_sigma  = options.hirsh_krr_sigma
@@ -80,6 +76,11 @@ class Hirshfeld:
                     if ele in d_train.keys() and len(d_train[ele]) > 0:
                         self.descr_train[ele] = d_train[ele]
                         self.alpha_train[ele] = a_train[ele]
+
+            
+        # Make sure we have a model for all elements
+           # raise Exception("Model not found for element {}".format(ele))    
+
         return None
 
     def save_ml(self, save_file):
@@ -128,7 +129,7 @@ class Hirshfeld:
 #        else:
 #            print("Kernel",self.krr_kernel,"not implemented.")
 
-        logger.info("training finished.")
+        self.logger.info("training finished.")
         return None
 
     def predict_mol(self, _system):
@@ -229,5 +230,5 @@ class Hirshfeld:
         #self.descr_train += new_system.coulomb_mat
         #self.target_train += [i for i in new_system.hirshfeld_ref]
 
-        logger.info("Added file to training set: %s" % new_system)
+        self.logger.info("Added file to training set: %s" % new_system)
         return natom

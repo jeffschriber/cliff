@@ -19,23 +19,19 @@ import glob
 import cliff.tests as t
 testpath = os.path.abspath(t.__file__).split('__init__')[0]
 
-
 class AtomicDensity:
     'AtomicDensity class. Predicts atomic populations and valence widths.'
 
     def __init__(self,options):
         name = options.name
         # Set logger
-        self.logger = logging.getLogger(__name__)
-        fh = logging.FileHandler(name + '.log')
-        self.logger.addHandler(fh)
+        self.logger = options.logger
 
         self.name = name
         self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
         self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
         self.alpha_train = {'H':None, 'C':None, 'O':None, 'N':None, 'S':None, 'Cl':None, 'F':None, 'Br':None}
         # kernel ridge regression
-        self.logger.setLevel(options.logger_level)
         self.krr_sigma = options.atomicdensity_krr_sigma
         self.krr_lambda = options.atomicdensity_krr_lambda
         self.training_file = options.atomicdensity_training
@@ -96,14 +92,14 @@ class AtomicDensity:
             # We've already got the descriptors
             if len(self.descr_train[ele]) > 0:
 
-                logger.info("Training set size: %d atoms" % size_training)                
+                self.logger.info("Training set size: %d atoms" % size_training)                
                 pairwise_dists = squareform(pdist(self.descr_train[ele], 'cityblock'))
 
                 kmat = np.exp(- pairwise_dists / self.krr_sigma )
                 kmat += self.krr_lambda*np.identity(len(self.target_train[ele]))
                 self.alpha_train[ele] = np.linalg.solve(kmat,self.target_train[ele])
         #print("Training finished")
-        logger.info("Training finished.")
+        self.logger.info("Training finished.")
         return None
 
     def predict_mol(self, _system):
@@ -196,5 +192,5 @@ class AtomicDensity:
                     print("Inconsistency in training data")
                     raise ValueError("Inconsistency in training data")
 
-        logger.info("Added file to training set: %s" % new_system)
+        self.logger.info("Added file to training set: %s" % new_system)
         return natom

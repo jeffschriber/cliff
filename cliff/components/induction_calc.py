@@ -21,9 +21,7 @@ class InductionCalc(Electrostatics):
     def __init__(self, options, sys, cell, ind_sr=None, hirshfeld_pred="krr", v1=False):
         # Set logger
         name = options.name
-        self.logger = logging.getLogger(__name__)
-        fh = logging.FileHandler(name + '.log')
-        self.logger.addHandler(fh)
+        self.logger = options.logger
 
         Electrostatics.__init__(self,options,sys,cell)
         self.logger.setLevel(options.logger_level)
@@ -68,7 +66,7 @@ class InductionCalc(Electrostatics):
             induced_dip.append(np.zeros((len(sys.elements),3)))
 
             # Atomic polarizabilities
-            atom_alpha_iso.append([alpha for alpha in Polarizability(options.name, self.scs_cutoff,self.pol_exponent,sys).get_pol_scaled()])
+            atom_alpha_iso.append([alpha for alpha in Polarizability(options.name, self.logger,self.scs_cutoff,self.pol_exponent,sys).get_pol_scaled()])
             ind_params.append([self.ind_sr[i] for i in sys.atom_types]) 
 
         # Compute the short-range correction

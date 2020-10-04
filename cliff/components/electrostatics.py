@@ -21,9 +21,7 @@ class Electrostatics:
         # Set logger
 
         name = options.name
-        self.logger = logging.getLogger(__name__)
-        fh = logging.FileHandler(name + '.log')
-        self.logger.addHandler(fh)
+        self.logger = options.logger
 
         self.systems = [sys]
         self.atom_in_system = [0]*len(sys.elements)

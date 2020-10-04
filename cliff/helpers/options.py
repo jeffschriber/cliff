@@ -24,14 +24,14 @@ class Options:
         if name is not None:
             self.name = name
 
-        logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger(__name__)
         fh = logging.FileHandler(self.name + '.log')
-        logger.addHandler(fh)
+        self.logger.addHandler(fh)
 
 
         # Logger level
         self.logger_level = 20
-        logger.setLevel(self.logger_level)
+        self.logger.setLevel(self.logger_level)
         util.set_logger_level(self.logger_level)
 
         self.test_mode = False

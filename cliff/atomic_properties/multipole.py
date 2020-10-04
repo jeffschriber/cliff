@@ -25,7 +25,6 @@ from qml.representations import get_slatm_mbtypes
 # for NNs
 #from atomicmultipole import Molecule, MultipoleModel
 
-
 class Multipole:
     '''
     Multipole class. Predicts multipoles from machine learning.
@@ -36,10 +35,7 @@ class Multipole:
     
         name = options.name
         # Set logger
-        self.logger = logging.getLogger(__name__)
-        fh = logging.FileHandler(name + '.log')
-        self.logger.addHandler(fh)
-        self.logger.setLevel(options.logger_level)
+        self.logger = options.logger
         self.multipoles = None
         self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
         self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
@@ -76,9 +72,7 @@ class Multipole:
         self.nn_mtp = None
 
         ## Load the models on init
-      #  print("    Predicting atomic multipoles with {}".format(self.ml_method))
         if self.ml_method == "KRR":
-       #     print("    Loading multipole models")
             mtp_s = time.time()
             mtp_models = glob.glob(options.multipole_training + '/*.pkl') 
             for model in mtp_models:

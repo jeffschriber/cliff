@@ -14,12 +14,10 @@ import cliff.helpers.constants as constants
 class Polarizability:
     'Polarizability class. Compute atomic and molecular polarizabilities.'
 
-    def __init__(self, name, scs_cutoff, pol_exponent, sys):
+    def __init__(self, name, logger, scs_cutoff, pol_exponent, sys):
 
         # Set logger
-        self.logger = logging.getLogger(__name__)
-        fh = logging.FileHandler(name + '.log')
-        self.logger.addHandler(fh)
+        self.logger = logger
 
         self.system = sys
         self.num_atoms = self.system.num_atoms

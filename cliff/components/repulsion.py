@@ -22,9 +22,8 @@ class Repulsion:
     def __init__(self,options, sys, cell, reps=None, v1=False):
         name = options.name
         # Set logger
-        self.logger = logging.getLogger(__name__)
-        fh = logging.FileHandler(name + '.log')
-        self.logger.addHandler(fh)
+        self.logger = options.logger
+
         self.systems = [sys]
         self.atom_in_system = [0]*len(sys.elements)
         self.logger.setLevel(options.logger_level)
