@@ -56,9 +56,9 @@ class Polarizability:
             self.freq_scaled_vec[i] = np.array([self.freq_scaled[i],
                 self.freq_scaled[i], self.freq_scaled[i]])
 
-        self.logger.info("Scaled isotropic polarizability:   %s" % self.pol_scaled)
-        self.logger.info("Characteristic frequencies free:   %s" % self.freq_free_atom)
-        self.logger.info("Characteristic frequencies scaled: %s" % self.freq_scaled)
+        self.logger.debug("Scaled isotropic polarizability:   %s" % self.pol_scaled)
+        self.logger.debug("Characteristic frequencies free:   %s" % self.freq_free_atom)
+        self.logger.debug("Characteristic frequencies scaled: %s" % self.freq_scaled)
         return None
 
     def compute_freq_scaled_anisotropic(self):
@@ -91,7 +91,7 @@ class Polarizability:
                 self.pol_scaled[i]**2 / \
                 np.multiply(self.pol_scaled_vec[i],
                             self.pol_scaled_vec[i])
-            self.logger.info(
+            self.logger.debug(
                 "atomic polarizability tensor of atom %d: %7.4f %7.4f %7.4f" %
                 (i,self.pol_scaled_vec[i][0],
                     self.pol_scaled_vec[i][1],

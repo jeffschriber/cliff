@@ -176,6 +176,18 @@ class Options:
             pass
 
 
+        try:
+            val = self.Config.get("hirshfeld","save_to_disk")
+            if val in ["True", "true", "t", "1"]:
+                self.hirsh_save_to_disk = True 
+        except:
+            pass
+        try:
+            self.hirsh_save_path = self.Config.get("hirshfeld","save_path")
+        except:
+            pass
+
+
     def set_logger_level(self, val):
         self.logger_level = val
 
@@ -248,6 +260,19 @@ class Options:
             self.atomicdensity_refpath = self.Config.get("atomicdensity","ref_path")
         except:
             pass
+
+        try:
+            val = self.Config.get("atomicdensity","save_to_disk")
+            if val in ["True", "true", "t", "1"]:
+                self.atomicdensity_save_to_disk = True 
+        except:
+            pass
+        try:
+            self.atomicdensity_save_path = self.Config.get("atomicdensity","save_path")
+        except:
+            pass
+
+
 
     def set_atomicdensity_training(self, val):
         self.atomicdensity_training = val
@@ -344,7 +369,7 @@ class Options:
             pass
 
         try:
-            self.multipole_save_path = self.Config.get("multipoles","mtp_save_path")
+            self.multipole_save_path = self.Config.get("multipoles","save_path")
         except:
             pass
 
