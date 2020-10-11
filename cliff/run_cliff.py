@@ -42,6 +42,8 @@ def init_args():
 
     parser.add_argument('-n','--name', type=str, help='Output job name')
 
+    parser.add_argument('-r','--ref', type=str, help='xyz of reference monomer')
+
     return parser.parse_args()
 
 def get_infile(inpt):
@@ -60,19 +62,31 @@ def get_infile(inpt):
 
     return infile
 
-def load_models(options):
+def load_models(options, ref=None):
     #initializes Hirshfeld class
-    hirsh = Hirshfeld(options) 
-    adens = AtomicDensity(options)
+    hirsh = Hirshfeld(options, ref) 
+    adens = AtomicDensity(options, ref)
 
     #load KRR model for Hirshfeld as specified in the config.ini file
     hirsh.load_ml() 
     adens.load_ml()
 
     #load multipoles with aSLATM representation
-    mtp_ml  = Multipole(options) 
+    mtp = Multipole(options,ref) 
 
-    return [hirsh, adens, mtp_ml]
+    # Predict the references, save to disk
+    if ref is not None:
+        sys = System(options,ref)
+        hirsh.predict_mol(sys, force_predict = True)
+        hirsh.save(sys)  
+
+        adens.predict_mol(sys, force_predict = True)
+        adens.save(sys)
+
+        mtp.predict_mol(sys, force_predict = True)
+        sys.save_mtp()
+
+    return [hirsh, adens, mtp]
 
 def get_energy(filenames, models, options, timer=None):
     np.set_printoptions(precision=4, suppress=True, linewidth=100)
@@ -206,7 +220,7 @@ def print_ret(name, ret):
     with open(name + '.csv','w') as cout:
         cout.write("# Dimer, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
         for k,v in ret.items():
-            logger.info("    %-17s%18.5f %14.5f %15.5f %15.5f %11.5f" % (k, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
+            logger.info("    %-27s%18.5f %14.5f %15.5f %15.5f %11.5f" % (k, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
             cout.write("\n%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (k, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
 
 def print_timings(timer):
@@ -217,7 +231,7 @@ def print_timings(timer):
     logger.info("    Induction     :  %10.3f s" % timer['ind'])
     logger.info("    Dispersion    :  %10.3f s" % timer['disp'])
 
-def main(inpt=None, files=None, name=None):
+def main(inpt=None, files=None, ref=None, name=None):
     # Do something if this file is invoked on its own
 
     infile = get_infile(inpt)
@@ -230,17 +244,22 @@ def main(inpt=None, files=None, name=None):
     print_banner()
     logger.info("    Loading options from {}".format(infile))
 
-    job_list = Utils.file_finder(options.name, files)
+    job_list = Utils.file_finder(options.name,ref,files)
 
     ret = {}
     timer = {}
 
 
-    models = load_models(options)
+    models = load_models(options, ref)
     for filenames in job_list:
-        dirname = filenames[0].split('/')[-2]
+
+        if ref is not None:
+            d_name =  filenames[0].split('/')[-1].split('.xyz')[0]
+            d_name += filenames[1].split('/')[-1].split('.xyz')[0]
+        else: 
+            d_name = filenames[0].split('/')[-2]
         en = get_energy(filenames, models, options, timer)
-        ret[dirname] = en
+        ret[d_name] = en
 
     print_ret(name, ret)
     print_timings(timer)
@@ -259,7 +278,7 @@ if __name__ == "__main__":
     fh = logging.FileHandler(name + '.log')
     logger.addHandler(fh)
 
-    main(args.input, args.files, name)
+    main(args.input, args.files, args.ref, name)
     end = time.time()
 
     logger.info("    CLIFF ran in {} s".format(end-start))

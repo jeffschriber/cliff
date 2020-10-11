@@ -70,9 +70,7 @@ class System:
         self.atom_reorder = []
     
         self.mtp_to_disk = options.multipole_save_to_disk
-
-        if self.mtp_to_disk:
-            self.mtp_save_path = options.multipole_save_path
+        self.mtp_save_path = options.multipole_save_path
 
 
     def __add__(self, sys):
@@ -187,17 +185,17 @@ class System:
         
         # print mtps to ref files
         if self.mtp_to_disk:
-            xyz = self.xyz[0].split('/')[-1].strip('.xyz')
-            reffile = self.mtp_save_path + xyz + '-mtp.txt'
-          #  print(reffile) 
-            #if os.path.exists(reffile):
-            #    return None
+            save_mtp()
 
-            with open(reffile, 'w') as mtp_file:
-                for mtps in self.multipoles:
-                    for mtp in mtps:
-                        mtp_file.write(str(mtp) + "\t")
-                    mtp_file.write("\n")
+    def save_mtp(self):
+        xyz = self.xyz[0].split('/')[-1].strip('.xyz')
+        reffile = self.mtp_save_path + xyz + '-mtp.txt'
+
+        with open(reffile, 'w') as mtp_file:
+            for mtps in self.multipoles:
+                for mtp in mtps:
+                    mtp_file.write(str(mtp) + "\t")
+                mtp_file.write("\n")
 
         return None
 

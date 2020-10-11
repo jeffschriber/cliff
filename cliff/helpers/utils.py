@@ -15,7 +15,7 @@ from numba import jit
 
 
 name = ""
-def file_finder(fname, jobdir = None):
+def file_finder(fname, ref = None, jobdir = None):
     """
     Compiles xyz files for multiple computations
     
@@ -26,29 +26,38 @@ def file_finder(fname, jobdir = None):
     if jobdir == None:
         jobdir = './'
 
-    # Gather directories in jobdir
-    jobdirs = [ os.path.join(jobdir,name) for name in os.listdir(jobdir) if os.path.isdir(os.path.join(jobdir, name)) ]
-    
-
-    if len(jobdirs) == 0:
-        raise Exception("Cannot find job directories!")
-    else:
-        logger.info("    Found {} job directories".format(len(jobdirs)))        
-        
     master_xyzs = []
-    filesum = 0
-    for n, jd in enumerate(jobdirs):
-        filelist = glob.glob(jd + '/*.xyz')
-        if len(filelist) == 0:
-            print("WARNING: Job {} does not contain any files!".format(n))
+    if ref is not None:
+        monbs = glob.glob(jobdir + '/*.xyz')
+        for monb in monbs: 
+            if monb == ref:
+                continue
+            filelist = [ref,monb]
+            master_xyzs.append(filelist)
 
-        filesum += len(filelist)
-        master_xyzs.append(filelist)
-
-    if filesum == 0:
-        raise Exception("Cannot find xyz files!")
     else:
-        logger.info("    Found {} xyz files".format(filesum))        
+        # Gather directories in jobdir
+        jobdirs = [ os.path.join(jobdir,name) for name in os.listdir(jobdir) if os.path.isdir(os.path.join(jobdir, name)) ]
+        
+
+        if len(jobdirs) == 0:
+            raise Exception("Cannot find job directories!")
+        else:
+            logger.info("    Found {} job directories".format(len(jobdirs)))        
+            
+        filesum = 0
+        for n, jd in enumerate(jobdirs):
+            filelist = glob.glob(jd + '/*.xyz')
+            if len(filelist) == 0:
+                print("WARNING: Job {} does not contain any files!".format(n))
+
+            filesum += len(filelist)
+            master_xyzs.append(filelist)
+
+        if filesum == 0:
+            raise Exception("Cannot find xyz files!")
+        else:
+            logger.info("    Found {} xyz files".format(filesum))        
 
 
     return master_xyzs

@@ -22,11 +22,12 @@ testpath = os.path.abspath(t.__file__).split('__init__')[0]
 class AtomicDensity:
     'AtomicDensity class. Predicts atomic populations and valence widths.'
 
-    def __init__(self,options):
+    def __init__(self,options, ref=None):
         name = options.name
         # Set logger
         self.logger = options.logger
 
+        self.ref = ref
         self.name = name
         self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
         self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
@@ -102,11 +103,12 @@ class AtomicDensity:
         self.logger.info("Training finished.")
         return None
 
-    def predict_mol(self, _system):
+    def predict_mol(self, _system, force_predict = False):
         '''Predict coefficients given  descriptors.'''
         t1 = time.time()
 
-        if self.use_ref_density:
+        if (force_predict == False) and (self.use_ref_density or (self.ref == _system.xyz[0])):
+            self.logger.info("Predicting adens for %s", _system.xyz[0])
             xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
             reffile = self.refpath + xyz + '-atmdns.txt'
             vws = []
@@ -146,13 +148,15 @@ class AtomicDensity:
                             _system.valence_widths[i] = pred.T[i]
 
             if self.save_to_disk:
-                xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
-                reffile = self.save_path + xyz + '-atmdns.txt'
-                with open(reffile,'w') as ref:
-                    for vw in _system.valence_widths:
-                        ref.write("%10.8f \n" % vw)
-            
-       # print("    Time spent predicting valence-widths and populations: %8.3f s" % (time.time() - t1))
+                save(_system)
+        return None
+
+    def save(self, system):
+        xyz = system.xyz[0].split('/')[-1].strip('.xyz')
+        reffile = self.save_path + xyz + '-atmdns.txt'
+        with open(reffile,'w') as ref:
+            for vw in system.valence_widths:
+                ref.write("%10.8f \n" % vw)
         return None
 
     def add_mol_to_training(self, new_system, valwidths, atom=None):

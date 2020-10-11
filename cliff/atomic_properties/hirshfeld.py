@@ -25,10 +25,11 @@ testpath = os.path.abspath(t.__file__).split('__init__')[0]
 class Hirshfeld:
     'Hirshfeld class. Predicts Hirshfeld ratios.'
 
-    def __init__(self, options):
+    def __init__(self, options, ref=None):
         # Set logger
         self.logger = options.logger 
 
+        self.ref = ref
         self.name = options.name
         self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
         self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
@@ -132,12 +133,13 @@ class Hirshfeld:
         self.logger.info("training finished.")
         return None
 
-    def predict_mol(self, _system):
+    def predict_mol(self, _system, force_predict = False):
         '''Predict coefficients given  descriptors.'''
         t1 = time.time()
 
         #_system.build_coulomb_matrices(self.max_neighbors)
-        if self.from_file:
+        if (force_predict == False) and (self.from_file or (self.ref == _system.xyz[0])):
+            self.logger.info("Predicting hirshfeld for %s", _system.xyz[0])
             h_ratios = []
             for hfile in _system.xyz:
                 hfile = self.filepath + hfile.split('/')[-1].strip('.xyz') + '-h.txt'
@@ -183,11 +185,16 @@ class Hirshfeld:
 
        # print("    Time spent predicting Hirshfeld ratios:               %8.3f s" % (time.time()-t1))
         if self.save_to_disk:
-            xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
-            reffile = self.save_path + xyz + '-h.txt'
-            with open(reffile,'w') as ref:
-                for hr in _system.hirshfeld_ratios:
-                    ref.write("%10.8f \n" % hr)
+            save(_system)
+
+        return None
+
+    def save(self, system):
+        xyz = system.xyz[0].split('/')[-1].strip('.xyz')
+        reffile = self.save_path + xyz + '-h.txt'
+        with open(reffile,'w') as ref:
+            for hr in system.hirshfeld_ratios:
+                ref.write("%10.8f \n" % hr)
         return None
 
     def add_mol_to_training(self, new_system, ref_ratios,atom = None):

@@ -31,11 +31,12 @@ class Multipole:
     No local axis system. Instead, basis set expansion along the pairwise vectors.
     '''
 
-    def __init__(self, options):
+    def __init__(self, options, ref = None):
     
         name = options.name
         # Set logger
         self.logger = options.logger
+        self.ref = ref
         self.multipoles = None
         self.descr_train  = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
         self.target_train = {'H':[], 'C':[], 'O':[], 'N':[], 'S':[], 'Cl':[], 'F':[], 'Br':[]}
@@ -220,13 +221,14 @@ class Multipole:
 
     #    _system.multipoles = full_mtp 
 
-    def predict_mol(self, _system, charge=0, xyz=None):
+    def predict_mol(self, _system, charge=0, xyz=None, force_predict = False):
         '''Predict multipoles in local reference frame given descriptors.'''
         tp = time.time()
         _system.initialize_multipoles()
         _system.compute_basis()
 
-        if self.ref_mtp:
+        if (force_predict == False) and (self.ref_mtp or (self.ref == _system.xyz[0])):
+            self.logger.info("Predicting mtp for %s", _system.xyz[0])
             xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
             #tail = '.' + xyz.split('.')[-1]
             #xyz = xyz.replace('gold.','', 1)
