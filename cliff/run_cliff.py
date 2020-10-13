@@ -10,15 +10,18 @@ Handles the primary functions
 
 """
 
+import os
+
+
 import numpy as np
 import configparser
 import sys
 import argparse
-import os
 import glob
 import time
 import json
 import logging
+import multiprocessing as mp
 
 import cliff
 from cliff.helpers.options import Options
@@ -33,6 +36,10 @@ from cliff.components.repulsion import Repulsion
 from cliff.components.induction_calc import InductionCalc
 from cliff.components.dispersion import Dispersion
 
+def set_nthread(nthread):
+    os.environ["OMP_NUM_THREADS"]    = str(nthread) 
+    os.environ["MKL_NUM_THREADS"]    = str(nthread)
+    os.environ["NUMEXPR_NUM_THREADS"]= str(nthread)
 
 def init_args():
     parser = argparse.ArgumentParser(description="CLIFF: a Component-based Learned Intermolecular Force Field")
@@ -43,6 +50,8 @@ def init_args():
     parser.add_argument('-n','--name', type=str, help='Output job name')
 
     parser.add_argument('-r','--ref', type=str, help='xyz of reference monomer')
+
+    parser.add_argument('-p','--nproc', type=int, help='Number of threads for numpy')
 
     return parser.parse_args()
 
@@ -231,7 +240,7 @@ def print_timings(timer):
     logger.info("    Induction     :  %10.3f s" % timer['ind'])
     logger.info("    Dispersion    :  %10.3f s" % timer['disp'])
 
-def main(inpt=None, files=None, ref=None, name=None):
+def main(inpt=None, files=None, ref=None, nproc=None, name=None):
     # Do something if this file is invoked on its own
 
     infile = get_infile(inpt)
@@ -242,7 +251,16 @@ def main(inpt=None, files=None, ref=None, name=None):
     logger.setLevel(options.logger_level)
 
     print_banner()
-    logger.info("    Loading options from {}".format(infile))
+
+    if infile == "":
+        logger.info("    Using default options")
+    else:
+        logger.info("    Loading options from {}".format(infile))
+
+    if nproc is not None:
+        logger.info("    Using {} threads".format(nproc))
+    else:
+        logger.info("    Using {} threads".format(mp.cpu_count()))
 
     job_list = Utils.file_finder(options.name,ref,files)
 
@@ -274,11 +292,15 @@ if __name__ == "__main__":
     if args.name is not None:
         name = args.name
 
+    if args.nproc is not None:
+        set_nthread(args.nproc)
+
+
     logger = logging.getLogger(__name__)
     fh = logging.FileHandler(name + '.log')
     logger.addHandler(fh)
 
-    main(args.input, args.files, args.ref, name)
+    main(args.input, args.files, args.ref, args.nproc, name)
     end = time.time()
 
     logger.info("    CLIFF ran in {} s".format(end-start))
