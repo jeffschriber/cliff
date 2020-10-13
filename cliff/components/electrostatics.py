@@ -11,7 +11,6 @@ from cliff.helpers.cell import Cell
 from cliff.helpers.system import System
 import cliff.helpers.constants as constants
 import cliff.helpers.utils as utils
-from numba import jit
 
 
 class Electrostatics:

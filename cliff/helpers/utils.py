@@ -11,8 +11,6 @@ import os
 import cliff.helpers.constants as constants
 import cliff.helpers.cell as Cell
 
-from numba import jit
-
 
 name = ""
 def file_finder(fname, ref = None, jobdir = None):
@@ -86,7 +84,6 @@ def read_file(infile):
 def set_logger_level(level):
     logger.setLevel(level)
 
-#@jit
 def build_coulomb_matrix(coords, atom_types,
     central_atom_id, max_neighbors, direction=None):
     '''Build Coulomb matrix ordered by distance to central_atom_id'''
@@ -201,7 +198,6 @@ def extract_atomic_numbers(cartesian,atom_types):
             exit(1)
     return Z
 
-@jit
 def spher_to_cart(quad, stone_convention=True):
     'convert spherical to cartesian multipoles'
     cart = np.zeros((3,3))
@@ -221,7 +217,6 @@ def spher_to_cart(quad, stone_convention=True):
         cart[0,0] =      constants.sqrt_3*quad[3] + cart[1,1]
     return cart
 
-@jit
 def cart_to_sphere(cart):
     'Convert cartesian to spherical multipoles'
     spher = np.zeros(5)
@@ -249,7 +244,6 @@ def slater_mbis(cell, coord_i, N_i, v_i, U_i, coord_j, N_j, v_j, U_j):
     #return U_i * U_j * slater_mbis_funcform(rij, N_i, v_i, N_j, v_j) 
     #return U_i * U_j * slater_mbis_funcform(rij, v_i, v_j) 
 
-#@jit
 #def slater_mbis_funcform(rij,vi, vj):
 #    Bij = np.sqrt(1.0/(vi*vj))
 #
@@ -277,7 +271,6 @@ def slater_ovp_mat(r,v1,v2):
  #           out[i][j] = slater_mbis_funcform(r[i][j],p1[i],v1[i],p2[j],v2[j])
     return out
 
-@jit
 def slater_mbis_funcform(rij, N_i, v_i, N_j, v_j):
     v_i2, v_j2 = v_i**2, v_j**2
     if abs(v_i-v_j) > 1e-4: # Original IPML uses 1e-3

@@ -108,7 +108,6 @@ class AtomicDensity:
         t1 = time.time()
 
         if (force_predict == False) and (self.use_ref_density or (self.ref == _system.xyz[0])):
-            self.logger.info("Predicting adens for %s", _system.xyz[0])
             xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
             reffile = self.refpath + xyz + '-atmdns.txt'
             vws = []

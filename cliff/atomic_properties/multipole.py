@@ -76,6 +76,8 @@ class Multipole:
         if self.ml_method == "KRR":
             mtp_s = time.time()
             mtp_models = glob.glob(options.multipole_training + '/*.pkl') 
+            self.logger.info(
+                    "    Loading multipole training from %s" % options.multipole_training)
             for model in mtp_models:
                # print(model)
                 if not self.ref_mtp:
@@ -96,8 +98,6 @@ class Multipole:
         '''Load machine learning model'''
         # Try many atoms and see which atoms we find
         if load_file != None:
-            self.logger.info(
-                    "    Loading multipole training from %s" % load_file)
             with open(load_file, 'rb') as f:
                 descr_train_at, alpha_train, norm_tgt_mean, \
                 norm_tgt_std, mbtypes = pickle.load(f,encoding="ISO-8859-1")
@@ -169,58 +169,6 @@ class Multipole:
         self.logger.info("training of multipoles finished.")
         return None
 
-    #def predict_mols(self, systems, charge=0, xyzs=None):
-    #    '''Predict multipoles in local reference frame given descriptors.'''
-    #    tp = time.time()
-    #    ## multipoles based on neural network models
-    #    mols = []
-    #    for sys in systems: 
-
-    #        # Build the Molecule object
-    #        elements = [constants.atomic_number[Z] for Z in sys.elements]
-    #        coords = sys.coords
-    #        m = np.zeros((len(elements), 12))
-    #        mols.append(Molecule(elements, coords, Q=m))
-
-    #    tq = time.time()
-    #    Qpred = self.nn_mtp.predict(mols, verbose=False)
-    #    tqf = time.time()
-    #    print("Time spent predicting: %8.4f" % (tqf - tq))
-    #    Qpred = Qpred[0]
-
-    #    if self.correct_charge:
-    #        # Weigh by ML error
-    #        mol_mu = sum([constants.ml_chg_correct_error[ele]
-    #                        for ele in _system.elements])
-    #        totalcharge = np.sum(Qpred, axis=0)[0]
-    #        excess_chg = totalcharge - float(charge)
-    #        if mol_mu > 0.:
-    #            for i,mtp_i in enumerate(Qpred):
-    #                w_i = constants.ml_chg_correct_error[_system.elements[i]]
-    #                mtp_i[0] += -1.*excess_chg * (w_i/mol_mu)
-
-    #    full_mtp = np.zeros((len(elements), 13))
-
-    #    for ele in range(len(elements)):
-    #        # copy charge and dipoles
-    #        full_mtp[ele][0] = Qpred[ele][0]
-    #        full_mtp[ele][1] = Qpred[ele][1]
-    #        full_mtp[ele][2] = Qpred[ele][2]
-    #        full_mtp[ele][3] = Qpred[ele][3]
-
-    #        # get quadripole ordering
-    #        full_mtp[ele][4] = Qpred[ele][4] #xx
-    #        full_mtp[ele][5] = Qpred[ele][5] #xy
-    #        full_mtp[ele][6] = Qpred[ele][6] #xz
-    #        full_mtp[ele][7] = Qpred[ele][5] #yx
-    #        full_mtp[ele][8] = Qpred[ele][7] #yy
-    #        full_mtp[ele][9] = Qpred[ele][8] #yz
-    #        full_mtp[ele][10] = Qpred[ele][6] #zx
-    #        full_mtp[ele][11] = Qpred[ele][8] #zy
-    #        full_mtp[ele][12] = Qpred[ele][9] #zz
-
-    #    _system.multipoles = full_mtp 
-
     def predict_mol(self, _system, charge=0, xyz=None, force_predict = False):
         '''Predict multipoles in local reference frame given descriptors.'''
         tp = time.time()
@@ -228,7 +176,6 @@ class Multipole:
         _system.compute_basis()
 
         if (force_predict == False) and (self.ref_mtp or (self.ref == _system.xyz[0])):
-            self.logger.info("Predicting mtp for %s", _system.xyz[0])
             xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
             #tail = '.' + xyz.split('.')[-1]
             #xyz = xyz.replace('gold.','', 1)

@@ -139,7 +139,6 @@ class Hirshfeld:
 
         #_system.build_coulomb_matrices(self.max_neighbors)
         if (force_predict == False) and (self.from_file or (self.ref == _system.xyz[0])):
-            self.logger.info("Predicting hirshfeld for %s", _system.xyz[0])
             h_ratios = []
             for hfile in _system.xyz:
                 hfile = self.filepath + hfile.split('/')[-1].strip('.xyz') + '-h.txt'
