@@ -307,7 +307,9 @@ def main(inpt=None, files=None, ref=None, nproc=None, name=None):
             monb = filenames[1].split('/')[-1].split('.xyz')[0]
             dname = mona + "-" + monb
         else: 
-            d_name = filenames[0].split('/')[-2]
+            mona =  filenames[0].split('/')[-1].split('.xyz')[0]
+            monb = filenames[1].split('/')[-1].split('.xyz')[0]
+            dname = filenames[0].split('/')[-2]
         en = get_energy(filenames, models, options, timer)
         ret[dname] = [mona,monb,en]
 
