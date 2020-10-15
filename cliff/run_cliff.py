@@ -76,15 +76,19 @@ def load_models(options, ref=None):
     hirsh = Hirshfeld(options, ref) 
     adens = AtomicDensity(options, ref)
 
+    tls = time.time()
     #load KRR model for Hirshfeld as specified in the config.ini file
     hirsh.load_ml() 
     adens.load_ml()
 
     #load multipoles with aSLATM representation
     mtp = Multipole(options,ref) 
+    tlf = time.time()
+    logger.info("    ~Time spent loading ML models: {} s".format(tlf-tls))
 
     # Predict the references, save to disk
     if ref is not None:
+        ts = time.time()
         
         pref = "/"
         for d in os.path.abspath(ref).split("/")[:-1]:
@@ -115,6 +119,9 @@ def load_models(options, ref=None):
             mtp.predict_mol(sys, force_predict = True)
             sys.save_mtp()
 
+        tf = time.time()
+        logger.info("    ~Time spent predicting atomic properties of reference: {} s".format(tf-ts))
+
     return [hirsh, adens, mtp]
 
 def get_energy(filenames, models, options, timer=None):
@@ -137,6 +144,7 @@ def get_energy(filenames, models, options, timer=None):
     
 #    mtp_ml.predict_mols(mols)
     logger.info("")
+    tms = time.time()
     for mol,xyz in zip(mols,xyzs):
         logger.info("    Predicting atomic properties for {}".format(xyz))
         #predicts monomer multipole moments for each monomer
@@ -144,7 +152,9 @@ def get_energy(filenames, models, options, timer=None):
         #predicts Hirshfeld ratios using KRR
         hirsh.predict_mol(mol)
         adens.predict_mol(mol)
-    
+    tmf = time.time()    
+    logger.info("    ~Time spent predicting atomic properties {} s".format(tmf-tms))
+
     #initializes relevant classes with monomer A
     mtp = Electrostatics(options,mols[0], cell)
     ind = InductionCalc(options, mols[0], cell)
@@ -240,8 +250,8 @@ def print_ret(name, ret):
     '''
     logger.info("")
     logger.info("    Output summary (kcal/mol)")
-    logger.info("              MonomerA         |       MonomerB            |  Electrostatics |   Exchange   |   Induction   |   Dispersion  |   Total ")
-    logger.info("    ----------------------------------------------------------------------------------------------") 
+    logger.info("           MonomerA     |      MonomerB      |  Electrostatics |   Exchange   |   Induction   |   Dispersion  |   Total ")
+    logger.info("    ----------------------------------------------------------------------------------------------------------------------") 
 
     with open(name + '.json','w') as out:
         json.dump(ret,out)
@@ -250,16 +260,16 @@ def print_ret(name, ret):
         cout.write("# Monomer A, Monomer B, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
         for k,val in ret.items():
             mona, monb, v = val
-            logger.info("    %-27s%-27s%18.5f %14.5f %15.5f %15.5f %11.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
+            logger.info("    %-20s %-20s%18.5f %14.5f %15.5f %15.5f %11.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
             cout.write("\n%s,%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
 
 def print_timings(timer):
     logger.info("")
-    logger.info("    Component Timings")
-    logger.info("    Electrostatics:  %10.3f s" % timer['elst'])
-    logger.info("    Exchange      :  %10.3f s" % timer['exch'])
-    logger.info("    Induction     :  %10.3f s" % timer['ind'])
-    logger.info("    Dispersion    :  %10.3f s" % timer['disp'])
+    logger.info("    ~Component Timings")
+    logger.info("    ~Electrostatics:  %10.3f s" % timer['elst'])
+    logger.info("    ~Exchange      :  %10.3f s" % timer['exch'])
+    logger.info("    ~Induction     :  %10.3f s" % timer['ind'])
+    logger.info("    ~Dispersion    :  %10.3f s" % timer['disp'])
 
 def main(inpt=None, files=None, ref=None, nproc=None, name=None):
     # Do something if this file is invoked on its own
@@ -325,5 +335,5 @@ if __name__ == "__main__":
     main(args.input, args.files, args.ref, args.nproc, name)
     end = time.time()
 
-    logger.info("    CLIFF ran in {} s".format(end-start))
+    logger.info("    ~CLIFF ran in {} s".format(end-start))
 
