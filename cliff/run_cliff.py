@@ -240,17 +240,18 @@ def print_ret(name, ret):
     '''
     logger.info("")
     logger.info("    Output summary (kcal/mol)")
-    logger.info("    File Directory   |  Electrostatics |   Exchange   |   Induction   |   Dispersion  |   Total ")
+    logger.info("              MonomerA         |       MonomerB            |  Electrostatics |   Exchange   |   Induction   |   Dispersion  |   Total ")
     logger.info("    ----------------------------------------------------------------------------------------------") 
 
     with open(name + '.json','w') as out:
         json.dump(ret,out)
 
     with open(name + '.csv','w') as cout:
-        cout.write("# Dimer, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
-        for k,v in ret.items():
-            logger.info("    %-27s%18.5f %14.5f %15.5f %15.5f %11.5f" % (k, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
-            cout.write("\n%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (k, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
+        cout.write("# Monomer A, Monomer B, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
+        for k,val in ret.items():
+            mona, monb, v = val
+            logger.info("    %-27s%-27s%18.5f %14.5f %15.5f %15.5f %11.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
+            cout.write("\n%s,%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
 
 def print_timings(timer):
     logger.info("")
@@ -292,12 +293,13 @@ def main(inpt=None, files=None, ref=None, nproc=None, name=None):
     for filenames in job_list:
 
         if ref is not None:
-            d_name =  filenames[0].split('/')[-1].split('.xyz')[0]
-            d_name += filenames[1].split('/')[-1].split('.xyz')[0]
+            mona =  filenames[0].split('/')[-1].split('.xyz')[0]
+            monb = filenames[1].split('/')[-1].split('.xyz')[0]
+            dname = mona + "-" + monb
         else: 
             d_name = filenames[0].split('/')[-2]
         en = get_energy(filenames, models, options, timer)
-        ret[d_name] = en
+        ret[dname] = [mona,monb,en]
 
     print_ret(name, ret)
     print_timings(timer)
