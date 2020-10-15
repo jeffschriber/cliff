@@ -55,6 +55,9 @@ class AtomicDensity:
         if options.test_mode:
             self.refpath = testpath + self.refpath
 
+    def set_save_path(self, path):
+        self.save_path = path
+
     def load_ml(self):
         self.logger.info(
             "    Loading atomic-density training from %s" % self.training_dir)
@@ -109,7 +112,7 @@ class AtomicDensity:
 
         if (force_predict == False) and (self.use_ref_density or (self.ref == _system.xyz[0])):
             xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
-            reffile = self.refpath + xyz + '-atmdns.txt'
+            reffile = self.save_path + xyz + '-atmdns.txt'
             vws = []
 
             with open(reffile, 'r') as f:

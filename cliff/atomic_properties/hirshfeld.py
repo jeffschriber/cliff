@@ -57,6 +57,8 @@ class Hirshfeld:
         
         self.training_dir = options.hirsh_training
 
+    def set_save_path(self, path):
+        self.save_path = path
 
     def load_ml(self):
 
@@ -141,7 +143,7 @@ class Hirshfeld:
         if (force_predict == False) and (self.from_file or (self.ref == _system.xyz[0])):
             h_ratios = []
             for hfile in _system.xyz:
-                hfile = self.filepath + hfile.split('/')[-1].strip('.xyz') + '-h.txt'
+                hfile = self.save_path + hfile.split('/')[-1].strip('.xyz') + '-h.txt'
                 with open(hfile,'r') as infile:
                     for line in infile:
                         line = line.split()

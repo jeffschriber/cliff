@@ -93,6 +93,8 @@ class Multipole:
             print("    Loaded multipole model in:\n\t\t {}".format(options.multipole_training))
             print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
 
+    def set_ref_path(self, path):
+        self.ref_path = path
 
     def load_ml(self, load_file=None):
         '''Load machine learning model'''

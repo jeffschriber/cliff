@@ -85,15 +85,35 @@ def load_models(options, ref=None):
 
     # Predict the references, save to disk
     if ref is not None:
+        
+        pref = "/"
+        for d in os.path.abspath(ref).split("/")[:-1]:
+            pref += d + "/"
+
+        # Set the path where the references are stored
+        hirsh.set_save_path(pref)
+        adens.set_save_path(pref)
+        mtp.set_ref_path(pref)
         sys = System(options,ref)
-        hirsh.predict_mol(sys, force_predict = True)
-        hirsh.save(sys)  
+        sys.set_mtp_save_path(pref)
 
-        adens.predict_mol(sys, force_predict = True)
-        adens.save(sys)
+        # Don't recompute references if we've already done it
+        if os.path.isfile(os.path.abspath(pref) + "/" + ref.split('/')[-1].strip('.xyz') + '-h.txt'):
+            logger.info("    Loading reference Hirshfeld from: {}".format(pref))
+        else:
+            hirsh.predict_mol(sys, force_predict = True)
+            hirsh.save(sys)  
 
-        mtp.predict_mol(sys, force_predict = True)
-        sys.save_mtp()
+        if os.path.isfile(os.path.abspath(pref) + "/" + ref.split('/')[-1].strip('.xyz') + '-atmdns.txt'):
+            logger.info("    Loading reference atomic widths from: {}".format(pref))
+        else:
+            adens.predict_mol(sys, force_predict = True)
+            adens.save(sys)
+        if os.path.isfile(os.path.abspath(pref) + "/" + ref.split('/')[-1].strip('.xyz') + '-mtp.txt'):
+            logger.info("    Loading reference multipoles from: {}".format(pref))
+        else:
+            mtp.predict_mol(sys, force_predict = True)
+            sys.save_mtp()
 
     return [hirsh, adens, mtp]
 

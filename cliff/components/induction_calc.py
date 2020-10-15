@@ -228,7 +228,7 @@ class InductionCalc(Electrostatics):
         #logger.debug("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
         #print("Polarization energy: %7.4f kcal/mol" % self.energy_polarization)
         #print "Short range", self.energy_shortranged
-        #print(self.sys_comb,self.energy_polarization , self.energy_shortranged)
+       # print(str(self.sys_comb)[:-1],self.energy_polarization , self.energy_shortranged)
         return self.energy_polarization - self.energy_shortranged
 
     def build_u(self,r, a1, a2): 

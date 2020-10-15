@@ -72,6 +72,8 @@ class System:
         self.mtp_to_disk = options.multipole_save_to_disk
         self.mtp_save_path = options.multipole_save_path
 
+    def set_mtp_save_path(self, path):
+        self.mtp_save_path = path
 
     def __add__(self, sys):
         """Combine two systems"""
