@@ -36,6 +36,9 @@ class InductionCalc(Electrostatics):
         self.smearing_coeff = options.indu_smearing_coeff
         self.scs_cutoff = options.pol_scs_cutoff
         self.pol_exponent = options.pol_exponent
+        
+        self.decompose = True
+        self.at_ind = np.zeros((0,0))
 
     def add_system(self, sys):
         Electrostatics.add_system(self, sys)
@@ -85,14 +88,19 @@ class InductionCalc(Electrostatics):
                 u_1 = self.build_u(r1, atom_alpha_iso[s1], atom_alpha_iso[s1])
                 u_2 = self.build_u(r2, atom_alpha_iso[s2], atom_alpha_iso[s2])
 
+                if self.decompose:
+                    self.at_ind = np.zeros((len(atom_coord[s1]), len(atom_coord[s2])))
+                    for i in range(len(atom_coord[s1])): 
+                        for j in range(len(atom_coord[s2])): 
+                            self.at_ind[i,j] = -1.0 * ovp[i,j] * ind_params[s1][i] * ind_params[s2][j] * constants.au2kcalmol
+                    
+
         self.energy_shortranged *= constants.au2kcalmol
         end_sr = time.time()
-        #logger.info("short-range: %6.3f" % (end_sr - start_sr))
-        #print("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
-        #logger.info("Induction energy: %7.4f kcal/mol" % self.energy_shortranged)
+
+        
 
         ###  Compute the induction term using Thole's formalism
-
         start_pol = time.time()
         if smearing_coeff != None:
             self.smearing_coeff = smearing_coeff 
@@ -218,7 +226,10 @@ class InductionCalc(Electrostatics):
                         mind_2 = self.induced_dip[s2][atom2,:]
                         T = interaction_tensor(crdi, crdj,self.cell)
 
-                        self.energy_polarization += np.dot(mind_1.T,np.dot(T, mj2)) + np.dot(mi1.T,np.dot(T, mind_2))
+                        en = np.dot(mind_1.T,np.dot(T, mj2)) + np.dot(mi1.T,np.dot(T, mind_2))
+                        self.energy_polarization += en 
+                        if self.decompose:
+                            self.at_ind[atom1,atom2] += en*0.5*constants.au2kcalmol
                         
 
         self.energy_polarization *= 0.5 * constants.au2kcalmol 

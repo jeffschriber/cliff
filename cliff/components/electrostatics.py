@@ -34,6 +34,9 @@ class Electrostatics:
         self.sys_comb = sys
         self.exp = options.elst_damping_exponents
 
+        self.decompose = True
+        self.at_elst = np.zeros((0,0))
+
     def add_system(self, sys):
         self.systems.append(sys)
         last_system_id = self.atom_in_system[-1]
@@ -111,7 +114,15 @@ class Electrostatics:
                 mj = self.mtps_cart[s2]
 
                 # 1. nuclear-nuclear int
-                elst0 = nuclear_rep(atom_coord[s1], atom_coord[s2], atom_nums[s1], atom_nums[s2], self.cell) 
+                r = constants.a2b * utils.build_r(atom_coord[s1],atom_coord[s2],self.cell)
+                r = 1.0 / r
+                if self.decompose:
+                    self.at_elst = np.zeros((len(atom_nums[s1]),len(atom_nums[s2])))
+                    for i,a in enumerate(atom_nums[s1]):
+                        for j,b in enumerate(atom_nums[s2]): 
+                            self.at_elst[i,j] = r[i,j]*a*b
+
+                elst0 =  np.dot(atom_nums[s1], np.matmul(r,atom_nums[s2]))
 
                 # 2. nuclear-MTP interaction
                 ## TODO: avoid this loop over atoms in sys
@@ -119,11 +130,17 @@ class Electrostatics:
                     zm_int = charge_mtp_damped_interaction(atom_coord[s1][ele], atom_coord[s2], alphas[s2], self.cell)
                     i1 = Z*np.einsum('ij,ij->i', zm_int,mj)
                     elst1 += np.sum(i1)
+                    if self.decompose:
+                        for n, value in enumerate(i1):
+                            self.at_elst[ele,n] += value
 
                 for ele, Z in enumerate(atom_nums[s2]):
                     zm_int = charge_mtp_damped_interaction(atom_coord[s2][ele], atom_coord[s1], alphas[s1], self.cell)
                     i1 = Z*np.einsum('ij,ij->i', zm_int,mi)
                     elst2 += np.sum(i1)
+                    if self.decompose:
+                        for n, value in enumerate(i1):
+                            self.at_elst[n,ele] += value
 
                 # 3. MTP-MTP
                 for atom1 in range(len(atom_nums[s1])):
@@ -135,18 +152,28 @@ class Electrostatics:
                         alpha2 = alphas[s2][atom2]
                         mj1 = mj[atom2,:] 
                         d_int = full_damped_interaction(crdi, crdj, alpha1, alpha2, self.cell)
-                        elst3 += np.dot(mi1.T, np.dot(d_int, mj1)) 
+                        value = np.dot(mi1.T, np.dot(d_int, mj1)) 
+                        elst3 += value
+                        if self.decompose:
+                            self.at_elst[atom1,atom2] += value
 
         elst += (elst0 + elst1 + elst2 + elst3)
                     
 
         self.energy_elst = elst * constants.au2kcalmol
+        self.at_elst *= constants.au2kcalmol
         return self.energy_elst
 
-def nuclear_rep(coord1, coord2, ele1, ele2, cell):
+def nuclear_rep(at_elst, coord1, coord2, ele1, ele2, cell):
 
     r = constants.a2b * utils.build_r(coord1,coord2,cell)
     r = 1.0 / r
+
+    if self.decompose:
+        for i,a in ele1:
+            for j,b in ele2: 
+                at_elst[i,j] = r[i,j]*a*b
+
     return np.dot(ele1, np.matmul(r,ele2))
 
 def full_damped_interaction(coord1, coord2, alpha1, alpha2, cell):

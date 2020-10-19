@@ -36,6 +36,9 @@ class Repulsion:
 
         self.rep = options.exch_int_params
         
+        self.decompose = True
+        self.at_exch = np.zeros((0,0))
+        
 
     def add_system(self, sys):
         self.systems.append(sys)
@@ -60,6 +63,13 @@ class Repulsion:
                 r = utils.build_r(atom_coord[s1], atom_coord[s2], self.cell)
                 ovp = utils.slater_ovp_mat(r,v_widths[s1],v_widths[s2])
                 self.energy += np.dot(params[s1], np.matmul(ovp,params[s2]))
+
+                if self.decompose:
+                    self.at_exch = np.zeros((len(atom_coord[s1]), len(atom_coord[s2])))
+                    for i in range(len(atom_coord[s1])): 
+                        for j in range(len(atom_coord[s2])): 
+                            self.at_exch[i,j] = ovp[i,j] * params[s1][i] * params[s2][j] * constants.au2kcalmol
+
 
         self.energy *= constants.au2kcalmol
         self.logger.debug("Energy: %7.4f kcal/mol" % self.energy)

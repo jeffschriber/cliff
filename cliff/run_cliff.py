@@ -53,6 +53,8 @@ def init_args():
 
     parser.add_argument('-p','--nproc', type=int, help='Number of threads for numpy')
 
+    parser.add_argument('-fr','--frag',type=bool, nargs="?", default=False, help='Do fragmentation analysis')
+
     return parser.parse_args()
 
 def get_infile(inpt):
@@ -124,7 +126,7 @@ def load_models(options, ref=None):
 
     return [hirsh, adens, mtp]
 
-def get_energy(filenames, models, options, timer=None):
+def get_energy(filenames, models, options, name, timer=None, frag=None):
     np.set_printoptions(precision=4, suppress=True, linewidth=100)
     
     hirsh = models[0]
@@ -142,7 +144,6 @@ def get_energy(filenames, models, options, timer=None):
         mols.append(System(options, xyz))
         xyzs.append(xyz)
     
-#    mtp_ml.predict_mols(mols)
     logger.info("")
     tms = time.time()
     for mol,xyz in zip(mols,xyzs):
@@ -192,9 +193,102 @@ def get_energy(filenames, models, options, timer=None):
     timer['ind']  =  ind_time
     timer['disp'] =  disp_time
 
+    # Save energy partitions
+    #print(mtp.at_elst, np.sum(mtp.at_elst))
+    #print(rep.at_exch, np.sum(rep.at_exch))
+    #print(ind.at_ind, np.sum(ind.at_ind))
+    #print(disp.at_disp, np.sum(disp.at_disp))
+
+    mona = filenames[0].split('/')[-1].split('.xyz')[0]
+    monb = filenames[1].split('/')[-1].split('.xyz')[0]
+    natom_a = mols[0].num_atoms
+    natom_b = mols[1].num_atoms
+
+    with open(mona + '_' + monb + "_atomic.txt","w") as outf:
+        for a in range(natom_a):
+            for b in range(natom_b):
+                elst_e =  mtp.at_elst[a,b]
+                exch_e =  rep.at_exch[a,b]
+                indu_e =   ind.at_ind[a,b]
+                disp_e = disp.at_disp[a,b]
+                total_e = elst_e + exch_e + indu_e + disp_e
+                outf.write("%3d %3d %12.8f %12.8f %12.8f %12.8f %12.8f \n" % (a+1,b+1,elst_e, exch_e, indu_e, disp_e, total_e) ) 
+        
+    if frag:
+        generate_frag_output(filenames, mtp.at_elst, rep.at_exch, ind.at_ind, disp.at_disp)
+
     # for printing
     ret = {'elst':elst, 'exch':exch, 'indu':indu, 'disp':disp_en, 'total':elst+exch+indu+disp_en}
     return ret
+
+
+def generate_frag_output(files, elst, exch, indu, disp):
+    # get the files that define the fragments
+
+    fa = files[0]
+    fb = files[1]
+
+    pref_a = fa.split('.xyz')[0]  
+    pref_b = fb.split('.xyz')[0]  
+
+    fa = pref_a + '-frag.dat'
+    fb = pref_b + '-frag.dat'
+
+    pref_a = pref_a.split('/')[-1]
+    pref_b = pref_b.split('/')[-1]
+
+    fa_frags = {}
+    fb_frags = {}
+
+    # load the fragments
+    with open(fa, 'r') as fa_file:
+        all_a = []
+        for line in fa_file:
+            line = line.split()
+            atms = []
+            for item in line[1:]:
+                atms.append(item)
+                all_a.append(item)
+            fa_frags[line[0]] = atms
+        fa_frags['All'] = all_a
+
+    with open(fb, 'r') as fb_file:
+        all_b = []
+        for line in fb_file:
+            line = line.split()
+            atms = []
+            for item in line[1:]:
+                atms.append(int(item))
+                all_b.append(item)
+            fb_frags[line[0]] = atms
+        fb_frags['All'] = all_b
+    
+    with open(pref_a + "-" + pref_b + "-frag.txt",'w') as ffile:
+        for fa, atoms_a in fa_frags.items():
+            for fb, atoms_b in fb_frags.items():
+                elst_e = 0.0 
+                exch_e = 0.0
+                indu_e = 0.0
+                disp_e = 0.0
+                total_e = 0.0           
+                for na in atoms_a:
+                    for nb in atoms_b:
+                        elst_a = elst[int(na)-1,int(nb)-1]  
+                        exch_a = exch[int(na)-1,int(nb)-1]  
+                        indu_a = indu[int(na)-1,int(nb)-1]  
+                        disp_a = disp[int(na)-1,int(nb)-1]  
+
+                        elst_e += elst_a
+                        exch_e += exch_a
+                        indu_e += indu_a
+                        disp_e += disp_a
+
+                        total_e += elst_a + exch_a + indu_a + disp_a
+
+                         
+                ffile.write("%s %s %12.8f %12.8f %12.8f %12.8f %12.8f \n" % (fa,fb,elst_e, exch_e, indu_e, disp_e, total_e) ) 
+            
+    
 
 def print_banner(): 
     title = r''' 
@@ -271,7 +365,7 @@ def print_timings(timer):
     logger.info("    ~Induction     :  %10.3f s" % timer['ind'])
     logger.info("    ~Dispersion    :  %10.3f s" % timer['disp'])
 
-def main(inpt=None, files=None, ref=None, nproc=None, name=None):
+def main(inpt=None, files=None, ref=None, nproc=None, name=None, frag = None):
     # Do something if this file is invoked on its own
 
     infile = get_infile(inpt)
@@ -310,7 +404,7 @@ def main(inpt=None, files=None, ref=None, nproc=None, name=None):
             mona =  filenames[0].split('/')[-1].split('.xyz')[0]
             monb = filenames[1].split('/')[-1].split('.xyz')[0]
             dname = filenames[0].split('/')[-2]
-        en = get_energy(filenames, models, options, timer)
+        en = get_energy(filenames, models, options, name, timer, frag)
         ret[dname] = [mona,monb,en]
 
     print_ret(name, ret)
@@ -329,12 +423,15 @@ if __name__ == "__main__":
     if args.nproc is not None:
         set_nthread(args.nproc)
 
+    frag = False
+    if args.frag != False:
+        frag = True
 
     logger = logging.getLogger(__name__)
     fh = logging.FileHandler(name + '.log')
     logger.addHandler(fh)
 
-    main(args.input, args.files, args.ref, args.nproc, name)
+    main(args.input, args.files, args.ref, args.nproc, name, frag)
     end = time.time()
 
     logger.info("    ~CLIFF ran in {} s".format(end-start))

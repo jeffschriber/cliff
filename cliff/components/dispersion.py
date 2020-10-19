@@ -27,8 +27,10 @@ class Dispersion():
         self.beta = options.disp_beta
         self.scs_cutoff = options.pol_scs_cutoff
         self.pol_exponent = options.pol_exponent
-
         self.disp_coeffs = options.disp_coeffs
+
+        self.decompose = True
+        self.at_disp = np.zeros((0,0))
 
     def add_system(self, sys):
         self.systems.append(sys)
@@ -70,17 +72,15 @@ class Dispersion():
         sys_i = self.systems[0]                    
         sys_j = self.systems[1]                    
 
-        # compute c6 coefficients
+        # compute c coefficients
         c6_ab = self.compute_c6_coeffs()
         c8_ab = self.compute_c8_coeffs(c6_ab)
-        #cdict = {6:c6_ab,8:c8_ab}  
-
-        #for A, ele_A in enumerate(sys_i.atom_types):
-        #    for B, ele_B in enumerate(sys_j.atom_types):
-        #        c8_ab[A][B] *= self.disp_coeffs[ele_A]*self.disp_coeffs[ele_B]
         c10_ab = self.compute_c10_coeffs(c6_ab, c8_ab)
 
         #print("Types ", sys_i.atom_types + sys_j.atom_types)
+
+        if self.decompose:
+            self.at_disp = np.zeros((len(sys_i.atom_types), len(sys_j.atom_types)))
 
         disp = 0.0
         for A, ele_A in enumerate(sys_i.atom_types):
@@ -98,21 +98,19 @@ class Dispersion():
                 # use combining rule
                 b_AB = np.sqrt(b_A*b_B)
                 
-                #for n in [6,8]:
-                #    fn = self.compute_tt_damping(n, rAB, b_AB)
-                #    cn = cdict[n]
-                #         
-                #    dij += fn * cn[A][B] / (rAB**n)   
-                
                 f6 = self.compute_tt_damping(6, rAB, b_AB)
                 f8 = self.compute_tt_damping(8, rAB, b_AB)
                 f10 = self.compute_tt_damping(10, rAB, b_AB)
 
-                #disp += self.scale6 * f6*c6_ab[A][B]/(rAB**6.0) 
-                #disp += self.scale8 * f8*c8_ab[A][B]/(rAB**8.0)
-                disp -= f6*c6_ab[A][B]/(rAB**6.0) 
-                #disp -= self.disp_coeffs[ele_A]*self.disp_coeffs[ele_B] * f8*c8_ab[A][B]/(rAB**8.0)
-                disp -= (f8*c8_ab[A][B]/(rAB**8.0) + f10*c10_ab[A][B]/(rAB**10.0)) * self.disp_coeffs[ele_A]*self.disp_coeffs[ele_B]
+                en  = -1.0* f6*c6_ab[A][B]/(rAB**6.0) 
+                en -= (f8*c8_ab[A][B]/(rAB**8.0) + f10*c10_ab[A][B]/(rAB**10.0)) * self.disp_coeffs[ele_A]*self.disp_coeffs[ele_B]
+
+                disp += en
+
+                if self.decompose:
+                    self.at_disp[A,B] = en*constants.au2kcalmol
+        
+        
 
                 #print(ele_A,ele_B, f6*c6_ab[A][B]/(rAB**6.0), (f8*c8_ab[A][B]/(rAB**8.0) + f10*c10_ab[A][B]/(rAB**10.0)))
 
