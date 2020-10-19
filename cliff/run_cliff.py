@@ -231,8 +231,8 @@ def generate_frag_output(files, elst, exch, indu, disp):
     pref_a = fa.split('.xyz')[0]  
     pref_b = fb.split('.xyz')[0]  
 
-    fa = pref_a + '-frag.dat'
-    fb = pref_b + '-frag.dat'
+    fa = pref_a + '_frag.dat'
+    fb = pref_b + '_frag.dat'
 
     pref_a = pref_a.split('/')[-1]
     pref_b = pref_b.split('/')[-1]
@@ -263,7 +263,7 @@ def generate_frag_output(files, elst, exch, indu, disp):
             fb_frags[line[0]] = atms
         fb_frags['All'] = all_b
     
-    with open(pref_a + "-" + pref_b + "-frag.txt",'w') as ffile:
+    with open(pref_a + "_" + pref_b + "_frag.txt",'w') as ffile:
         for fa, atoms_a in fa_frags.items():
             for fb, atoms_b in fb_frags.items():
                 elst_e = 0.0 
@@ -285,7 +285,6 @@ def generate_frag_output(files, elst, exch, indu, disp):
 
                         total_e += elst_a + exch_a + indu_a + disp_a
 
-                         
                 ffile.write("%s %s %12.8f %12.8f %12.8f %12.8f %12.8f \n" % (fa,fb,elst_e, exch_e, indu_e, disp_e, total_e) ) 
             
     
