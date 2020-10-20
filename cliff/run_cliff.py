@@ -231,8 +231,8 @@ def generate_frag_output(files, elst, exch, indu, disp):
     pref_a = fa.split('.xyz')[0]  
     pref_b = fb.split('.xyz')[0]  
 
-    fa = pref_a + '_frag.dat'
-    fb = pref_b + '_frag.dat'
+    fa = pref_a + '-frag.dat'
+    fb = pref_b + '-frag.dat'
 
     pref_a = pref_a.split('/')[-1]
     pref_b = pref_b.split('/')[-1]

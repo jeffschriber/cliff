@@ -187,7 +187,7 @@ class System:
         
         # print mtps to ref files
         if self.mtp_to_disk:
-            save_mtp()
+            self.save_mtp()
 
     def save_mtp(self):
         xyz = self.xyz[0].split('/')[-1].strip('.xyz')

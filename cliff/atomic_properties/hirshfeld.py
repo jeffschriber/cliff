@@ -186,7 +186,7 @@ class Hirshfeld:
 
        # print("    Time spent predicting Hirshfeld ratios:               %8.3f s" % (time.time()-t1))
         if self.save_to_disk:
-            save(_system)
+            self.save(_system)
 
         return None
 

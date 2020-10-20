@@ -150,7 +150,7 @@ class AtomicDensity:
                             _system.valence_widths[i] = pred.T[i]
 
             if self.save_to_disk:
-                save(_system)
+                self.save(_system)
         return None
 
     def save(self, system):

@@ -183,7 +183,7 @@ class Options:
         except:
             pass
         try:
-            self.hirsh_save_path = self.Config.get("hirshfeld","save_path")
+            self.hirsh_save_path = self.Config.get("hirshfeld","ref_path")
         except:
             pass
 
@@ -268,7 +268,7 @@ class Options:
         except:
             pass
         try:
-            self.atomicdensity_save_path = self.Config.get("atomicdensity","save_path")
+            self.atomicdensity_save_path = self.Config.get("atomicdensity","ref_path")
         except:
             pass
 
@@ -369,7 +369,7 @@ class Options:
             pass
 
         try:
-            self.multipole_save_path = self.Config.get("multipoles","save_path")
+            self.multipole_save_path = self.Config.get("multipoles","ref_path")
         except:
             pass
 
