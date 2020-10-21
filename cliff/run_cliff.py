@@ -204,7 +204,8 @@ def get_energy(filenames, models, options, name, timer=None, frag=None):
     natom_a = mols[0].num_atoms
     natom_b = mols[1].num_atoms
 
-    with open(mona + '_' + monb + "_atomic.txt","w") as outf:
+    with open(name + "_atomic.txt","w") as outf:
+        outf.write("# %s, %s, electrostatic, exchange-repulsion, induction, dispersion, total \n" %(mona, monb))
         for a in range(natom_a):
             for b in range(natom_b):
                 elst_e =  mtp.at_elst[a,b]
@@ -215,14 +216,14 @@ def get_energy(filenames, models, options, name, timer=None, frag=None):
                 outf.write("%3d %3d %12.8f %12.8f %12.8f %12.8f %12.8f \n" % (a+1,b+1,elst_e, exch_e, indu_e, disp_e, total_e) ) 
         
     if frag:
-        generate_frag_output(filenames, mtp.at_elst, rep.at_exch, ind.at_ind, disp.at_disp)
+        generate_frag_output(filenames, name, mtp.at_elst, rep.at_exch, ind.at_ind, disp.at_disp)
 
     # for printing
     ret = {'elst':elst, 'exch':exch, 'indu':indu, 'disp':disp_en, 'total':elst+exch+indu+disp_en}
     return ret
 
 
-def generate_frag_output(files, elst, exch, indu, disp):
+def generate_frag_output(files, name, elst, exch, indu, disp):
     # get the files that define the fragments
 
     fa = files[0]
@@ -263,7 +264,8 @@ def generate_frag_output(files, elst, exch, indu, disp):
             fb_frags[line[0]] = atms
         fb_frags['All'] = all_b
     
-    with open(pref_a + "_" + pref_b + "_frag.txt",'w') as ffile:
+    with open(name + "_frag.txt",'w') as ffile:
+        ffile.write("# %s, %s, electrostatic, exchange-repulsion, induction, dispersion, total \n" %(pref_a,pref_b))
         for fa, atoms_a in fa_frags.items():
             for fb, atoms_b in fb_frags.items():
                 elst_e = 0.0 
@@ -421,6 +423,9 @@ if __name__ == "__main__":
 
     if args.nproc is not None:
         set_nthread(args.nproc)
+    
+    if args.files is not None:
+        name = args.files + "/" + name
 
     frag = False
     if args.frag != False:
