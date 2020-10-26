@@ -8,7 +8,7 @@ from cliff.helpers.system import System
 from cliff.atomic_properties.hirshfeld import Hirshfeld
 from cliff.atomic_properties.atomic_density import AtomicDensity
 from cliff.atomic_properties.multipole import Multipole
-from cliff.components.cp_multipoles import CPMultipoleCalc
+from cliff.components.electrostatics import Electrostatics
 from cliff.components.induction_calc import InductionCalc
 from cliff.components.repulsion import Repulsion
 from cliff.components.dispersion import Dispersion
@@ -52,7 +52,7 @@ def get_energy(filename):
     adens.load_ml()
     
     #load multipoles with aSLATM representation
-    mtp_ml  = Multipole(options, descriptor="slatm") 
+    mtp_ml  = Multipole(options) 
     
     #loads monomer geometries
     mols = []
@@ -70,7 +70,7 @@ def get_energy(filename):
         adens.predict_mol(mol)
     
     #initializes relevant classes with monomer A
-    mtp = CPMultipoleCalc(options,mols[0], cell)
+    mtp = Electrostatics(options,mols[0], cell)
     ind = InductionCalc(options,mols[0], cell)
     rep = Repulsion(options, mols[0], cell)
     dis = Dispersion(options, mols[0], cell)
@@ -138,3 +138,4 @@ def test_total():
         r = refs[k]
         en = v[4]
         assert abs(en - r[4]) < 1e-9
+test_total()

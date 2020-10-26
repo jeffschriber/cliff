@@ -77,7 +77,7 @@ class Dispersion():
         c8_ab = self.compute_c8_coeffs(c6_ab)
         c10_ab = self.compute_c10_coeffs(c6_ab, c8_ab)
 
-        #print("Types ", sys_i.atom_types + sys_j.atom_types)
+       # print("Types ", sys_i.atom_types + sys_j.atom_types)
 
         if self.decompose:
             self.at_disp = np.zeros((len(sys_i.atom_types), len(sys_j.atom_types)))
@@ -112,7 +112,7 @@ class Dispersion():
         
         
 
-                #print(ele_A,ele_B, f6*c6_ab[A][B]/(rAB**6.0), (f8*c8_ab[A][B]/(rAB**8.0) + f10*c10_ab[A][B]/(rAB**10.0)))
+               # print(ele_A,ele_B, f6*c6_ab[A][B]/(rAB**6.0), (f8*c8_ab[A][B]/(rAB**8.0) + f10*c10_ab[A][B]/(rAB**10.0)))
 
         return disp
 
