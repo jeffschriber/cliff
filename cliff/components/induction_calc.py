@@ -194,8 +194,9 @@ class InductionCalc(Electrostatics):
             for n in range(nsys):
                 diff += np.linalg.norm(mu_next[n]-mu_prev[n])
             if diff > diff_init*10 or counter > 2000:
-                logger.error("Can't converge self-consistent equations. Exiting.")
-                exit(1)
+                self.logger.info("Can't converge self-consistent equations. Exiting.")
+                #exit(1)
+                return False
             if counter % 50 == 0 and self.omega > 0.2:
                 self.omega *= 0.8
 

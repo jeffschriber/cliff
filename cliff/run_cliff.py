@@ -204,6 +204,8 @@ def get_energy(filenames, models, options, name, timer=None, frag=None):
     natom_a = mols[0].num_atoms
     natom_b = mols[1].num_atoms
 
+
+
     with open(name + "_atomic.txt","w") as outf:
         outf.write("# %s, %s, electrostatic, exchange-repulsion, induction, dispersion, total \n" %(mona, monb))
         for a in range(natom_a):
@@ -220,7 +222,37 @@ def get_energy(filenames, models, options, name, timer=None, frag=None):
 
     # for printing
     ret = {'elst':elst, 'exch':exch, 'indu':indu, 'disp':disp_en, 'total':elst+exch+indu+disp_en}
+    update_files(filenames, ret)
+
     return ret
+
+def update_files(files, energy_dict):
+    # get name
+    mona =  files[0].split('/')[-1].split('.xyz')[0]
+    monb = files[1].split('/')[-1].split('.xyz')[0]
+    dname = mona + "-" + monb
+
+    # Append to json
+    try:
+        out =  open(name + '.json','r')
+        data = json.load(out)
+        out.close()
+        data.update({dname:energy_dict})
+    except:
+        data = {dname:energy_dict}
+    out =  open(name + '.json','w')
+    json.dump(data,out)
+    out.close()
+
+    # Append to csv
+    try:
+        with open(name + '.csv','a+') as cout:
+            cout.write("\n%s,%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (mona,monb,energy_dict['elst'],energy_dict['exch'],energy_dict['indu'],energy_dict['disp'],energy_dict['total']))
+    except:
+        with open(name + '.csv','w') as cout:
+            cout.write("# Monomer A, Monomer B, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
+            cout.write("\n%s,%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (mona,monb,energy_dict['elst'],energy_dict['exch'],energy_dict['indu'],energy_dict['disp'],energy_dict['total']))
+
 
 
 def generate_frag_output(files, name, elst, exch, indu, disp):
@@ -314,30 +346,8 @@ def print_banner():
     Jeffrey B. Schriber, C. David Sherrill (2019)
     ===================================================='''
 
-    
     logger.info(title)
 
-def canvas(with_attribution=True):
-    """
-    Placeholder function to show example docstring (NumPy format)
-
-    Replace this function and doc string for your own project
-
-    Parameters
-    ----------
-    with_attribution : bool, Optional, default: True
-        Set whether or not to display who the quote is from
-
-    Returns
-    -------
-    quote : str
-        Compiled string including quote and optional attribution
-    """
-
-    quote = "    The code is but a canvas to our imagination."
-    if with_attribution:
-        quote += "\n\t    - Adapted from Henry David Thoreau"
-    return quote
 
 def print_ret(name, ret):
     '''
@@ -348,15 +358,15 @@ def print_ret(name, ret):
     logger.info("           MonomerA     |      MonomerB      |  Electrostatics |   Exchange   |   Induction   |   Dispersion  |   Total ")
     logger.info("    ----------------------------------------------------------------------------------------------------------------------") 
 
-    with open(name + '.json','w') as out:
-        json.dump(ret,out)
+  #  with open(name + '.json','w') as out:
+  #      json.dump(ret,out)
 
-    with open(name + '.csv','w') as cout:
-        cout.write("# Monomer A, Monomer B, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
-        for k,val in ret.items():
-            mona, monb, v = val
-            logger.info("    %-20s %-20s%18.5f %14.5f %15.5f %15.5f %11.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
-            cout.write("\n%s,%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
+  #  with open(name + '.csv','w') as cout:
+  #      cout.write("# Monomer A, Monomer B, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
+  #      for k,val in ret.items():
+  #          mona, monb, v = val
+  #          logger.info("    %-20s %-20s%18.5f %14.5f %15.5f %15.5f %11.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
+  #          cout.write("\n%s,%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
 
 def print_timings(timer):
     logger.info("")
@@ -375,6 +385,9 @@ def main(inpt=None, files=None, ref=None, nproc=None, name=None, frag = None):
     options = Options(infile,name) 
     options.set_name(name) 
     logger.setLevel(options.logger_level)
+    with open(name + '.csv','w') as cout:
+        cout.write("# Monomer A, Monomer B, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
+    os.remove(name + '.json')
 
     print_banner()
 
