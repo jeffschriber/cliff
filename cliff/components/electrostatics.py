@@ -42,8 +42,7 @@ class Electrostatics:
         last_system_id = self.atom_in_system[-1]
         self.atom_in_system += [last_system_id+1]*len(sys.elements)
         self.sys_comb = self.sys_comb + sys
-        self.sys_comb.populations, self.sys_comb.valence_widths = [], []
-        # Refinement
+        self.sys_comb.valence_widths = []
         for s in self.systems:
             self.sys_comb.valence_widths = np.append(self.sys_comb.valence_widths,
                     s.valence_widths)

@@ -47,8 +47,9 @@ def file_finder(fname, ref = None, jobdir = None):
         for n, jd in enumerate(jobdirs):
             filelist = glob.glob(jd + '/*.xyz')
             if len(filelist) == 0:
-                print("WARNING: Job {} does not contain any files!".format(n))
+                print("WARNING: Job {} does not contain any files!".format(jd.split("/")[-1]))
 
+            filelist = sorted(filelist)
             filesum += len(filelist)
             master_xyzs.append(filelist)
 

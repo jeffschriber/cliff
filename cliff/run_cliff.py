@@ -44,15 +44,10 @@ def set_nthread(nthread):
 def init_args():
     parser = argparse.ArgumentParser(description="CLIFF: a Component-based Learned Intermolecular Force Field")
     parser.add_argument('-i','--input', type=str, help='Location of input configuration file')
-
     parser.add_argument('-f','--files', type=str, help='Directory of monomer xyz files')
-
     parser.add_argument('-n','--name', type=str, help='Output job name')
-
     parser.add_argument('-r','--ref', type=str, help='xyz of reference monomer')
-
     parser.add_argument('-p','--nproc', type=int, help='Number of threads for numpy')
-
     parser.add_argument('-fr','--frag',type=bool, nargs="?", default=False, help='Do fragmentation analysis')
 
     return parser.parse_args()
@@ -168,7 +163,6 @@ def get_energy(filenames, models, options, name, timer=None, frag=None):
         ind.add_system(mol)
         rep.add_system(mol)
         disp.add_system(mol)
-    
     #computes electrostatic, induction and exchange energies
     t1 = time.time()
     elst = mtp.mtp_energy()
@@ -187,7 +181,6 @@ def get_energy(filenames, models, options, name, timer=None, frag=None):
     disp_en = disp.compute_dispersion(hirsh)  
     disp_time = time.time() - t4
 
-     
     timer['elst'] =  elst_time
     timer['exch'] =  rep_time
     timer['ind']  =  ind_time
@@ -203,8 +196,6 @@ def get_energy(filenames, models, options, name, timer=None, frag=None):
     monb = filenames[1].split('/')[-1].split('.xyz')[0]
     natom_a = mols[0].num_atoms
     natom_b = mols[1].num_atoms
-
-
 
     with open(name + "_atomic.txt","w") as outf:
         outf.write("# %s, %s, electrostatic, exchange-repulsion, induction, dispersion, total \n" %(mona, monb))
@@ -358,15 +349,9 @@ def print_ret(name, ret):
     logger.info("           MonomerA     |      MonomerB      |  Electrostatics |   Exchange   |   Induction   |   Dispersion  |   Total ")
     logger.info("    ----------------------------------------------------------------------------------------------------------------------") 
 
-  #  with open(name + '.json','w') as out:
-  #      json.dump(ret,out)
-
-  #  with open(name + '.csv','w') as cout:
-  #      cout.write("# Monomer A, Monomer B, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
-  #      for k,val in ret.items():
-  #          mona, monb, v = val
-  #          logger.info("    %-20s %-20s%18.5f %14.5f %15.5f %15.5f %11.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
-  #          cout.write("\n%s,%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
+    for k,val in ret.items():
+        mona, monb, v = val
+        logger.info("    %-20s %-20s%18.5f %14.5f %15.5f %15.5f %11.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
 
 def print_timings(timer):
     logger.info("")
@@ -387,7 +372,8 @@ def main(inpt=None, files=None, ref=None, nproc=None, name=None, frag = None):
     logger.setLevel(options.logger_level)
     with open(name + '.csv','w') as cout:
         cout.write("# Monomer A, Monomer B, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
-    os.remove(name + '.json')
+    if os.path.isfile(name + '.json'):
+        os.remove(name + '.json')
 
     print_banner()
 
@@ -410,6 +396,9 @@ def main(inpt=None, files=None, ref=None, nproc=None, name=None, frag = None):
     models = load_models(options, ref)
     for filenames in job_list:
 
+        if len(filenames) < 2:
+            continue
+
         if ref is not None:
             mona =  filenames[0].split('/')[-1].split('.xyz')[0]
             monb = filenames[1].split('/')[-1].split('.xyz')[0]
@@ -418,8 +407,11 @@ def main(inpt=None, files=None, ref=None, nproc=None, name=None, frag = None):
             mona =  filenames[0].split('/')[-1].split('.xyz')[0]
             monb = filenames[1].split('/')[-1].split('.xyz')[0]
             dname = filenames[0].split('/')[-2]
-        en = get_energy(filenames, models, options, name, timer, frag)
-        ret[dname] = [mona,monb,en]
+        try:
+            en = get_energy(filenames, models, options, name, timer, frag)
+            ret[dname] = [mona,monb,en]
+        except:
+            logger.info("    Unable to compute energy for dimer %s!" % dname)
 
     print_ret(name, ret)
     print_timings(timer)

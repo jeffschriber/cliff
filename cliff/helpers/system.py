@@ -1,9 +1,4 @@
 #!/usr/bin/env python
-#
-# System class. Define overall molecular system, load coordinates,
-# all variables and physical parameters.
-#
-# Tristan Bereau (2017)
 
 import numpy as np
 import cliff.helpers.utils as utils
@@ -15,18 +10,20 @@ import re
 import qml
 import configparser
 
-# Set logger
-logger = logging.getLogger(__name__)
 
 class System:
     'Common system class for molecular system'
 
     def __init__(self, options, xyz=None, log=False):
-        logger.setLevel(options.logger_level)
+        
         # xyz and mps can't both be empty
         if not xyz:
-            logger.error("Need an xyz file")
+            options.logger.error("Need an xyz file")
             exit(1)
+
+        self.master_elements   = ['C','N','O','H','S','Cl','F','Br']
+        self.master_atom_types = ['Cl','F','S1','S2','HS','HC','HN','HO','C4','C3','C2','N3','N2','N1','O1','O2','Br']
+
         self.xyz = [xyz]
         # Coordinates
         self.coords = None
@@ -65,7 +62,7 @@ class System:
         # List of bonds to each atom
         self.bonded_atoms = None
         if len(self.xyz) == 1:
-            self.load_xyz()
+            self.load_xyz(options.logger)
         #self.coulomb_mat = []
         self.atom_reorder = []
     
@@ -92,16 +89,20 @@ class System:
                 out_str += xyz + "_"
                 return out_str
         else:
-            logger.error("No molecule name!")
-            print("No molecule name!")
-            exit(1)
+            raise Exception("No molecule name!")
 
-    def load_xyz(self):
+    def load_xyz(self, logger):
         extract_file = utils.read_file(self.xyz[0])
         self.num_atoms = int(extract_file[0])
         self.elements = [str(line.split()[0])
                         for i,line in enumerate(extract_file)
                         if i>1 and i<self.num_atoms+2]
+
+        # check element types:
+        for ele in self.elements:
+            if ele not in self.master_elements: 
+                logger.info("    Found element %s, but not parameterized!" % ele)
+                raise Exception("    Found element %s, but not parameterized!" % ele)
 
         for i in range(len(self.elements)):
             ele = self.elements[i]
@@ -119,7 +120,7 @@ class System:
                         for i,line in enumerate(extract_file)
                         if i>1 and len(line.split())>4)
         self.hirshfeld_ref = np.fromiter(iterable,np.float)
-        self.identify_atom_types()
+        self.identify_atom_types(logger)
         logger.debug('Loaded molecule %s with %s atoms.' \
             % (self.xyz, self.num_atoms))
         logger.debug('Elements %s' % ', '.join(self.elements))
@@ -214,13 +215,15 @@ class System:
             vec_all_dir.append(vec)
         return vec_all_dir
 
-    def identify_atom_types(self):
+    def identify_atom_types(self, logger):
         "Identifies the atom type and bonds of every atom in the molecule"
         self.atom_types = []
         self.bonded_atoms = []
         for at_id in range(self.num_atoms):
             at_ele = self.elements[at_id]
             at_crd = np.asarray(self.coords[at_id])
+
+            at_type = ""
             bonded = []
             for i,at in enumerate(self.coords):
                 at_i = self.elements[i]
@@ -238,31 +241,30 @@ class System:
                     bonded.append((at_i,at,dist))
             self.bonded_atoms.append(bonded)
             if at_ele == 'H':
-                #print(bonded)
-                self.atom_types.append('H'+bonded[0][0])
-
-                # pick the shortest non-hydrogen
-             #   if len(bonded) == 1:
-             #       self.atom_types.append('H'+bonded[0][0])
-             #   else:
+                at_type = 'H'+bonded[0][0]
             elif at_ele == 'O':
-                self.atom_types.append('O'+str(len(bonded)))
+                at_type = 'O'+str(len(bonded))
             elif at_ele == 'N':
-                self.atom_types.append('N'+str(len(bonded)))
+                at_type = 'N'+str(len(bonded))
             elif at_ele == 'C':
-                self.atom_types.append('C'+str(len(bonded)))
+                at_type = 'C'+str(len(bonded))
             elif at_ele == 'S':
                 if len(bonded) >= 2:
-                    s_at = 'S2'
+                    at_type = 'S2'
                 else:
-                    s_at = 'S'+str(len(bonded))
-                self.atom_types.append(s_at)
+                    at_type = 'S'+str(len(bonded))
             elif at_ele == 'Cl' or at_ele == 'CL':
-                self.atom_types.append('Cl')
+                at_type = 'Cl'
             elif at_ele == 'F':
-                self.atom_types.append('F')
+                at_type = 'F'
             elif at_ele == 'BR' or at_ele == 'Br':
-                self.atom_types.append('Br')
+                at_type = 'Br'
+
+            if at_type not in self.master_atom_types:
+                logger.info("    Atom type %s detected, but is not parameterized!" % at_type) 
+                raise Exception("    Atom type %s detected, but is not parameterized!" % at_type) 
+
+            self.atom_types.append(at_type)
         return None
 
     def load_mtp_from_hipart(self, txt, rotate=False):
