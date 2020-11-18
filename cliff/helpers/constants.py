@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-#
-# List of global parameters and constants.
-#
-# Tristan Bereau (2017)
 
 # Atomic units to kcal/mol
 au2kcalmol    = 627.5095
@@ -35,34 +31,6 @@ atomic_number = {
   'Cl' :17,
   'Br' :35,
   'I'  :53,
-}
-
-Z_val = {
-    'H' : 1,
-    'B' : 3,
-    'C' : 4,
-    'N' : 5,
-    'O' : 6,
-    'F' : 7,
-    'P' : 5,
-    'S' : 6,
-    'Cl': 7,
-    'Br': 7,
-    'I' : 7,
-}
-
-atom_row = {
-    'H' : 0,
-    'B' : 1,
-    'C' : 1,
-    'N' : 1,
-    'O' : 1,
-    'F' : 1,
-    'P' : 2,
-    'S' : 2,
-    'Cl': 2,
-    'Br': 3,
-    'I' : 4,
 }
 
 pol_free = {
@@ -194,9 +162,6 @@ map_mtp_coeff = {
   'Q22s' : 4,
 }
 
-# Atoms for bag of bonds (correctly ordered)
-bob_atoms = ['C','H','O','S','N','Br','Cl','F','I','P','B']
-
 # Charge penetration
 # Follows Wang et al. JCTC (2017) DOI: 10.1021/acs.jctc.5b00267
 # effective core charge
@@ -257,32 +222,6 @@ ml_power = {
     'laplacian': 1
 }
 
-
-# This is how IPML re-shuffles charge when correcting
-# for non-integer total charge. Instead of these parameters.
-# we'll use atomic weights
-#ml_chg_correct_error = {
-#    'H': 1.,
-#    'C': 1.,
-#    'N': 1.,
-#    'O': 1.,
-#    'S': 1., # NOT SURE WHAT VALUE
-#}
-#ml_chg_correct_error = {
-#    'H': 1.,
-#    'C': 3.2,
-#    'N': 1.7,
-#    'O': 1.,
-#    'S': 1., # NOT SURE WHAT VALUE
-#}
-# based on mae
-#ml_chg_correct_error = {
-#    'H': 0.144236,
-#    'C': 0.362682,
-#    'N': 0.463021,
-#    'O': 0.290041,
-#    'S': 0.741042, 
-#}
 ml_chg_correct_error = {
     'H'  : 1.0,
     'C'  : 2.5145,

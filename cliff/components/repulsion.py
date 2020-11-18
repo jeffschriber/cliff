@@ -1,10 +1,4 @@
 #!/usr/bin/env python
-#
-# Repulsion class. Compute repulsive interaction based on anisotropic Hirshfeld
-# ratios.
-#
-# Tristan Bereau (2017)
-
 import numpy as np
 import math
 import cliff.helpers.constants as constants

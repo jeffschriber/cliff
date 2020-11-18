@@ -1,9 +1,4 @@
 #!/usr/bin/env python
-#
-# System class. Define overall molecular system, load coordinates,
-# all variables and physical parameters.
-#
-# Tristan Bereau (2017)
 
 import numpy as np
 import cliff.helpers.utils as utils

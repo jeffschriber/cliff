@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-#
-# Cell class. Define cell geometry.
-#
-# Tristan Bereau (2016)
 
 import numpy as np
 import cliff.helpers.utils
