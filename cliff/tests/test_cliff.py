@@ -20,25 +20,15 @@ def test_cliff_runscript():
     """Test execution of run_cliff.py"""
     import cliff.run_cliff as rc
     
-    ret = rc.main(testpath + '/cliff_test/config.ini', testpath + '/s30/xyzs/' )
-    with open(testpath + 's30/s30_ref_TT.json','r') as f:
+    ret = rc.main(testpath + '/cliff_test/config.ini', testpath + '/s18/xyzs/', name='test' )
+    with open(testpath + 's18/xyzs/s18_test.json','r') as f:
         refs = json.load(f)
-
-        rc.print_ret(refs)
-
         # Make sure values match up
         for k,v in ret.items():
             r = refs[k]
-            assert abs(v[0] - r[0]) < 1e-5 
-            assert abs(v[1] - r[1]) < 1e-5 
-            assert abs(v[2] - r[2]) < 1e-5 
-            assert abs(v[3] - r[3]) < 1e-5 
-            assert abs(v[4] - r[4]) < 1e-5 
-            #if abs(v[2] - r[2]) > 1e-5:
-            #    print(k, abs(v[2] - r[2]))# < 1e-5 
-            #print(abs(v[1] - r[1]))# < 1e-5 #fail 
-            #print(abs(v[2] - r[2]))# < 1e-5 #fail 
-            #print(abs(v[3] - r[3]))# < 1e-5 
-            #print(abs(v[4] - r[4]))# < 1e-5 
+            assert abs(v[0] - r['elst']) < 1e-5 
+            assert abs(v[1] - r['exch']) < 1e-5 
+            assert abs(v[2] - r['indu']) < 1e-5 
+            assert abs(v[3] - r['disp']) < 1e-5 
+            assert abs(v[4] - r['total']) < 1e-5 
     
-#test_cliff_runscript()

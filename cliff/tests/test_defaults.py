@@ -36,9 +36,9 @@ def get_energy(filename):
     options = Options(testpath + 'defaults/config.ini') 
     
     # set the path for reference parameters
-    options.set_hirshfeld_filepath(testpath + '/s30/hirshfeld_data/') 
-    options.set_atomicdensity_refpath(testpath + '/s30/multipoles_and_valence_parameters/') 
-    options.set_multipole_ref_path(testpath + '/s30/multipoles_and_valence_parameters/') 
+    options.set_hirsh_save_path(testpath + '/s18/hirsh/') 
+    options.set_atomicdensity_save_path(testpath + '/s18/adens/') 
+    options.set_multipole_ref_path(testpath + '/s18/mtp/') 
     
     #defines cell parameters for grid computations
     cell = Cell.lattice_parameters(100., 100., 100.)
@@ -85,7 +85,7 @@ def get_energy(filename):
     #computes electrostatic, induction and exchange energies
     elst = mtp.mtp_energy()
     indu = ind.polarization_energy(options)
-    exch = rep.compute_repulsion("slater_mbis")
+    exch = rep.compute_repulsion()
     disp = dis.compute_dispersion(hirsh)
     
     # for printing
@@ -94,48 +94,46 @@ def get_energy(filename):
     
 filenames = {}
 current = {}
-mols = glob.glob(testpath + 's30/xyzs/*/*monoA-unCP.xyz')
+mols = glob.glob(testpath + 's18/xyzs/*/*A.xyz')
 for mol in mols:
     monA = mol 
-    monB = mol.strip("monoA-unCP.xyz") + "-monoB-unCP.xyz"
+    monB = mol.split("-A.xyz")[0] + "-B.xyz"
     filename = [monA,monB]
-    monA = monA.split('/')[-1]
-    monA = monA.split('-mon')[0]
-    filenames[monA] = filename
-    current[monA] = get_energy(filename)
+    key = monA.split(".xyz")[0].split("/")[-1] + "-" + monB.split(".xyz")[0].split("/")[-1]
+    filenames[key] = filename
+    current[key] = get_energy(filename)
    # break
     
 refs = {}
-with open(testpath + 's30/s30_ref_TT.json','r') as f:
+with open(testpath + 's18/xyzs/s18_test.json','r') as f:
     refs = json.load(f)
 
 def test_elst():
     for k,v in current.items():
         r = refs[k]
         en = v[0]
-        assert abs(en - r[0]) < 1e-9
+        assert abs(en - r['elst']) < 1e-9
 
 def test_exch():
     for k,v in current.items():
         r = refs[k]
         en = v[1]
-        assert abs(en - r[1]) < 1e-9
+        assert abs(en - r['exch']) < 1e-9
 
 def test_ind():
     for k,v in current.items():
         r = refs[k]
         en = v[2]
-        assert abs(en - r[2]) < 1e-9
+        assert abs(en - r['indu']) < 1e-9
 
 def test_disp():
     for k,v in current.items():
         r = refs[k]
         en = v[3]
-        assert abs(en - r[3]) < 1e-9
+        assert abs(en - r['disp']) < 1e-9
 
 def test_total():
     for k,v in current.items():
         r = refs[k]
         en = v[4]
-        assert abs(en - r[4]) < 1e-9
-test_total()
+        assert abs(en - r['total']) < 1e-6

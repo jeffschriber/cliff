@@ -211,7 +211,7 @@ ca_ref = np.array([[ 3.56764869e-01, -7.99961726e-02, 1.96965580e-02,-2.85287115
 def test_ml_mtp():
     """Train machine learning on data set"""
     options = Options(testpath + '/mtp_train/config.ini') 
-    mtp_model = Multipole(options, descriptor="slatm")
+    mtp_model = Multipole(options)
     # Load mbtypes
     with open(testpath + "/../models/mbtypes.pkl", 'rb') as f:
         mtp_model.mbtypes = pickle.load(f)
@@ -232,9 +232,10 @@ def test_ml_mtp():
     res = np.square(np.subtract(c_alpha,ca_ref))
     res = np.sum(res)
     
+    print(res)
     assert res < 1e-12
 
 
-    
+test_ml_mtp()    
     
 

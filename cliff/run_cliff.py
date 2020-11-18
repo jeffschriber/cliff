@@ -68,7 +68,7 @@ def get_infile(inpt):
 
     return infile
 
-def load_models(options, ref=None):
+def load_models(logger, options, ref=None):
     #initializes Hirshfeld class
     hirsh = Hirshfeld(options, ref) 
     adens = AtomicDensity(options, ref)
@@ -121,7 +121,7 @@ def load_models(options, ref=None):
 
     return [hirsh, adens, mtp]
 
-def get_energy(filenames, models, options, name, timer=None, frag=None):
+def get_energy(logger, filenames, models, options, name, timer=None, frag=None):
     np.set_printoptions(precision=4, suppress=True, linewidth=100)
     
     hirsh = models[0]
@@ -314,7 +314,7 @@ def generate_frag_output(files, name, elst, exch, indu, disp):
             
     
 
-def print_banner(): 
+def print_banner(logger): 
     title = r''' 
                                                       
                                       ___               
@@ -340,7 +340,7 @@ def print_banner():
     logger.info(title)
 
 
-def print_ret(name, ret):
+def print_ret(logger, name, ret):
     '''
     Print out results from return dict
     '''
@@ -353,7 +353,7 @@ def print_ret(name, ret):
         mona, monb, v = val
         logger.info("    %-20s %-20s%18.5f %14.5f %15.5f %15.5f %11.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
 
-def print_timings(timer):
+def print_timings(logger, timer):
     logger.info("")
     logger.info("    ~Component Timings")
     logger.info("    ~Electrostatics:  %10.3f s" % timer['elst'])
@@ -362,7 +362,10 @@ def print_timings(timer):
     logger.info("    ~Dispersion    :  %10.3f s" % timer['disp'])
 
 def main(inpt=None, files=None, ref=None, nproc=None, name=None, frag = None):
-    # Do something if this file is invoked on its own
+    start = time.time()
+    logger = logging.getLogger(__name__)
+    fh = logging.FileHandler(name + '.log')
+    logger.addHandler(fh)
 
     infile = get_infile(inpt)
 
@@ -375,7 +378,7 @@ def main(inpt=None, files=None, ref=None, nproc=None, name=None, frag = None):
     if os.path.isfile(name + '.json'):
         os.remove(name + '.json')
 
-    print_banner()
+    print_banner(logger)
 
     if infile == "":
         logger.info("    Using default options")
@@ -393,7 +396,7 @@ def main(inpt=None, files=None, ref=None, nproc=None, name=None, frag = None):
     timer = {}
 
 
-    models = load_models(options, ref)
+    models = load_models(logger, options, ref)
     for filenames in job_list:
 
         if len(filenames) < 2:
@@ -408,20 +411,21 @@ def main(inpt=None, files=None, ref=None, nproc=None, name=None, frag = None):
             monb = filenames[1].split('/')[-1].split('.xyz')[0]
             dname = filenames[0].split('/')[-2]
         try:
-            en = get_energy(filenames, models, options, name, timer, frag)
+            en = get_energy(logger, filenames, models, options, name, timer, frag)
             ret[dname] = [mona,monb,en]
         except:
             logger.info("    Unable to compute energy for dimer %s!" % dname)
 
-    print_ret(name, ret)
-    print_timings(timer)
+    print_ret(logger, name, ret)
+    print_timings(logger, timer)
+
+    end = time.time()
+    logger.info("    ~CLIFF ran in {} s".format(end-start))
 
     return ret
 
 if __name__ == "__main__":
-    start = time.time()
     args = init_args()
-
     name = 'output'
     if args.name is not None:
         name = args.name
@@ -436,12 +440,5 @@ if __name__ == "__main__":
     if args.frag != False:
         frag = True
 
-    logger = logging.getLogger(__name__)
-    fh = logging.FileHandler(name + '.log')
-    logger.addHandler(fh)
-
     main(args.input, args.files, args.ref, args.nproc, name, frag)
-    end = time.time()
-
-    logger.info("    ~CLIFF ran in {} s".format(end-start))
 
