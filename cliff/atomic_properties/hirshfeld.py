@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-#
-# Hirshfeld class. Predict Hirshfeld ratios.
-#
-# Tristan Bereau (2017)
 
 from cliff.helpers.system import System
 import cliff.helpers.utils
