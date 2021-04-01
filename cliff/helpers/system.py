@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
+import qcelemental as qcel
 import numpy as np
 import cliff.helpers.utils as utils
 import logging
-import cliff.helpers.constants
+import cliff.helpers.constants as constants
 import os
 import copy
 import re
@@ -16,11 +17,6 @@ class System:
 
     def __init__(self, options, xyz=None, log=False):
         
-        # xyz and mps can't both be empty
-        if not xyz:
-            options.logger.error("Need an xyz file")
-            exit(1)
-
         self.master_elements   = ['C','N','O','H','S','Cl','F','Br']
         self.master_atom_types = ['Cl','F','S1','S2','HS','HC','HN','HO','C4','C3','C2','N3','N2','N1','O1','O2','Br']
 
@@ -31,7 +27,7 @@ class System:
         self.num_atoms = 0
         # Chemical elements
         self.elements = None
-        self.hirshfeld_ref = None
+        self.Z = None
         # Coulomb matrix
         #self.coulomb_mat = None
         self.atom_reorder = None
@@ -61,9 +57,8 @@ class System:
         self.atom_types = None
         # List of bonds to each atom
         self.bonded_atoms = None
-        if len(self.xyz) == 1:
+        if xyz is not None:
             self.load_xyz(options.logger)
-        #self.coulomb_mat = []
         self.atom_reorder = []
     
         self.mtp_to_disk = options.multipole_save_to_disk
@@ -119,12 +114,18 @@ class System:
         iterable = (float(line.split()[4])
                         for i,line in enumerate(extract_file)
                         if i>1 and len(line.split())>4)
-        self.hirshfeld_ref = np.fromiter(iterable,np.float)
         self.identify_atom_types(logger)
         logger.debug('Loaded molecule %s with %s atoms.' \
             % (self.xyz, self.num_atoms))
         logger.debug('Elements %s' % ', '.join(self.elements))
         return None
+
+    def load_qcel_mol(self,mol):
+        self.num_atoms = len(mol.symbols)
+        self.coords = mol.geometry*qcel.constants.conversion_factor("bohr", "angstrom")
+        self.elements = mol.symbols
+        self.Z = np.array([constants.atomic_number[ele] for ele in self.elements]) 
+        self.identify_atom_types() 
 
     def build_coulomb_matrices(self, max_neighbors, atom, direction=None):
         self.coulomb_mat = []
@@ -139,17 +140,20 @@ class System:
         return None
 
     def build_slatm(self, mbtypes, cutoff, xyz=None):
-        self.slatm = []
-        # Need xyz
-        if len(self.xyz) == 0:
-            if xyz is not None:
-                mol = qml.Compound(xyz)
-            else:
-                raise ValueError("Missing xyz file")
-        else:
-            mol = qml.Compound(self.xyz[0])
-        mol.generate_slatm(mbtypes, rcut=cutoff,local=True)
-        self.slatm = mol.representation
+        #self.slatm = []
+        ## Need xyz
+        #if len(self.xyz) == 0:
+        #    if xyz is not None:
+        #        mol = qml.Compound(xyz)
+        #    else:
+        #        raise ValueError("Missing xyz file")
+        #else:
+        #    mol = qml.Compound(self.xyz[0])
+        #mol.generate_slatm(mbtypes, rcut=cutoff,local=True)
+        #self.slatm = mol.representation
+
+        self.slatm = qml.representations.generate_slatm(self.coords,self.Z,mbtypes,rcut=cutoff,local=True)
+        
         return None
 
     def initialize_multipoles(self):
@@ -185,7 +189,6 @@ class System:
                 #         self.basis[i]), stone_convention=True)
                 for j in range(5):
                     self.multipoles[i][4+j] = quad[j]
-        
         # print mtps to ref files
         if self.mtp_to_disk:
             self.save_mtp()
@@ -215,7 +218,7 @@ class System:
             vec_all_dir.append(vec)
         return vec_all_dir
 
-    def identify_atom_types(self, logger):
+    def identify_atom_types(self, logger=None):
         "Identifies the atom type and bonds of every atom in the molecule"
         self.atom_types = []
         self.bonded_atoms = []
@@ -260,7 +263,7 @@ class System:
             elif at_ele == 'BR' or at_ele == 'Br':
                 at_type = 'Br'
 
-            if at_type not in self.master_atom_types:
+            if at_type not in self.master_atom_types and logger != None:
                 logger.info("    Atom type %s detected, but is not parameterized!" % at_type) 
                 raise Exception("    Atom type %s detected, but is not parameterized!" % at_type) 
 

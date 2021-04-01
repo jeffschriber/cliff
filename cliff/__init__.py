@@ -6,6 +6,7 @@ Component-based Learned Intermolecular Force Field
 # Add imports here
 #from .cliff import *
 from cliff import helpers, atomic_properties, components
+from .driver import *
 
 # Handle versioneer
 from ._version import get_versions

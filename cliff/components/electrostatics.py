@@ -39,13 +39,13 @@ class Electrostatics:
 
     def add_system(self, sys):
         self.systems.append(sys)
-        last_system_id = self.atom_in_system[-1]
-        self.atom_in_system += [last_system_id+1]*len(sys.elements)
-        self.sys_comb = self.sys_comb + sys
-        self.sys_comb.valence_widths = []
-        for s in self.systems:
-            self.sys_comb.valence_widths = np.append(self.sys_comb.valence_widths,
-                    s.valence_widths)
+      #  last_system_id = self.atom_in_system[-1]
+      #  self.atom_in_system += [last_system_id+1]*len(sys.elements)
+      #  self.sys_comb = self.sys_comb + sys
+      #  self.sys_comb.valence_widths = []
+      #  for s in self.systems:
+      #      self.sys_comb.valence_widths = np.append(self.sys_comb.valence_widths,
+      #              s.valence_widths)
 
         return None
 
@@ -61,8 +61,7 @@ class Electrostatics:
             atom_ele.append([ele for ele in self.systems[sys].elements])
         for s1,sys in enumerate(self.systems):
             if len(sys.multipoles) == 0:
-                self.logger.error("Multipoles not initialized for system %s!"
-                    % sys)
+                print("Multipoles not initialized for system!")
                 exit(1)
 
             for i in range(sys.num_atoms):

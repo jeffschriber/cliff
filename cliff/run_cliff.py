@@ -80,6 +80,7 @@ def load_models(logger, options, ref=None):
 
     #load multipoles with aSLATM representation
     mtp = Multipole(options,ref) 
+    #mtp.load_ml()
     tlf = time.time()
     logger.info("    ~Time spent loading ML models: {} s".format(tlf-tls))
 
