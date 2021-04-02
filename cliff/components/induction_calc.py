@@ -99,7 +99,6 @@ class InductionCalc(Electrostatics):
         self.energy_shortranged *= constants.au2kcalmol
         end_sr = time.time()
 
-        
 
         ###  Compute the induction term using Thole's formalism
         start_pol = time.time()
@@ -145,23 +144,15 @@ class InductionCalc(Electrostatics):
 
         end_init = time.time()
 
-#        logger.info("Initial induced dipole:")
-#        logger.info("Mol 1")
-#        for vec in induced_dip[0]:
-#            tmp_vec = vec * constants.au2debye
-#            logger.info("%9.6f  %9.6f  %9.6f" %(tmp_vec[0],tmp_vec[1],tmp_vec[2]))
-#        logger.info("Mol 2")
-#        for vec in induced_dip[1]:
-#            tmp_vec = vec * constants.au2debye
-#            logger.info("%9.6f  %9.6f  %9.6f" %(tmp_vec[0],tmp_vec[1],tmp_vec[2]))
-
         #logger.info("init: %6.3f" % (end_init - start_pol))
         # Self-consistent polarization
-        mu_next = np.copy(induced_dip)
+        #mu_next = np.copy(induced_dip)
+        mu_next = []
         #mu_prev = np.zeros(np.shape(mu_next))
         #mu_prev = np.zeros(np.shape(induced_dip))
         mu_prev = []
         for i in induced_dip:
+            mu_next.append(i)
             mu_prev.append(np.zeros(np.shape(i)))
 
        # diff_init = np.linalg.norm(mu_next-mu_prev)
@@ -175,8 +166,9 @@ class InductionCalc(Electrostatics):
         # We already have the interaction tensors
         diff = diff_init
         while diff > self.conv:
-            mu_prev = np.copy(mu_next)
-            mu_next = (1.0 - self.omega) * mu_prev
+            for s in range(nsys):
+                mu_prev[s] = np.copy(mu_next[s])
+                mu_next[s] = (1.0 - self.omega) * mu_prev[s]
             for s1 in range(nsys):
                 mp_1 = mu_prev[s1]
                 for s2 in range(s1+1,nsys):

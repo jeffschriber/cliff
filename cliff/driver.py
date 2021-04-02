@@ -181,7 +181,6 @@ def predict_from_monomer_list(monomer_a, monomer_b, return_pairs=False):
         mon_b_list = monomer_b
     else:
         mon_b_list = [monomer_b]
-
     options = Options()
     models = load_krr_models(options) 
     energies = []
@@ -217,7 +216,7 @@ def energy_kernel(mon_a, mon_b, options):
     ind.add_system(mon_b)
     rep.add_system(mon_b)
     disp.add_system(mon_b)
-
+    
     #computes electrostatic, induction and exchange energies
     elst_n = mtp.mtp_energy()
     indu_n = ind.polarization_energy()

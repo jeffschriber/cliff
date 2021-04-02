@@ -44,9 +44,10 @@ def set_nthread(nthread):
 def init_args():
     parser = argparse.ArgumentParser(description="CLIFF: a Component-based Learned Intermolecular Force Field")
     parser.add_argument('-i','--input', type=str, help='Location of input configuration file')
-    parser.add_argument('-f','--files', type=str, help='Directory of monomer xyz files')
+    parser.add_argument('-d','--dimer', type=str, help='Directory of dimer xyz files, or an individual dimer xyz file')
+    parser.add_argument('-a','--monA', type=str, help='Monomer A xyz file')
+    parser.add_argument('-b','--monB', type=str, help='Monomer B xyz file')
     parser.add_argument('-n','--name', type=str, help='Output job name')
-    parser.add_argument('-r','--ref', type=str, help='xyz of reference monomer')
     parser.add_argument('-p','--nproc', type=int, help='Number of threads for numpy')
     parser.add_argument('-fr','--frag',type=bool, nargs="?", default=False, help='Do fragmentation analysis')
 
@@ -218,34 +219,25 @@ def get_energy(logger, filenames, models, options, name, timer=None, frag=None):
 
     return ret
 
-def update_files(files, energy_dict):
+def update_files(name, ret):
     # get name
-    mona =  files[0].split('/')[-1].split('.xyz')[0]
-    monb = files[1].split('/')[-1].split('.xyz')[0]
-    dname = mona + "-" + monb
-
-    # Append to json
-    try:
-        out =  open(name + '.json','r')
-        data = json.load(out)
-        out.close()
-        data.update({dname:energy_dict})
-    except:
-        data = {dname:energy_dict}
-    out =  open(name + '.json','w')
-    json.dump(data,out)
-    out.close()
-
+    labels = ret[0]
+    energies = ret[1]
+    
     # Append to csv
     try:
-        with open(name + '.csv','a+') as cout:
-            cout.write("\n%s,%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (mona,monb,energy_dict['elst'],energy_dict['exch'],energy_dict['indu'],energy_dict['disp'],energy_dict['total']))
+        cout = open(name + '.csv','a+')
     except:
-        with open(name + '.csv','w') as cout:
-            cout.write("# Monomer A, Monomer B, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
-            cout.write("\n%s,%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (mona,monb,energy_dict['elst'],energy_dict['exch'],energy_dict['indu'],energy_dict['disp'],energy_dict['total']))
+        cout = open(name + '.csv','w')
+        cout.write("# Monomer A, Monomer B, Electrostatics, Exchange, Induction, Dispersion, Total (kcal/mol)")
 
+    for lab, en in zip(labels,energies):
+        mona = lab[0]
+        monb = lab[1]
+        total = np.sum(en)
+        cout.write("\n%s,%s,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" % (mona,monb,en[0],en[1],en[2],en[3],total))
 
+    cout.close()
 
 def generate_frag_output(files, name, elst, exch, indu, disp):
     # get the files that define the fragments
@@ -341,7 +333,7 @@ def print_banner(logger):
     logger.info(title)
 
 
-def print_ret(logger, name, ret):
+def print_ret(logger, ret):
     '''
     Print out results from return dict
     '''
@@ -350,9 +342,13 @@ def print_ret(logger, name, ret):
     logger.info("           MonomerA     |      MonomerB      |  Electrostatics |   Exchange   |   Induction   |   Dispersion  |   Total ")
     logger.info("    ----------------------------------------------------------------------------------------------------------------------") 
 
-    for k,val in ret.items():
-        mona, monb, v = val
-        logger.info("    %-20s %-20s%18.5f %14.5f %15.5f %15.5f %11.5f" % (mona,monb, v['elst'],v['exch'],v['indu'],v['disp'],v['total']))
+    labels = ret[0]
+    energies = ret[1]
+    for lab, en in zip(labels,energies):
+        mona = lab[0]
+        monb = lab[1]
+        total = np.sum(en)
+        logger.info("    %-20s %-20s%18.5f %14.5f %15.5f %15.5f %11.5f" % (mona,monb,en[0],en[1],en[2],en[3], total))
 
 def print_timings(logger, timer):
     logger.info("")
@@ -362,7 +358,7 @@ def print_timings(logger, timer):
     logger.info("    ~Induction     :  %10.3f s" % timer['ind'])
     logger.info("    ~Dispersion    :  %10.3f s" % timer['disp'])
 
-def main(inpt=None, files=None, ref=None, nproc=None, name=None, frag = None):
+def main(inpt=None, dimer=None, monA=None, monB=None, nproc=None, name=None, frag = None):
     start = time.time()
     logger = logging.getLogger(__name__)
     fh = logging.FileHandler(name + '.log')
@@ -391,35 +387,36 @@ def main(inpt=None, files=None, ref=None, nproc=None, name=None, frag = None):
     else:
         logger.info("    Using {} threads".format(mp.cpu_count()))
 
-    job_list = Utils.file_finder(options.name,ref,files)
+    if dimer is not None:
+        files = []
+        if os.path.isdir(dimer):
+            files = glob.glob(dimer + '/*.xyz') 
+        elif dimer.split('.')[-1] == 'xyz':
+            files.append(dimer)
+        dimer_mols = []
+        dimer_names = []
+        for mol in files:
+            dimer_mols.append(cliff.load_dimer_xyz(mol))
+            dimer_names.append((mol.split('/')[-1].split('.xyz')[0]+'-A',mol.split('/')[-1].split('.xyz')[0]+'-B')) 
 
-    ret = {}
-    timer = {}
+        en = cliff.predict_from_dimers(dimer_mols)
 
+        ret = (dimer_names,en)
+    elif (monA is not None) and (monB is not None):
+        molA = cliff.load_monomer_xyz(monA)
+        molB = cliff.load_monomer_xyz(monB)
+        en = cliff.predict_from_monomer_list(molA,molB)
 
-    models = load_models(logger, options, ref)
-    for filenames in job_list:
+        # make some labels
+        labels = []
+        for n in range(len(molA)):
+            for m in range(len(molB)):
+                labels.append((n,m))
+        ret = (labels,en)
 
-        if len(filenames) < 2:
-            continue
-
-        if ref is not None:
-            mona =  filenames[0].split('/')[-1].split('.xyz')[0]
-            monb = filenames[1].split('/')[-1].split('.xyz')[0]
-            dname = mona + "-" + monb
-        else: 
-            mona =  filenames[0].split('/')[-1].split('.xyz')[0]
-            monb = filenames[1].split('/')[-1].split('.xyz')[0]
-            dname = filenames[0].split('/')[-2]
-        try:
-            en = get_energy(logger, filenames, models, options, name, timer, frag)
-            ret[dname] = [mona,monb,en]
-        except:
-            logger.info("    Unable to compute energy for dimer %s!" % dname)
-
-    print_ret(logger, name, ret)
-    print_timings(logger, timer)
-
+    print_ret(logger, ret)
+    
+    update_files(name, ret)
     end = time.time()
     logger.info("    ~CLIFF ran in {} s".format(end-start))
 
@@ -434,12 +431,9 @@ if __name__ == "__main__":
     if args.nproc is not None:
         set_nthread(args.nproc)
     
-    if args.files is not None:
-        name = args.files + "/" + name
-
     frag = False
     if args.frag != False:
         frag = True
 
-    main(args.input, args.files, args.ref, args.nproc, name, frag)
+    main(args.input, args.dimer, args.monA, args.monB, args.nproc, name, frag)
 
