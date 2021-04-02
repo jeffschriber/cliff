@@ -48,7 +48,7 @@ def mol_to_sys(mol, options):
         return systems        
     
 
-def load_dimer_xyz(xyz_file):
+def load_dimer_xyz(xyz_file, units='angstrom'):
     '''
     Loads xyz file, where the separation between dimers is
     specified as the last field in the comment line
@@ -67,14 +67,14 @@ def load_dimer_xyz(xyz_file):
 
     blockA = f"0 1\n" + "".join(coords[:na])
     blockB = f"0 1\n" + "".join(coords[na:])
-    dimer = blockA + "--\n" + blockB + "no_com\nno_reorient\nunits angstrom"
+    dimer = blockA + "--\n" + blockB + f"no_com\nno_reorient\nunits {units}"
     dimer = qcel.models.Molecule.from_data(dimer)
 
     return dimer
     
 
 
-def load_monomer_xyz(xyz_file):
+def load_monomer_xyz(xyz_file, units='angstrom'):
     '''
     Loads single/multi xyz file of monomers
     Total charge is last field in comment line    
@@ -92,12 +92,13 @@ def load_monomer_xyz(xyz_file):
     charges = [int(line.split(',')[-1]) for line in lines if (len(line.split(',')) > 1)]
     coords = [line for line in lines if len(line.split()) == 4]
 
+
     n_prev = 0
     for z,n in zip(charges,atom_n):
         mol = f"{z} 1\n" + "".join(coords[n_prev:n_prev + n]) 
-        mol += "no_com\nno_reorient\nunits angstrom"
+        mol += f"no_com\nno_reorient\nunits {units}"
 
-        n_prev = n
+        n_prev += n
         molecules.append(qcel.models.Molecule.from_data(mol))
 
     return molecules

@@ -358,7 +358,7 @@ def print_timings(logger, timer):
     logger.info("    ~Induction     :  %10.3f s" % timer['ind'])
     logger.info("    ~Dispersion    :  %10.3f s" % timer['disp'])
 
-def main(inpt=None, dimer=None, monA=None, monB=None, nproc=None, name=None, frag = None):
+def main(inpt=None, dimer=None, monA=None, monB=None, nproc=None, name=None, frag = None, units='angstrom'):
     start = time.time()
     logger = logging.getLogger(__name__)
     fh = logging.FileHandler(name + '.log')
@@ -396,15 +396,15 @@ def main(inpt=None, dimer=None, monA=None, monB=None, nproc=None, name=None, fra
         dimer_mols = []
         dimer_names = []
         for mol in files:
-            dimer_mols.append(cliff.load_dimer_xyz(mol))
+            dimer_mols.append(cliff.load_dimer_xyz(mol, units))
             dimer_names.append((mol.split('/')[-1].split('.xyz')[0]+'-A',mol.split('/')[-1].split('.xyz')[0]+'-B')) 
 
         en = cliff.predict_from_dimers(dimer_mols)
 
         ret = (dimer_names,en)
     elif (monA is not None) and (monB is not None):
-        molA = cliff.load_monomer_xyz(monA)
-        molB = cliff.load_monomer_xyz(monB)
+        molA = cliff.load_monomer_xyz(monA, units)
+        molB = cliff.load_monomer_xyz(monB, units)
         en = cliff.predict_from_monomer_list(molA,molB)
 
         # make some labels
