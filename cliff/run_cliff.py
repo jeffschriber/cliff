@@ -396,8 +396,11 @@ def main(inpt=None, dimer=None, monA=None, monB=None, nproc=None, name=None, fra
         dimer_mols = []
         dimer_names = []
         for mol in files:
-            dimer_mols.append(cliff.load_dimer_xyz(mol, units))
-            dimer_names.append((mol.split('/')[-1].split('.xyz')[0]+'-A',mol.split('/')[-1].split('.xyz')[0]+'-B')) 
+            try:
+                dimer_mols.append(cliff.load_dimer_xyz(mol, units))
+                dimer_names.append((mol.split('/')[-1].split('.xyz')[0]+'-A',mol.split('/')[-1].split('.xyz')[0]+'-B')) 
+            except:
+                logger.info(f"   Cannot load {mol}")
 
         en = cliff.predict_from_dimers(dimer_mols)
 
