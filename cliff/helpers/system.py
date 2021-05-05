@@ -20,6 +20,8 @@ class System:
         self.master_elements   = ['C','N','O','H','S','Cl','F','Br']
         self.master_atom_types = ['Cl','F','S1','S2','HS','HC','HN','HO','C4','C3','C2','N3','N2','N1','O1','O2','Br']
 
+        self.name = ""
+
         self.xyz = [xyz]
         # Coordinates
         self.coords = None
@@ -28,15 +30,11 @@ class System:
         # Chemical elements
         self.elements = None
         self.Z = None
-        # Coulomb matrix
-        #self.coulomb_mat = None
         self.atom_reorder = None
         # slatm
         self.slatm = None
         # Predict ratios
         self.hirshfeld_ratios = None
-        # Atomic populations
-        #self.populations = None
         # Atomic valence widths
         self.valence_widths = None
         # Core charge
@@ -78,11 +76,8 @@ class System:
         return s
 
     def __str__(self):
-        out_str = ""
-        if self.xyz:
-            for xyz in self.xyz:
-                out_str += xyz + "_"
-                return out_str
+        if self.name != "":
+            return self.name
         else:
             raise Exception("No molecule name!")
 
@@ -120,7 +115,8 @@ class System:
         logger.debug('Elements %s' % ', '.join(self.elements))
         return None
 
-    def load_qcel_mol(self,mol):
+    def load_qcel_mol(self,mol,name):
+        self.name = name 
         self.num_atoms = len(mol.symbols)
         self.coords = mol.geometry*qcel.constants.conversion_factor("bohr", "angstrom")
         self.elements = mol.symbols

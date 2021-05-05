@@ -34,12 +34,18 @@ def mol_to_sys(mol, options):
     # If mol is a dimer, return two sys
     
     nfrag = len(mol.fragments)
-
+    dimer_name = mol.name
     systems = []
     for frag in range(nfrag):
         fmol = mol.get_fragment(frag)
         sys = System(options)
-        sys.load_qcel_mol(fmol)
+
+        if nfrag == 1:
+            sys.load_qcel_mol(fmol, name = dimer_name)
+        else:
+            f_name = dimer_name + "-" + str(frag)
+            sys.load_qcel_mol(fmol, name = f_name)
+    
         systems.append(sys)
 
     if nfrag == 1:
@@ -65,10 +71,11 @@ def load_dimer_xyz(xyz_file, units='angstrom'):
     na = int(data.split(',')[-1])
     nb = natom - na
 
+    mol_name = xyz_file.split("/")[-1].split(".xyz")[0]
     blockA = f"0 1\n" + "".join(coords[:na])
     blockB = f"0 1\n" + "".join(coords[na:])
     dimer = blockA + "--\n" + blockB + f"no_com\nno_reorient\nunits {units}"
-    dimer = qcel.models.Molecule.from_data(dimer)
+    dimer = qcel.models.Molecule.from_data(dimer, **{'name':mol_name})
 
     return dimer
     
@@ -82,8 +89,6 @@ def load_monomer_xyz(xyz_file, units='angstrom'):
     Returns list of qcel Molecule objects
     '''
     
-    #with open(xyz_file,'r') as inf:
-    #    for line in inf:
 
     molecules = []    
 
@@ -94,12 +99,16 @@ def load_monomer_xyz(xyz_file, units='angstrom'):
 
 
     n_prev = 0
+    nmol = 0
     for z,n in zip(charges,atom_n):
         mol = f"{z} 1\n" + "".join(coords[n_prev:n_prev + n]) 
         mol += f"no_com\nno_reorient\nunits {units}"
 
         n_prev += n
-        molecules.append(qcel.models.Molecule.from_data(mol))
+
+        mol_name = xyz_file.split("/")[-1].split(".xyz")[0] + "-" + str(nmol)
+        molecules.append(qcel.models.Molecule.from_data(mol,**{'name':mol_name}))
+        nmol += 1
 
     return molecules
     
@@ -109,16 +118,32 @@ def predict_atomic_properties(mol, models):
     adens = models[1]
     mtp_ml = models[2]
 
-
-
     mtp_ml.predict_mol(mol, force_predict=True)
     hirsh.predict_mol(mol, force_predict=True)
     adens.predict_mol(mol, force_predict=True)
  
     return mol    
     
+def save_atomic_properties(mol,path):
+    # Only do properties that have been computed
+    if len(mol.hirshfeld_ratios) > 0:
+        sfile = mol.name + "-h.npy"
+        np.save(path + "/" + sfile, mol.hirshfeld_ratios) 
+    if len(mol.valence_widths) > 0:
+        sfile = mol.name + "-vw.npy"
+        np.save(path + "/" + sfile, mol.valence_widths) 
+    if len(mol.multipoles) > 0:
+        sfile = mol.name + "-mtp.npy"
+        np.save(path + "/" + sfile, mol.multipoles) 
 
-def predict_from_dimers(dimers, return_pairs=False):
+def load_atomic_properties(mol,path):
+    mol.hirshfeld_ratios = np.load(path + "/" + mol.name + "-h.npy")  
+    mol.valence_widths = np.load(path + "/" + mol.name + "-vw.npy")  
+    mol.multipoles = np.load(path + "/" + mol.name + "-mtp.npy")  
+        
+    return mol
+
+def predict_from_dimers(dimers, load_path=None, return_pairs=False):
     '''
     Compute energy components from a list of dimers.
     Uses all default options, turns off logging
@@ -146,8 +171,12 @@ def predict_from_dimers(dimers, return_pairs=False):
 
         mon_a, mon_b = mol_to_sys(dimer, options)
 
-        mon_a = predict_atomic_properties(mon_a,models)
-        mon_b = predict_atomic_properties(mon_b,models)
+        if load_path is None:
+            mon_a = predict_atomic_properties(mon_a,models)
+            mon_b = predict_atomic_properties(mon_b,models)
+        else:
+            mon_a = load_atomic_properties(mon_a,load_path)  
+            mon_b = load_atomic_properties(mon_b,load_path)  
 
         try:
             en = energy_kernel(mon_a, mon_b, options) 
@@ -158,7 +187,7 @@ def predict_from_dimers(dimers, return_pairs=False):
 
     return np.asarray(energies) 
     
-def predict_from_monomer_list(monomer_a, monomer_b, return_pairs=False):
+def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs=False):
     '''
     Compute energy components from two lists of monomers
     Uses default options, places mon_a in outer loop 
@@ -187,10 +216,20 @@ def predict_from_monomer_list(monomer_a, monomer_b, return_pairs=False):
     energies = []
     for A in mon_a_list:
         mon_a = mol_to_sys(A, options)
-        mon_a = predict_atomic_properties(mon_a,models)
+        
+        if load_path is None:
+            mon_a = predict_atomic_properties(mon_a,models)
+        else:
+            mon_a = load_atomic_properties(mon_a,load_path)  
+            
+
         for B in mon_b_list:
             mon_b = mol_to_sys(B, options)
-            mon_b = predict_atomic_properties(mon_b,models)
+
+            if load_path is None:
+                mon_b = predict_atomic_properties(mon_b,models)
+            else:
+                mon_b = load_atomic_properties(mon_b,load_path)  
 
             try:
                 en = energy_kernel(mon_a, mon_b, options) 
