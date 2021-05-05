@@ -25,18 +25,18 @@ jobs:
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }}" # • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
 
-  steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
   
-      - name: Create Environment
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: test
-          environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
-          python-version: ${{ matrix.cfg.python-version }}
-          auto-activate-base: false
+    - name: Create Environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: test
+        environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
+        python-version: ${{ matrix.cfg.python-version }}
+        auto-activate-base: false
 
     - name: Environment Information
       run: |
