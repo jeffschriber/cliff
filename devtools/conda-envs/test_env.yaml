@@ -8,6 +8,7 @@ dependencies:
   - numba
   - scipy
   - numpy
+  - qcelemental
 
     # Testing
   - pytest
