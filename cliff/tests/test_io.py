@@ -32,12 +32,12 @@ def test_cliff_io():
     monB = cliff.load_monomer_xyz(monomerB)
 
     print(monA,monB)
+    
+    options = Options()
+    models = cliff.load_krr_models(options)
+
+    print("models loaded")
     assert True
-#    
-#    options = Options()
-#    models = cliff.load_krr_models(options)
-#
-#    print("models loaded")
 #
 #    sysa = cliff.mol_to_sys(monA, options)
 #    sysa = cliff.predict_atomic_properties(sysa,models)    
