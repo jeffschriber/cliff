@@ -118,9 +118,9 @@ def predict_atomic_properties(mol, models):
     adens = models[1]
     mtp_ml = models[2]
 
-    mtp_ml.predict_mol(mol, force_predict=True)
     hirsh.predict_mol(mol, force_predict=True)
     adens.predict_mol(mol, force_predict=True)
+    mtp_ml.predict_mol(mol, force_predict=True)
  
     return mol    
     
