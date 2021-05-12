@@ -13,6 +13,7 @@ testpath = os.path.abspath(t.__file__).split('__init__')[0]
 
 def test_cliff_imported():
     """Sample test, will always pass so long as import statement worked"""
+    print("Test import cliff")
     assert "cliff" in sys.modules
 
 #def test_cliff_dimer_runscript():
