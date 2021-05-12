@@ -23,7 +23,9 @@ def test_cliff_io():
     monomerA = testpath + "/monomer_data/monomerA.xyz"
     monomerB = testpath + "/monomer_data/monomerB.xyz"
     
-    save_path = "monomer_data/atomic_data/"
+    save_path = testpath + "/monomer_data/atomic_data/"
+
+    print(save_path)
 
     monA = cliff.load_monomer_xyz(monomerA)[0]
     monB = cliff.load_monomer_xyz(monomerB)
