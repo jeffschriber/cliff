@@ -80,7 +80,7 @@ jobs:
 
     - name: PyTest
       run: |
-        pytest -rws -v --cov=cliff --color=yes --cov-report=xml cliff/
+        pytest -s -v --cov=cliff --color=yes --cov-report=xml cliff/
 
     - name: CodeCov
       uses: codecov/codecov-action@v1
