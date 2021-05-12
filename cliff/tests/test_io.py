@@ -35,7 +35,7 @@ def test_cliff_io():
     
     options = Options()
     assert True
-    models = cliff.load_krr_models(options)
+    #models = cliff.load_krr_models(options)
 
     #print("models loaded")
 #
