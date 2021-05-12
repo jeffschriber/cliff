@@ -49,9 +49,12 @@ jobs:
 
     - name: Unload ML Models
       run: |
-        tar -xvf ./cliff/models/large/adens/*.gz
-        tar -xvf ./cliff/models/large/hirsh/*.gz
-        tar -xvf ./cliff/models/large/mtp/*.gz
+        cd cliff/models/large/adens/
+        tar -xvf *tar.gz  
+        cd ../hirsh/
+        tar -xvf *tar.gz  
+        cd ../mtp/
+        tar -xvf *tar.gz  
 
     - name: PyTest
       run: |
