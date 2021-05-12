@@ -76,6 +76,7 @@ jobs:
         tar -xvf n.tar.gz 
         tar -xvf o.tar.gz 
         tar -xvf s.tar.gz 
+        cd ../../../../
 
     - name: PyTest
       run: |
