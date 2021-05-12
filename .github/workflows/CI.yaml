@@ -47,6 +47,12 @@ jobs:
       run: |
         python -m pip install . --no-deps
 
+    - name: Unload ML Models
+      run: |
+        tar -xvf ./cliff/models/large/adens/*.gz
+        tar -xvf ./cliff/models/large/hirsh/*.gz
+        tar -xvf ./cliff/models/large/mtp/*.gz
+
     - name: PyTest
       run: |
         pytest -rws -v --cov=cliff --color=yes --cov-report=xml cliff/
