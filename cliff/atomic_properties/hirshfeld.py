@@ -80,7 +80,6 @@ class Hirshfeld:
                 print("Could not load model ", model)
 
         print("Hirshfeld models loaded") 
-        exit()
         # Make sure we have a model for all elements
            # raise Exception("Model not found for element {}".format(ele))    
 

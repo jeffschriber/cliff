@@ -271,8 +271,8 @@ def load_krr_models(options):
     mtp = Multipole(options,None)
 
     hirsh.load_ml()
-    adens.load_ml()
-    mtp.load_ml()
+#    adens.load_ml()
+#    mtp.load_ml()
 
     return [hirsh,adens,mtp]
 
