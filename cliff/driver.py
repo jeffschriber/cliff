@@ -270,8 +270,8 @@ def load_krr_models(options):
     adens = AtomicDensity(options,None)
     mtp = Multipole(options,None)
 
-#    hirsh.load_ml()
-#    adens.load_ml()
+    hirsh.load_ml()
+    adens.load_ml()
     mtp.load_ml()
 
     return [hirsh,adens,mtp]
