@@ -66,12 +66,15 @@ class AtomicDensity:
 
         adens_models = glob.glob(self.training_dir + '/*.pkl') 
         for model in adens_models:
-            with open(model, 'rb') as f:
-                d_train,a_train, self.mbtypes = pkl.load(f)
-                for ele in self.descr_train.keys():
-                    if ele in d_train.keys() and len(d_train[ele]) > 0:
-                        self.descr_train[ele] = d_train[ele]
-                        self.alpha_train[ele] = a_train[ele]
+            try:
+                with open(model, 'rb') as f:
+                    d_train,a_train, self.mbtypes = pkl.load(f)
+                    for ele in self.descr_train.keys():
+                        if ele in d_train.keys() and len(d_train[ele]) > 0:
+                            self.descr_train[ele] = d_train[ele]
+                            self.alpha_train[ele] = a_train[ele]
+            except:
+                print("Could not load model ", model)
         return None
 
 

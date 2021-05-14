@@ -34,37 +34,36 @@ def test_cliff_io():
     print(monA,monB)
     
     options = Options()
-    assert True
-    #models = cliff.load_krr_models(options)
+    models = cliff.load_krr_models(options)
 
-    #print("models loaded")
-#
-#    sysa = cliff.mol_to_sys(monA, options)
-#    sysa = cliff.predict_atomic_properties(sysa,models)    
-#    sysb_list = []
-#    for mb in monB:
-#        sysb = cliff.mol_to_sys(mb, options)
-#        sysb = cliff.predict_atomic_properties(sysb,models)    
-#
-#        sysb_list.append(sysb)
-#
-#
-#
-#    cliff.save_atomic_properties(sysa,save_path)
-#    for sb in sysb_list:
-#        cliff.save_atomic_properties(sb,save_path)
-#
-#
-#    monA = cliff.load_monomer_xyz(monomerA)
-#    monB = cliff.load_monomer_xyz(monomerB)
-#    energies = cliff.predict_from_monomer_list(monA,monB,load_path=save_path)
-#
-#    for n in range(3):
-#        ref = refs[n]
-#        en  = energies[n]
-#        assert (ref[0] - en[0]) < 1e-5        
-#        assert (ref[1] - en[1]) < 1e-5        
-#        assert (ref[2] - en[2]) < 1e-5        
-#        assert (ref[3] - en[3]) < 1e-5        
+    print("models loaded")
+
+    sysa = cliff.mol_to_sys(monA, options)
+    sysa = cliff.predict_atomic_properties(sysa,models)    
+    sysb_list = []
+    for mb in monB:
+        sysb = cliff.mol_to_sys(mb, options)
+        sysb = cliff.predict_atomic_properties(sysb,models)    
+
+        sysb_list.append(sysb)
+
+
+
+    cliff.save_atomic_properties(sysa,save_path)
+    for sb in sysb_list:
+        cliff.save_atomic_properties(sb,save_path)
+
+
+    monA = cliff.load_monomer_xyz(monomerA)
+    monB = cliff.load_monomer_xyz(monomerB)
+    energies = cliff.predict_from_monomer_list(monA,monB,load_path=save_path)
+
+    for n in range(3):
+        ref = refs[n]
+        en  = energies[n]
+        assert (ref[0] - en[0]) < 1e-5        
+        assert (ref[1] - en[1]) < 1e-5        
+        assert (ref[2] - en[2]) < 1e-5        
+        assert (ref[3] - en[3]) < 1e-5        
 
 

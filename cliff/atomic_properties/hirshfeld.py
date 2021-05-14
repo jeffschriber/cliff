@@ -65,16 +65,19 @@ class Hirshfeld:
             "    Loading Hirshfeld training from %s" % self.training_dir)
         hirsh_models = glob.glob(self.training_dir + '/*.pkl') 
         for model in hirsh_models:
-            with open(model, 'rb') as f:
-                #self.descr_train, self.alpha_train = pickle.load(f)
-                #d_train,a_train, self.mbtypes = pickle.load(f, encoding='latin1')
-                d_train,a_train, self.mbtypes = pickle.load(f, encoding="ISO-8859-1")
-                #d_train,a_train, self.mbtypes = pickle.load(f)
+            try:
+                with open(model, 'rb') as f:
+                    #self.descr_train, self.alpha_train = pickle.load(f)
+                    #d_train,a_train, self.mbtypes = pickle.load(f, encoding='latin1')
+                    d_train,a_train, self.mbtypes = pickle.load(f, encoding="ISO-8859-1")
+                    #d_train,a_train, self.mbtypes = pickle.load(f)
 
-                for ele in self.descr_train.keys():
-                    if ele in d_train.keys() and len(d_train[ele]) > 0:
-                        self.descr_train[ele] = d_train[ele]
-                        self.alpha_train[ele] = a_train[ele]
+                    for ele in self.descr_train.keys():
+                        if ele in d_train.keys() and len(d_train[ele]) > 0:
+                            self.descr_train[ele] = d_train[ele]
+                            self.alpha_train[ele] = a_train[ele]
+            except:
+                print("Could not load model ", model)
 
             
         # Make sure we have a model for all elements
