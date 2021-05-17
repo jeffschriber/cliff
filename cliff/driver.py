@@ -163,7 +163,9 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False):
 
     # load options (all defaults) and get the KRR models
     options = Options()
-    models = load_krr_models(options) 
+
+    if load_path is None:
+        models = load_krr_models(options) 
    
     energies = []
 

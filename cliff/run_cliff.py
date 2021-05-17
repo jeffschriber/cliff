@@ -409,7 +409,7 @@ def main(inpt=None, dimer=None, monA=None, monB=None, nproc=None, name=None, fra
         molA = cliff.load_monomer_xyz(monA, units)
         molB = cliff.load_monomer_xyz(monB, units)
         en = cliff.predict_from_monomer_list(molA,molB)
-
+        return 0
         # make some labels
         labels = []
         for n in range(len(molA)):
