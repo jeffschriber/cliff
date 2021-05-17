@@ -234,7 +234,8 @@ def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs
                 mon_b = load_atomic_properties(mon_b,load_path)  
 
             try:
-                en = energy_kernel(mon_a, mon_b, options) 
+                #en = energy_kernel(mon_a, mon_b, options) 
+                en = 0.0
             except:
                 en = "Error"
 
