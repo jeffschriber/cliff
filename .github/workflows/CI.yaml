@@ -67,15 +67,6 @@ jobs:
         tar -xvf N-hirsh.tar.gz 
         tar -xvf O-hirsh.tar.gz 
         tar -xvf S-hirsh.tar.gz 
-        cd ../mtp/
-        tar -xvf br.tar.gz 
-        tar -xvf cl.tar.gz 
-        tar -xvf c.tar.gz 
-        tar -xvf f.tar.gz 
-        tar -xvf h.tar.gz 
-        tar -xvf n.tar.gz 
-        tar -xvf o.tar.gz 
-        tar -xvf s.tar.gz 
         cd ../../../../
 
     - name: PyTest
