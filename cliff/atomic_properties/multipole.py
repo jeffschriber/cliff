@@ -105,7 +105,8 @@ class Multipole:
             load_files.append(load_file)
         else:
             load_files = glob.glob(self.training_dir + "/*.pkl")
-
+            self.logger.info(
+                "    Loading Multipole training from %s" % self.training_dir)
         for mtp_file in load_files: 
             try:
                 with open(mtp_file, 'rb') as f:
