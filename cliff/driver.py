@@ -213,7 +213,7 @@ def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs
         mon_b_list = [monomer_b]
     options = Options()
 
-    if load_path is not None:
+    if load_path is None:
         models = load_krr_models(options) 
     energies = []
     for A in mon_a_list:
