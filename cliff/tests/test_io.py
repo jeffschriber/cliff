@@ -50,15 +50,14 @@ def test_cliff_io():
 
     monA = cliff.load_monomer_xyz(monomerA)
     monB = cliff.load_monomer_xyz(monomerB)
-    assert True
-#    energies = cliff.predict_from_monomer_list(monA,monB,load_path=save_path)
-#
-#    for n in range(3):
-#        ref = refs[n]
-#        en  = energies[n]
-#        assert abs(ref[0] - en[0]) < 1e-5        
-#        assert abs(ref[1] - en[1]) < 1e-5        
-#        assert abs(ref[2] - en[2]) < 1e-5        
-#        assert abs(ref[3] - en[3]) < 1e-5        
+    energies = cliff.predict_from_monomer_list(monA,monB,load_path=save_path)
+
+    for n in range(3):
+        ref = refs[n]
+        en  = energies[n]
+        assert abs(ref[0] - en[0]) < 1e-5        
+        assert abs(ref[1] - en[1]) < 1e-5        
+        assert abs(ref[2] - en[2]) < 1e-5        
+        assert abs(ref[3] - en[3]) < 1e-5        
 
 
