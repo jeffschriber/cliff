@@ -46,11 +46,11 @@ def test_cliff_io():
     for sb in sysb_list:
         cliff.save_atomic_properties(sb,save_path)
 
+
+
+    monA = cliff.load_monomer_xyz(monomerA)
+    monB = cliff.load_monomer_xyz(monomerB)
     assert True
-
-
-#    monA = cliff.load_monomer_xyz(monomerA)
-#    monB = cliff.load_monomer_xyz(monomerB)
 #    energies = cliff.predict_from_monomer_list(monA,monB,load_path=save_path)
 #
 #    for n in range(3):
