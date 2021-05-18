@@ -38,25 +38,25 @@ def test_cliff_imported():
 #        assert abs(ref[3] - en[3]) < 1e-5        
 #
 
-def test_cliff_monomers():
-
-    refs = np.array([[-1.57184919,  1.94681627, -0.28760022, -1.34216795],[-0.99218904,  1.08849426, -0.15499095, -1.02014158],[-0.48795822,  0.43990854, -0.05996322, -0.67700809]])
-    
-    monomerA = testpath + "/monomer_data/monomerA.xyz"
-    monomerB = testpath + "/monomer_data/monomerB.xyz"
-
-    monA = cliff.load_monomer_xyz(monomerA)[0]
-    monB = cliff.load_monomer_xyz(monomerB)
-
-    energies = cliff.predict_from_monomer_list(monA,monB, infile=testpath +'/config.ini')
-
-    for n in range(3):
-        ref = refs[n]
-        en  = energies[n]
-        assert abs(ref[0] - en[0]) < 1e-5        
-        assert abs(ref[1] - en[1]) < 1e-5        
-        assert abs(ref[2] - en[2]) < 1e-5        
-        assert abs(ref[3] - en[3]) < 1e-5        
+#def test_cliff_monomers():
+#
+#    refs = np.array([[-1.57184919,  1.94681627, -0.28760022, -1.34216795],[-0.99218904,  1.08849426, -0.15499095, -1.02014158],[-0.48795822,  0.43990854, -0.05996322, -0.67700809]])
+#    
+#    monomerA = testpath + "/monomer_data/monomerA.xyz"
+#    monomerB = testpath + "/monomer_data/monomerB.xyz"
+#
+#    monA = cliff.load_monomer_xyz(monomerA)[0]
+#    monB = cliff.load_monomer_xyz(monomerB)
+#
+#    energies = cliff.predict_from_monomer_list(monA,monB, infile=testpath +'/config.ini')
+#
+#    for n in range(3):
+#        ref = refs[n]
+#        en  = energies[n]
+#        assert abs(ref[0] - en[0]) < 1e-5        
+#        assert abs(ref[1] - en[1]) < 1e-5        
+#        assert abs(ref[2] - en[2]) < 1e-5        
+#        assert abs(ref[3] - en[3]) < 1e-5        
 
 #def test_cliff_dimer_runscript():
 #    """Test execution of run_cliff.py"""
