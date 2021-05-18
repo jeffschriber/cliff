@@ -220,7 +220,6 @@ class Multipole:
 #                            float(extract_file[i].split()[12])])
 #                                for i in range(4,len(extract_file))]
         elif self.ml_method == "KRR" :
-            return None
             _system.build_slatm(self.mbtypes,self.cutoff)
             power  = constants.ml_power[self.kernel]
             prefac = constants.ml_prefactor[self.kernel]
