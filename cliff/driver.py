@@ -217,7 +217,6 @@ def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs
     if options is None:
         options = Options()
 
-    return 0
     if load_path is None:
         models = load_krr_models(options) 
     energies = []
