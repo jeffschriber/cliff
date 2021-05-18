@@ -29,16 +29,14 @@ def test_cliff_dimers():
                        [-1.62012678, 2.22211712,-0.25787379,-2.86988216],
                        [-4.08143058, 7.62044375,-1.97118627,-3.27760226]])
 
-    return true
-#    for n in range(4):
-#        ref = refs[n]
-#        en  = energies[n]
-#        assert abs(ref[0] - en[0]) < 1e-5        
-#        assert abs(ref[1] - en[1]) < 1e-5        
-#        assert abs(ref[2] - en[2]) < 1e-5        
-#        assert abs(ref[3] - en[3]) < 1e-5        
+    for n in range(4):
+        ref = refs[n]
+        en  = energies[n]
+        assert abs(ref[0] - en[0]) < 1e-5        
+        assert abs(ref[1] - en[1]) < 1e-5        
+        assert abs(ref[2] - en[2]) < 1e-5        
+        assert abs(ref[3] - en[3]) < 1e-5        
 
-test_cliff_dimers()
 
 ##def test_cliff_monomers():
 #
