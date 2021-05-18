@@ -119,6 +119,7 @@ def predict_atomic_properties(mol, models):
     mtp_ml = models[2]
 
     hirsh.predict_mol(mol, force_predict=True)
+    return 0
     adens.predict_mol(mol, force_predict=True)
     mtp_ml.predict_mol(mol, force_predict=True)
  
@@ -179,8 +180,8 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False, infile=None,
 
         if load_path is None:
             mon_a = predict_atomic_properties(mon_a,models)
-            return 0
             mon_b = predict_atomic_properties(mon_b,models)
+            return 0
         else:
             mon_a = load_atomic_properties(mon_a,load_path)  
             mon_b = load_atomic_properties(mon_b,load_path)  
