@@ -22,7 +22,7 @@ def test_cliff_imported():
 def test_cliff_dimers():
     dimer_xyz = glob.glob("dimer_data/*.xyz")
     dimers = [cliff.load_dimer_xyz(f) for f in dimer_xyz]
-    energies = cliff.predict_from_dimers(dimers)
+    energies = cliff.predict_from_dimers(dimers, infile='config.ini')
 
     refs = np.asarray([[-2.36940907, 3.35565678,-0.45133031,-3.90665939],
                        [-4.21149822, 6.35877881,-1.22398329,-2.14624461],
@@ -47,7 +47,7 @@ def test_cliff_monomers():
     monA = cliff.load_monomer_xyz(monomerA)[0]
     monB = cliff.load_monomer_xyz(monomerB)
 
-    energies = cliff.predict_from_monomer_list(monA,monB)
+    energies = cliff.predict_from_monomer_list(monA,monB, infile='config.ini')
 
     for n in range(3):
         ref = refs[n]

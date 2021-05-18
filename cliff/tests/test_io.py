@@ -60,4 +60,3 @@ def test_cliff_io():
         assert abs(ref[2] - en[2]) < 1e-5        
         assert abs(ref[3] - en[3]) < 1e-5        
 
-

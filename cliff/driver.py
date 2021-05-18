@@ -143,7 +143,7 @@ def load_atomic_properties(mol,path):
         
     return mol
 
-def predict_from_dimers(dimers, load_path=None, return_pairs=False):
+def predict_from_dimers(dimers, load_path=None, return_pairs=False, infile=None):
     '''
     Compute energy components from a list of dimers.
     Uses all default options, turns off logging
@@ -162,7 +162,10 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False):
 
 
     # load options (all defaults) and get the KRR models
-    options = Options()
+    if infile is None:
+        options = Options()
+    else:
+        options = Options(config_file=infile)
 
     if load_path is None:
         models = load_krr_models(options) 
@@ -189,7 +192,7 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False):
 
     return np.asarray(energies) 
     
-def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs=False, options=None):
+def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs=False,infile=None, options=None):
     '''
     Compute energy components from two lists of monomers
     Uses default options, places mon_a in outer loop 
@@ -215,7 +218,10 @@ def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs
         mon_b_list = [monomer_b]
 
     if options is None:
-        options = Options()
+        if infile is None:
+            options = Options()
+        else:
+            options = Options(config_file=infile)
 
     if load_path is None:
         models = load_krr_models(options) 
