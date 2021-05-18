@@ -28,8 +28,8 @@ def test_cliff_io():
     monA = cliff.load_monomer_xyz(monomerA)[0]
     monB = cliff.load_monomer_xyz(monomerB)
 
-    options = Options(config_file=testpath +"/config.ini")
-    #options.set_multipole_training(testpath + '/../models/small/mtp')
+    options = Options()
+    options.set_multipole_training(testpath + '/../models/small/mtp')
     models = cliff.load_krr_models(options)
 
     sysa = cliff.mol_to_sys(monA, options)
