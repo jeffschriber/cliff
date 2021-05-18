@@ -20,7 +20,7 @@ def test_cliff_imported():
     assert "cliff" in sys.modules
 
 def test_cliff_dimers():
-    dimer_xyz = glob.glob("dimer_data/*.xyz")
+    dimer_xyz = glob.glob(testpath + "/dimer_data/*.xyz")
     dimers = [cliff.load_dimer_xyz(f) for f in dimer_xyz]
     energies = cliff.predict_from_dimers(dimers, infile=testpath + '/config.ini')
 
