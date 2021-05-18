@@ -162,10 +162,11 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False, infile=None)
 
 
     # load options (all defaults) and get the KRR models
-    if infile is None:
-        options = Options()
-    else:
-        options = Options(config_file=infile)
+    if options is None:
+        if infile is None:
+            options = Options()
+        else:
+            options = Options(config_file=infile)
 
     if load_path is None:
         models = load_krr_models(options) 
