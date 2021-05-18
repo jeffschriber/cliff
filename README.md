@@ -27,6 +27,8 @@ For now, we use the external library QML to handle the computation of descriptor
 
     pip install qml --user -U
 Note that QML also requires a Fortran compiler which is available from conda.
+As a last piece of setup, all KRR models in the three subdirectories in cliff/models/large need to be un-tarred.
+
 
 # Running the Code
 CLIFF can be run using either a provided python script for command-line use, or by using import cliff in user-written python scripts.
