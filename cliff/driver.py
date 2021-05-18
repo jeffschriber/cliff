@@ -143,7 +143,7 @@ def load_atomic_properties(mol,path):
         
     return mol
 
-def predict_from_dimers(dimers, load_path=None, return_pairs=False, infile=None):
+def predict_from_dimers(dimers, load_path=None, return_pairs=False, infile=None, options=None):
     '''
     Compute energy components from a list of dimers.
     Uses all default options, turns off logging
