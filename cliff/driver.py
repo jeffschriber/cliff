@@ -189,7 +189,7 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False):
 
     return np.asarray(energies) 
     
-def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs=False):
+def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs=False, options=None):
     '''
     Compute energy components from two lists of monomers
     Uses default options, places mon_a in outer loop 
@@ -213,7 +213,9 @@ def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs
         mon_b_list = monomer_b
     else:
         mon_b_list = [monomer_b]
-    options = Options()
+
+    if options is None:
+        options = Options()
 
     if load_path is None:
         models = load_krr_models(options) 
