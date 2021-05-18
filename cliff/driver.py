@@ -171,7 +171,6 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False, infile=None,
     if load_path is None:
         models = load_krr_models(options) 
    
-    return 0
     energies = []
 
     for dimer in d_list:
@@ -185,6 +184,7 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False, infile=None,
             mon_a = load_atomic_properties(mon_a,load_path)  
             mon_b = load_atomic_properties(mon_b,load_path)  
         
+        return 0
         try:
             en = energy_kernel(mon_a, mon_b, options) 
         except:
