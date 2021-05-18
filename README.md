@@ -82,7 +82,7 @@ import cliff
 import glob
 
 # put your own path before /tests
-dimer_xyz = glob.glob(/tests/monomer_data/*.xyz)
+dimer_xyz = glob.glob("/tests/monomer_data/*.xyz")
 
 # Call a function to load the dimers
 # These dimers are QCelemental Molecule objects, with fragments specified
