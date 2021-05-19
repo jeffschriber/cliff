@@ -403,7 +403,7 @@ def main(inpt=None, dimer=None, monA=None, monB=None, nproc=None, name=None, fra
             except:
                 logger.info(f"   Cannot load {mol}")
 
-        en = cliff.predict_from_dimers(dimer_mols)
+        en = cliff.predict_from_dimers(dimer_mols, options=options)
 
         ret = (dimer_names,en)
     elif (monA is not None) and (monB is not None):
