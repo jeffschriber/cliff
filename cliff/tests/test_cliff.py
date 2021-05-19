@@ -73,12 +73,14 @@ def test_cliff_monomers():
 def test_cliff_dimer_runscript():
     """Test execution of run_cliff.py"""
     import cliff.run_cliff as rc
-    with open(testpath + '/config.ini', 'w') as inf:
+
+    config_file = testpath + 'config.ini'
+    with open(config_file, 'w') as inf:
         info = "[multipoles]\n"
         info += "training = " + testpath + "/../models/small/mtp"
         inf.write(info)
     
-    ret = rc.main(inpt = testpath + '/config.ini', dimer = testpath + '/dimer_data/', name='test' )
+    ret = rc.main(inpt = config_file, dimer = testpath + '/dimer_data/', name='test' )
     labels = ret[0]
     energy = ret[1]
 
