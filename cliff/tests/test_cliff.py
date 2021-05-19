@@ -82,7 +82,7 @@ def test_cliff_dimer_runscript():
     
     ret = rc.main(inpt = config_file, dimer = testpath + '/dimer_data/', name='test' )
     labels = ret[0]
-    energy = ret[1]
+    energies = ret[1]
 
     refs = np.asarray([[-1.62012678, 2.22211712, -0.25787379, -2.86988216],
     [-2.36940907, 3.35565678,-0.45133031,-3.90665939],
@@ -97,6 +97,7 @@ def test_cliff_dimer_runscript():
         assert abs(ref[2] - en[2]) < 1e-5        
         assert abs(ref[3] - en[3]) < 1e-5        
 
+test_cliff_dimer_runscript()
     
 #def test_cliff_mon_runscript():
 #    import cliff.run_cliff as rc

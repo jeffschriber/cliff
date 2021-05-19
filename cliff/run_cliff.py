@@ -391,7 +391,7 @@ def main(inpt=None, dimer=None, monA=None, monB=None, nproc=None, name=None, fra
     if dimer is not None:
         files = []
         if os.path.isdir(dimer):
-            files = glob.glob(dimer + '/*.xyz') 
+            files = sorted(glob.glob(dimer + '/*.xyz'))
         elif dimer.split('.')[-1] == 'xyz':
             files.append(dimer)
         dimer_mols = []
