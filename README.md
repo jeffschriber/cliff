@@ -1,6 +1,7 @@
 CLIFF
 ==============================
 [//]: # (Badges)
+[![CI](https://github.com/jeffschriber/cliff/actions/workflows/CI.yaml/badge.svg)](https://github.com/jeffschriber/cliff/actions/workflows/CI.yaml)
 [![codecov](https://codecov.io/gh/jeffschriber/CLIFF/branch/master/graph/badge.svg?token=vYYLLXHWhK)](https://codecov.io/gh/jeffschriber/CLIFF)
 
 Component-based Learned Intermolecular Force Field
