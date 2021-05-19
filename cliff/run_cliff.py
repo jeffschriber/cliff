@@ -67,6 +67,7 @@ def get_infile(inpt):
         else:
             infile = inpt                
 
+    print(infile)
     return infile
 
 def load_models(logger, options, ref=None):
