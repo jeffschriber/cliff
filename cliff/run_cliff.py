@@ -67,6 +67,7 @@ def get_infile(inpt):
         else:
             infile = inpt                
 
+    print(infile)
     return infile
 
 def load_models(logger, options, ref=None):
@@ -390,7 +391,7 @@ def main(inpt=None, dimer=None, monA=None, monB=None, nproc=None, name=None, fra
     if dimer is not None:
         files = []
         if os.path.isdir(dimer):
-            files = glob.glob(dimer + '/*.xyz') 
+            files = sorted(glob.glob(dimer + '/*.xyz'))
         elif dimer.split('.')[-1] == 'xyz':
             files.append(dimer)
         dimer_mols = []
@@ -402,14 +403,13 @@ def main(inpt=None, dimer=None, monA=None, monB=None, nproc=None, name=None, fra
             except:
                 logger.info(f"   Cannot load {mol}")
 
-        en = cliff.predict_from_dimers(dimer_mols)
+        en = cliff.predict_from_dimers(dimer_mols, options=options)
 
         ret = (dimer_names,en)
     elif (monA is not None) and (monB is not None):
         molA = cliff.load_monomer_xyz(monA, units)
         molB = cliff.load_monomer_xyz(monB, units)
-        en = cliff.predict_from_monomer_list(molA,molB)
-
+        en = cliff.predict_from_monomer_list(molA,molB, options=options)
         # make some labels
         labels = []
         for n in range(len(molA)):

@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - gha
+  pull_request:
+    branches:
+      - gha
+
+jobs:
+  build:
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+          - conda-env: test_env
+            python-version: 3.6
+            label: test_env
+            runs-on: ubuntu-latest
+
+    name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }}" # • ${{ matrix.cfg.runs-on }}"
+    runs-on: ${{ matrix.cfg.runs-on }}
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+  
+    - name: Create Environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: test
+        environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
+        python-version: ${{ matrix.cfg.python-version }}
+        auto-activate-base: false
+
+    - name: Environment Information
+      run: |
+        conda info
+        conda list --show-channel-urls
+
+    - name: Install CLIFF
+      run: |
+        python -m pip install . --no-deps
+
+    - name: Unload ML Models
+      run: |
+        cd cliff/models/large/adens/
+        tar -xvf Br-adens.tar.gz 
+        tar -xvf Cl-adens.tar.gz 
+        tar -xvf C-adens.tar.gz 
+        tar -xvf F-adens.tar.gz 
+        tar -xvf H-adens.tar.gz 
+        tar -xvf N-adens.tar.gz 
+        tar -xvf O-adens.tar.gz 
+        tar -xvf S-adens.tar.gz 
+        cd ../hirsh/
+        tar -xvf Br-hirsh.tar.gz 
+        tar -xvf Cl-hirsh.tar.gz 
+        tar -xvf C-hirsh.tar.gz 
+        tar -xvf F-hirsh.tar.gz 
+        tar -xvf H-hirsh.tar.gz 
+        tar -xvf N-hirsh.tar.gz 
+        tar -xvf O-hirsh.tar.gz 
+        tar -xvf S-hirsh.tar.gz 
+        cd ../../../../
+
+    - name: PyTest
+      run: |
+        pytest -s --cov=cliff --color=yes --cov-report=xml cliff/
+
+    - name: CodeCov
+      uses: codecov/codecov-action@v1

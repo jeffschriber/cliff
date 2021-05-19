@@ -105,21 +105,27 @@ class Multipole:
             load_files.append(load_file)
         else:
             load_files = glob.glob(self.training_dir + "/*.pkl")
+            self.logger.info(
+                "    Loading Multipole training from %s" % self.training_dir)
 
+            print("MTP models: ", self.training_dir)
         for mtp_file in load_files: 
-            with open(mtp_file, 'rb') as f:
-                descr_train_at, alpha_train, norm_tgt_mean, \
-                norm_tgt_std, mbtypes = pickle.load(f,encoding="ISO-8859-1")
-                #norm_tgt_std, mbtypes = pickle.load(f) #try for old pickles
-                #norm_tgt_std, mbtypes = pickle.load(f, encoding='latin1') #try for old pickles
-                for e in self.descr_train.keys():
-                    if e in descr_train_at.keys() and len(descr_train_at[e]) > 0:
-                        # Update
-                        self.descr_train[e] = descr_train_at[e]
-                        self.alpha_train[e] = alpha_train[e]
-                        self.norm_tgt_mean[e] = norm_tgt_mean[e]
-                        self.norm_tgt_std[e] = norm_tgt_std[e]
-                self.mbtypes = mbtypes
+            try:
+                with open(mtp_file, 'rb') as f:
+                    descr_train_at, alpha_train, norm_tgt_mean, \
+                    norm_tgt_std, mbtypes = pickle.load(f,encoding="ISO-8859-1")
+                    #norm_tgt_std, mbtypes = pickle.load(f) #try for old pickles
+                    #norm_tgt_std, mbtypes = pickle.load(f, encoding='latin1') #try for old pickles
+                    for e in self.descr_train.keys():
+                        if e in descr_train_at.keys() and len(descr_train_at[e]) > 0:
+                            # Update
+                            self.descr_train[e] = descr_train_at[e]
+                            self.alpha_train[e] = alpha_train[e]
+                            self.norm_tgt_mean[e] = norm_tgt_mean[e]
+                            self.norm_tgt_std[e] = norm_tgt_std[e]
+                    self.mbtypes = mbtypes
+            except:
+                print("Could not load model ", mtp_file)
         return None
 
     def save_ml(self, save_file):

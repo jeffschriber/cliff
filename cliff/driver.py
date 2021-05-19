@@ -118,9 +118,9 @@ def predict_atomic_properties(mol, models):
     adens = models[1]
     mtp_ml = models[2]
 
-    mtp_ml.predict_mol(mol, force_predict=True)
     hirsh.predict_mol(mol, force_predict=True)
     adens.predict_mol(mol, force_predict=True)
+    mtp_ml.predict_mol(mol, force_predict=True)
  
     return mol    
     
@@ -143,7 +143,7 @@ def load_atomic_properties(mol,path):
         
     return mol
 
-def predict_from_dimers(dimers, load_path=None, return_pairs=False):
+def predict_from_dimers(dimers, load_path=None, return_pairs=False, infile=None, options=None):
     '''
     Compute energy components from a list of dimers.
     Uses all default options, turns off logging
@@ -162,8 +162,14 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False):
 
 
     # load options (all defaults) and get the KRR models
-    options = Options()
-    models = load_krr_models(options) 
+    if options is None:
+        if infile is None:
+            options = Options()
+        else:
+            options = Options(config_file=infile)
+
+    if load_path is None:
+        models = load_krr_models(options) 
    
     energies = []
 
@@ -177,7 +183,7 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False):
         else:
             mon_a = load_atomic_properties(mon_a,load_path)  
             mon_b = load_atomic_properties(mon_b,load_path)  
-
+        
         try:
             en = energy_kernel(mon_a, mon_b, options) 
         except:
@@ -187,7 +193,7 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False):
 
     return np.asarray(energies) 
     
-def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs=False):
+def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs=False,infile=None, options=None):
     '''
     Compute energy components from two lists of monomers
     Uses default options, places mon_a in outer loop 
@@ -211,8 +217,16 @@ def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs
         mon_b_list = monomer_b
     else:
         mon_b_list = [monomer_b]
-    options = Options()
-    models = load_krr_models(options) 
+
+    if options is None:
+        if infile is None:
+            options = Options()
+        else:
+            options = Options(config_file=infile)
+
+    if load_path is None:
+        models = load_krr_models(options) 
+
     energies = []
     for A in mon_a_list:
         mon_a = mol_to_sys(A, options)
