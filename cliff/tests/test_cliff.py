@@ -97,21 +97,25 @@ def test_cliff_dimer_runscript():
         assert abs(ref[2] - en[2]) < 1e-5        
         assert abs(ref[3] - en[3]) < 1e-5        
 
-test_cliff_dimer_runscript()
     
-#def test_cliff_mon_runscript():
-#    import cliff.run_cliff as rc
-#    ret = rc.main(monA = testpath + '/monomer_data/monomerA.xyz', monB = testpath + '/monomer_data/monomerB.xyz', name='test',units='angstrom')
-#    ref = [[-1.57184919,  1.94681627, -0.28760022, -1.34216795], 
-#           [-0.99218904,  1.08849426, -0.15499095, -1.02014158],
-#           [-0.48795822,  0.43990854, -0.05996322, -0.67700809]]
-#    labels = ret[0]
-#    energy = ret[1]
-#    for lab,en in zip(labels,energy):
-#        l = int(lab[1])
-#        ref_e = ref[l]
-#        assert abs(ref_e[0] - en[0]) < 1e-5 
-#        assert abs(ref_e[1] - en[1]) < 1e-5 
-#        assert abs(ref_e[2] - en[2]) < 1e-5 
-#        assert abs(ref_e[3] - en[3]) < 1e-5 
+def test_cliff_mon_runscript():
+    import cliff.run_cliff as rc
+    config_file = testpath + 'config.ini'
+    with open(config_file, 'w') as inf:
+        info = "[multipoles]\n"
+        info += "training = " + testpath + "/../models/small/mtp"
+        inf.write(info)
+    ret = rc.main(inpt = config_file, monA = testpath + '/monomer_data/monomerA.xyz', monB = testpath + '/monomer_data/monomerB.xyz', name='test',units='angstrom')
+    ref = [[-1.57184919,  1.94681627, -0.28760022, -1.34216795], 
+           [-0.99218904,  1.08849426, -0.15499095, -1.02014158],
+           [-0.48795822,  0.43990854, -0.05996322, -0.67700809]]
+    labels = ret[0]
+    energy = ret[1]
+    for lab,en in zip(labels,energy):
+        l = int(lab[1])
+        ref_e = ref[l]
+        assert abs(ref_e[0] - en[0]) < 1e-5 
+        assert abs(ref_e[1] - en[1]) < 1e-5 
+        assert abs(ref_e[2] - en[2]) < 1e-5 
+        assert abs(ref_e[3] - en[3]) < 1e-5 
 
