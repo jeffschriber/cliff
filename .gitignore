@@ -3,6 +3,7 @@ cliff/attic/*
 cliff/models/large/hirsh/*.pkl
 cliff/models/large/adens/*.pkl
 cliff/models/large/mtp/*.pkl
+cliff/tests/monomer_data/atomic_data/*.npy
 
 
 # Byte-compiled / optimized / DLL files
