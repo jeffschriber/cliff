@@ -123,17 +123,22 @@ class System:
         self.Z = np.array([constants.atomic_number[ele] for ele in self.elements]) 
         self.identify_atom_types() 
 
-    def build_coulomb_matrices(self, max_neighbors, atom, direction=None):
-        self.coulomb_mat = []
-        self.atom_reorder = []
-        #for at in range(len(self.elements)):
-            # Only do one atom at a time
-        #if self.elements[at] == atom or (atom is None):
-        coul_mat, reorder_atoms = utils.build_coulomb_matrix(
-            self.coords, self.elements, atom, max_neighbors, direction)
-        self.coulomb_mat.append(coul_mat)
-        self.atom_reorder.append(reorder_atoms)
-        return None
+    def set_properties(self, props):
+        self.valence_widths = props['widths'] 
+        self.hirshfeld_ratios = props['ratios']
+        mtps = props['charges']
+        dip = props['dipoles']
+        qs = props['quadrupoles']
+
+        natom = len(mtps)
+
+        mtps = mtps.reshape(natom,1)
+        mtps = np.append(mtps, dip,1)
+        for c1 in range(3):
+            for c2 in range(3):
+                mtps = np.append(mtps, qs[:,c1,c2].reshape(natom,1),1)
+        self.multipoles = mtps
+
 
     def build_slatm(self, mbtypes, cutoff, xyz=None):
         #self.slatm = []
@@ -266,24 +271,4 @@ class System:
                 raise Exception("    Atom type %s detected, but is not parameterized!" % at_type) 
 
             self.atom_types.append(at_type)
-        return None
-
-    def load_mtp_from_hipart(self, txt, rotate=False):
-        """Load multipoles from hipart output text file"""
-        extract_file = utils.read_file(txt)
-        self.multipoles = [np.array([
-                        float(extract_file[i].split()[4]),
-                        float(extract_file[i].split()[6]),
-                        float(extract_file[i].split()[7]),
-                        float(extract_file[i].split()[5]),
-                        float(extract_file[i].split()[8]),
-                        float(extract_file[i].split()[9]),
-                        float(extract_file[i].split()[10]),
-                        float(extract_file[i].split()[11]),
-                        float(extract_file[i].split()[12])])
-                            for i in range(4,len(extract_file))]
-        if rotate is True:
-            self.compute_principal_axes()
-            self.multipoles = utils.rotate_mtps_back(
-                    self.multipoles, self.principal_axes)
         return None
