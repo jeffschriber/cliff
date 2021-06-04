@@ -185,7 +185,7 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False, infile=None,
             mon_b = load_atomic_properties(mon_b,load_path)  
         
         try:
-            en = energy_kernel(mon_a, mon_b, options) 
+            en = energy_kernel(mon_a, mon_b, options, return_pairs=return_pairs) 
         except:
             en = "Error"
 
@@ -246,7 +246,7 @@ def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs
                 mon_b = load_atomic_properties(mon_b,load_path)  
 
             try:
-                en = energy_kernel(mon_a, mon_b, options) 
+                en = energy_kernel(mon_a, mon_b, options, return_pairs=return_pairs) 
             except:
                 en = "Error"
 
@@ -254,7 +254,7 @@ def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs
 
     return energies
 
-def energy_kernel(mon_a, mon_b, options):
+def energy_kernel(mon_a, mon_b, options, return_pairs=False):
     
     #defines cell parameters for grid computations
     cell = Cell.lattice_parameters(100., 100., 100.)
@@ -276,8 +276,21 @@ def energy_kernel(mon_a, mon_b, options):
     indu_n = ind.polarization_energy()
     exch_n = rep.compute_repulsion()
     disp_en = disp.compute_dispersion()  
+    total = elst_n + indu_n + exch_n + disp_en
 
-    return np.array([elst_n,exch_n,indu_n,disp_en]) 
+    if return_pairs:
+        elst_p = mtp.at_elst
+        exch_p = rep.at_exch
+        indu_p = ind.at_ind
+        disp_p = disp.at_disp
+
+        total_p = elst_p + exch_p + indu_p + disp_p
+
+        ret_array = np.array([total_p,elst_p,exch_p,indu_p,disp_p])
+    else:
+        ret_array = np.array([total,elst_n,exch_n,indu_n,disp_en])
+
+    return ret_array 
 
 def load_krr_models(options):
     hirsh = Hirshfeld(options,None)

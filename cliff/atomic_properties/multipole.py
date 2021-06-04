@@ -73,27 +73,6 @@ class Multipole:
 
         self.nn_mtp = None
 
-        ## Load the models on init
-#        if self.ml_method == "KRR":
-#            mtp_s = time.time()
-#            mtp_models = glob.glob(options.multipole_training + '/*.pkl') 
-#            self.logger.info(
-#                    "    Loading multipole training from %s" % options.multipole_training)
-#            for model in mtp_models:
-#               # print(model)
-#                if not self.ref_mtp:
-#                    self.load_ml(model)
-#            mtp_e = time.time() 
-#            print("    Loaded {} multipole models in:\n\t\t {}".format(len(mtp_models), options.multipole_training))
-         #   print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
-#        elif self.ml_method == "NNAP":
-#            print("    Loading multipole models")
-#            mtp_s = time.time()
-#            self.nn_mtp = MultipoleModel.from_directory(options.multipole_training)
-#            mtp_e = time.time() 
-#            print("    Loaded multipole model in:\n\t\t {}".format(options.multipole_training))
-#            print("    Took %7.4f s to load multipole models" % (mtp_e - mtp_s))
-
     def set_ref_path(self, path):
         self.ref_path = path
 
@@ -108,7 +87,7 @@ class Multipole:
             self.logger.info(
                 "    Loading Multipole training from %s" % self.training_dir)
 
-            print("MTP models: ", self.training_dir)
+            #print("MTP models: ", self.training_dir)
         for mtp_file in load_files: 
             try:
                 with open(mtp_file, 'rb') as f:
