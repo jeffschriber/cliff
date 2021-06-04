@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - gha
+      - master
   pull_request:
     branches:
-      - gha
+      - master
 
 jobs:
   build:
