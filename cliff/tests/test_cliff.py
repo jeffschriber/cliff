@@ -39,10 +39,10 @@ def test_cliff_dimers():
     for n in range(4):
         ref = refs[n]
         en  = energies[n]
-        assert abs(ref[0] - en[0]) < 1e-5        
-        assert abs(ref[1] - en[1]) < 1e-5        
-        assert abs(ref[2] - en[2]) < 1e-5        
-        assert abs(ref[3] - en[3]) < 1e-5        
+        assert abs(ref[0] - en[1]) < 1e-5        
+        assert abs(ref[1] - en[2]) < 1e-5        
+        assert abs(ref[2] - en[3]) < 1e-5        
+        assert abs(ref[3] - en[4]) < 1e-5        
 
 def test_cliff_monomers():
 
@@ -65,10 +65,10 @@ def test_cliff_monomers():
     for n in range(3):
         ref = refs[n]
         en  = energies[n]
-        assert abs(ref[0] - en[0]) < 1e-5        
-        assert abs(ref[1] - en[1]) < 1e-5        
-        assert abs(ref[2] - en[2]) < 1e-5        
-        assert abs(ref[3] - en[3]) < 1e-5        
+        assert abs(ref[0] - en[1]) < 1e-5        
+        assert abs(ref[1] - en[2]) < 1e-5        
+        assert abs(ref[2] - en[3]) < 1e-5        
+        assert abs(ref[3] - en[4]) < 1e-5        
 
 def test_cliff_dimer_runscript():
     """Test execution of run_cliff.py"""
@@ -92,10 +92,10 @@ def test_cliff_dimer_runscript():
     for n in range(4):
         ref = refs[n]
         en  = energies[n]
-        assert abs(ref[0] - en[0]) < 1e-5        
-        assert abs(ref[1] - en[1]) < 1e-5        
-        assert abs(ref[2] - en[2]) < 1e-5        
-        assert abs(ref[3] - en[3]) < 1e-5        
+        assert abs(ref[0] - en[1]) < 1e-5        
+        assert abs(ref[1] - en[2]) < 1e-5        
+        assert abs(ref[2] - en[3]) < 1e-5        
+        assert abs(ref[3] - en[4]) < 1e-5        
 
     
 def test_cliff_mon_runscript():
@@ -114,8 +114,8 @@ def test_cliff_mon_runscript():
     for lab,en in zip(labels,energy):
         l = int(lab[1])
         ref_e = ref[l]
-        assert abs(ref_e[0] - en[0]) < 1e-5 
-        assert abs(ref_e[1] - en[1]) < 1e-5 
-        assert abs(ref_e[2] - en[2]) < 1e-5 
-        assert abs(ref_e[3] - en[3]) < 1e-5 
+        assert abs(ref_e[0] - en[1]) < 1e-5 
+        assert abs(ref_e[1] - en[2]) < 1e-5 
+        assert abs(ref_e[2] - en[3]) < 1e-5 
+        assert abs(ref_e[3] - en[4]) < 1e-5 
 

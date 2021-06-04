@@ -55,8 +55,8 @@ def test_cliff_io():
     for n in range(3):
         ref = refs[n]
         en  = energies[n]
-        assert abs(ref[0] - en[0]) < 1e-5        
-        assert abs(ref[1] - en[1]) < 1e-5        
-        assert abs(ref[2] - en[2]) < 1e-5        
-        assert abs(ref[3] - en[3]) < 1e-5        
+        assert abs(ref[0] - en[1]) < 1e-5        
+        assert abs(ref[1] - en[2]) < 1e-5        
+        assert abs(ref[2] - en[3]) < 1e-5        
+        assert abs(ref[3] - en[4]) < 1e-5        
 
