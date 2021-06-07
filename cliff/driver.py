@@ -29,6 +29,11 @@ from cliff.components.repulsion import Repulsion
 from cliff.components.induction_calc import InductionCalc
 from cliff.components.dispersion import Dispersion
 
+def set_nthread(nthread):
+    os.environ["OMP_NUM_THREADS"]    = str(nthread) 
+    os.environ["MKL_NUM_THREADS"]    = str(nthread)
+    os.environ["NUMEXPR_NUM_THREADS"]= str(nthread)
+
 def mol_to_sys(mol, options):
     
     # If mol is a dimer, return two sys

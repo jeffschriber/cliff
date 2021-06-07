@@ -36,11 +36,6 @@ from cliff.components.repulsion import Repulsion
 from cliff.components.induction_calc import InductionCalc
 from cliff.components.dispersion import Dispersion
 
-def set_nthread(nthread):
-    os.environ["OMP_NUM_THREADS"]    = str(nthread) 
-    os.environ["MKL_NUM_THREADS"]    = str(nthread)
-    os.environ["NUMEXPR_NUM_THREADS"]= str(nthread)
-
 def init_args():
     parser = argparse.ArgumentParser(description="CLIFF: a Component-based Learned Intermolecular Force Field")
     parser.add_argument('-i','--input', type=str, help='Location of input configuration file')

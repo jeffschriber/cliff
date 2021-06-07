@@ -60,6 +60,7 @@ def test_cliff_monomers():
     monA = cliff.load_monomer_xyz(monomerA)[0]
     monB = cliff.load_monomer_xyz(monomerB)
 
+    cliff.set_nthread(1)
     energies = cliff.predict_from_monomer_list(monA,monB, infile=testpath +'/config.ini')
 
     for n in range(3):

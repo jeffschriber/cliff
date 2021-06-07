@@ -132,7 +132,7 @@ class Multipole:
                 if at == 1:
                     # Do include the descriptor
                     self.descr_train[mol.atomtypes[j]].append(mol.representation[j])
-        for e in  self.descr_train.keys():
+        for e in self.descr_train.keys():
             size_training = len(self.target_train[e])
             # self.normalize(e)
            # print(e, size_training, len(self.descr_train[e]))
