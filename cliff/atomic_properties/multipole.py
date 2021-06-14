@@ -253,11 +253,10 @@ class Multipole:
         else:
             self.qml_filter_ele.append([1 if (str(mol.atomtypes[i]) == atom) else 0
                                 for i in range(mol.natoms)])
-        new_system.multipoles = np.empty((new_system.num_atoms,9))
+        new_system.multipoles = pun
         # Read in multipole moments from txt file
-        new_system.load_mtp_from_hipart(pun, rotate=False)
         if len(new_system.multipoles) != new_system.num_atoms:
-            raise Exception("Wrong number of charges in %s" % (pun))
+            raise Exception("Wrong number of charges in %s" % (len(pun)))
 
         for i in range(len(new_system.elements)):
             ele_i = new_system.elements[i]

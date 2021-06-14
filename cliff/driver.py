@@ -10,8 +10,6 @@ Contains all functions intended for outermost API-layer
 """
 
 import os
-
-
 import numpy as np
 import glob
 import qcelemental as qcel
