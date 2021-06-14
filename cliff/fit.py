@@ -164,30 +164,30 @@ def get_energy(params, pathname, gamma, ref):
 
 def fit_global_parameters(pathname, ref_dict, initial_guess=None,gamma=0.4, method='bfgs'):
 
-"""
-Fits global parameters used in CLIFF
-
-
-Parameters
-----------
-
-pathname : :class: `str`
-    Path to the dimer xyz files. The comment (second) line in the xyz needs to specify
-    the number of atoms in the first monomer.
-ref_dict : :class: `dict`
-    Dictionary containing the reference energies for fitting. The keys to the dictionary
-    need to be the extension-less dimer filenames, and the value is a numpy array of
-    energies: [total, elst, exch. indu].
-initial_guess : :class: `~numpy.ndarray`
-    Numpy array of initial guess parameters (69 total). See the `get_energy` function
-    for how initial parameters should be ordered. Default is 1.0 for all parameters
-gamma : :class: `float`
-    Gamma parameter between 0 and 1.0 that controls the degree to which the total 
-    energy influences fitting.
-method: :class: `str`
-    Algorithm used for minimization. See scipy.minimize documentation for all options
-
-"""
+    """
+    Fits global parameters used in CLIFF
+    
+    
+    Parameters
+    ----------
+    
+    pathname : :class: `str`
+        Path to the dimer xyz files. The comment (second) line in the xyz needs to specify
+        the number of atoms in the first monomer.
+    ref_dict : :class: `dict`
+        Dictionary containing the reference energies for fitting. The keys to the dictionary
+        need to be the extension-less dimer filenames, and the value is a numpy array of
+        energies: [total, elst, exch. indu].
+    initial_guess : :class: `~numpy.ndarray`
+        Numpy array of initial guess parameters (69 total). See the `get_energy` function
+        for how initial parameters should be ordered. Default is 1.0 for all parameters
+    gamma : :class: `float`
+        Gamma parameter between 0 and 1.0 that controls the degree to which the total 
+        energy influences fitting.
+    method: :class: `str`
+        Algorithm used for minimization. See scipy.minimize documentation for all options
+    
+    """
 
     atoms = ['Cl', 'F', 'Br', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2', 'N3', 'N2', 'N1', 'O1', 'O2']
     
