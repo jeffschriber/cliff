@@ -86,7 +86,7 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
-          - conda_env: docs_cf
+          - conda-env: docs_cf
             python-version: 3.6
             label: Sphinx
             runs-on: ubuntu-latest
