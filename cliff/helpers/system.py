@@ -240,6 +240,8 @@ class System:
                     bonded.append((at_i,at,dist))
             self.bonded_atoms.append(bonded)
             if at_ele == 'H':
+                # only let H bond to one ele, pick the shortest
+                bonded = sorted(bonded, key = lambda x: x[2]) 
                 at_type = 'H'+bonded[0][0]
             elif at_ele == 'O':
                 at_type = 'O'+str(len(bonded))
