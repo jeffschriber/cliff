@@ -28,12 +28,33 @@ from cliff.components.induction_calc import InductionCalc
 from cliff.components.dispersion import Dispersion
 
 def set_nthread(nthread):
+    """
+    Sets the number of threads used by the entire CLIFF module.
+    Increasing threads can only impact any threaded numpy routines.
+
+    Parameters
+    ----------
+    nthread : :class: `int`
+        Number of threads.
+    """
+
     os.environ["OMP_NUM_THREADS"]    = str(nthread) 
     os.environ["MKL_NUM_THREADS"]    = str(nthread)
     os.environ["NUMEXPR_NUM_THREADS"]= str(nthread)
 
 def mol_to_sys(mol, options):
-    
+    """
+    Converts a qcelemental Molecule into a System object used by CLIFF.
+    The input molecule object can specify either a dimer or a monomer, 
+    though it has to have a name (mol.name) in either case.
+
+    Parameters
+    ----------
+    mol : :class: `~qcel.models.Molecule`
+        Input molecule.
+    options : :class: `~cliff.helpers.Options`
+        Options object
+    """
     # If mol is a dimer, return two sys
     
     nfrag = len(mol.fragments)
@@ -90,6 +111,21 @@ def load_monomer_xyz(xyz_file, units='angstrom'):
     Total charge is last field in comment line    
 
     Returns list of qcel Molecule objects
+
+    Parameters
+    ----------
+
+    xyz_file : :class: `string`
+        Single xyz file containing one or more monomer coordinates. Each monomer
+        is in the usual xyz format, with the exception that here we reqiure the 
+        second line to specify the total charge as the final field in a comma-separated list
+        with potentially other information before
+        For example, neutral water could be:
+        3
+        water, 0
+        O 0.0 0.0 0.0
+        H 0.0 1.0 0.0
+        H 0.0 0.0 1.0
     '''
     
 
@@ -100,6 +136,8 @@ def load_monomer_xyz(xyz_file, units='angstrom'):
     charges = [int(line.split(',')[-1]) for line in lines if (len(line.split(',')) > 1)]
     coords = [line for line in lines if len(line.split()) == 4]
 
+    if len(charges) == 0:
+        raise Exception("Must specify total charge in xyz file (last field in comment line of xyz)")
 
     n_prev = 0
     nmol = 0
@@ -117,6 +155,18 @@ def load_monomer_xyz(xyz_file, units='angstrom'):
     
 
 def predict_atomic_properties(mol, models):
+    """
+    Predicts the atomic properties for an input System
+    Returns System with Hirshfeld, atomic density, and multipole.
+
+    Parameters
+    ----------
+    mol : :class: `~cliff.helpers.System`
+        Input System
+    models : list of :class: `~cliff.atomic_properties.Hirshfeld` ,`~cliff.atomic_properties.AtomicDensity`, and `~cliff.atomic_properties.Multipole`
+        List of dimension (3,) in the exact order: [Hirshfeld, AtomicDensity, Multipole].
+    """
+
     hirsh = models[0]
     adens = models[1]
     mtp_ml = models[2]
@@ -128,6 +178,20 @@ def predict_atomic_properties(mol, models):
     return mol    
     
 def save_atomic_properties(mol,path):
+    """
+    Saves atomic properties to a .npy file in a specified location.
+    The name of the file is determined by the name of the original
+    qcelemental Molecule object, with the suffix -h.npy, -vw.npy, or
+    -mtp.npy for a given atomic property.
+
+    Parameters
+    ----------
+    mol : :class: `~cliff.helpers.System`
+        System object with one or more atomic property fields already computed.
+    path : :class: `str`
+        Path to the destination where atomic property files are to be stored.
+        Note that this path needs to exist, and it cannot be used to specify a filename. 
+    """
     # Only do properties that have been computed
     if len(mol.hirshfeld_ratios) > 0:
         sfile = mol.name + "-h.npy"
@@ -140,6 +204,12 @@ def save_atomic_properties(mol,path):
         np.save(path + "/" + sfile, mol.multipoles) 
 
 def load_atomic_properties(mol,path):
+    """
+    Loads Hirshfeld ratios, valence widths, and multipoles
+    from files and stores them in the input System object.
+    The System object finds the appropriate 
+    """
+
     mol.hirshfeld_ratios = np.load(path + "/" + mol.name + "-h.npy")  
     mol.valence_widths = np.load(path + "/" + mol.name + "-vw.npy")  
     mol.multipoles = np.load(path + "/" + mol.name + "-mtp.npy")  
@@ -280,6 +350,7 @@ def energy_kernel(mon_a, mon_b, options, return_pairs=False):
     exch_n = rep.compute_repulsion()
     disp_en = disp.compute_dispersion()  
     total = elst_n + indu_n + exch_n + disp_en
+
 
     if return_pairs:
         elst_p = mtp.at_elst
