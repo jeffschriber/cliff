@@ -1,0 +1,479 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>CLIFF API Documentation &mdash; CLIFF 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cliff.helpers package" href="cliff.helpers.html" />
+    <link rel="prev" title="Running CLIFF" href="running_cliff.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CLIFF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running_cliff.html">Running CLIFF</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CLIFF API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cliff.helpers.html">cliff.helpers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-cliff.driver">Driver Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-cliff.fit">Fitting Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-cliff.train">Training functions</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CLIFF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>CLIFF API Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/cliff.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cliff-api-documentation">
+<h1>CLIFF API Documentation<a class="headerlink" href="#cliff-api-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cliff.helpers.html">cliff.helpers package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cliff.helpers.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cliff.helpers.html#module-cliff.helpers.cell">cliff.helpers.cell module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cliff.helpers.html#module-cliff.helpers.constants">cliff.helpers.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cliff.helpers.html#module-cliff.helpers.options">cliff.helpers.options module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cliff.helpers.html#module-cliff.helpers.system">cliff.helpers.system module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cliff.helpers.html#module-cliff.helpers.utils">cliff.helpers.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cliff.helpers.html#module-cliff.helpers">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="module-cliff.driver">
+<span id="driver-functions"></span><h2>Driver Functions<a class="headerlink" href="#module-cliff.driver" title="Permalink to this headline">¶</a></h2>
+<p>Driver functions contain the main functions for energy computation,
+in addition to related functions needed for predicting atomic properties.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.driver.energy_kernel">
+<span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">energy_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mon_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mon_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#energy_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.energy_kernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.driver.load_atomic_properties">
+<span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">load_atomic_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#load_atomic_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.load_atomic_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads Hirshfeld ratios, valence widths, and multipoles
+from files and stores them in the input System object.
+The System object finds the appropriate</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.driver.load_dimer_xyz">
+<span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">load_dimer_xyz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'angstrom'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#load_dimer_xyz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.load_dimer_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a dimer xyz file, where the separation between dimers is
+specified as the last field in the second line in the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xyz_file</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Filename of the dimer xyz file. See main docs for how to format a dimer xyz.</p></li>
+<li><p><strong>units</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>:) – Units of the input coordinates, default to Angstrom. See QCElemental documentation
+for all available units.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dimer</strong> – QCElemental Molecule object. The returned Molecule object has two defined fragemens, one for
+each monomer.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">molecule</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.driver.load_krr_models">
+<span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">load_krr_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#load_krr_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.load_krr_models" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.driver.load_monomer_xyz">
+<span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">load_monomer_xyz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'angstrom'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#load_monomer_xyz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.load_monomer_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads single/multi xyz file of monomers.
+Total charge is last field in comment line.</p>
+<p>Function returns list of qcel Molecule objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xyz_file</strong> – Single xyz file containing one or more monomer coordinates. Each monomer
+is in the usual xyz format, with the exception that here we reqiure the
+second line to specify the total charge as the final field in a comma-separated list
+with potentially other information before.</p></li>
+<li><p><strong>units</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>:) – Units of the input coordinates, default to Angstrom. See QCElemental documentation
+for all available units.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>molecules</strong> – A List of QCElemental molecule objects, each corresponding to a monomer in the input monomer xyz
+file.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of <code class="xref py py-class docutils literal notranslate"><span class="pre">qcelemental.molecule</span></code> objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.driver.mol_to_sys">
+<span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">mol_to_sys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#mol_to_sys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.mol_to_sys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a qcelemental Molecule into a System object used by CLIFF.
+The input molecule object can specify either a dimer or a monomer,
+though it has to have a name (mol.name) in either case.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> – Input QCElemental molecule.</p></li>
+<li><p><strong>options</strong> – Options object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>systems</strong> – Cliff System object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">cliff.System</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.driver.predict_atomic_properties">
+<span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">predict_atomic_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#predict_atomic_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.predict_atomic_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicts the atomic properties for an input System
+Returns System with Hirshfeld, atomic density, and multipole.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> – Input System</p></li>
+<li><p><strong>models</strong> (list of <code class="xref py py-class docutils literal notranslate"><span class="pre">Hirshfeld</span></code> ,`~cliff.atomic_properties.AtomicDensity`, and <cite>~cliff.atomic_properties.Multipole</cite>) – List of dimension (3,) in the exact order: [Hirshfeld, AtomicDensity, Multipole].</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.driver.predict_from_dimers">
+<span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">predict_from_dimers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#predict_from_dimers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.predict_from_dimers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute energy components from a list of dimers.
+Uses all default options, turns off logging</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimers</strong> (<em>qcel Molecule class</em><em> or </em><em>list of Molecule class</em>) – </p></li>
+<li><p><strong>return_pairs</strong> (<em>bool to control returning of full atom-pairwise decomposition</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.driver.predict_from_monomer_list">
+<span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">predict_from_monomer_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monomer_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monomer_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#predict_from_monomer_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.predict_from_monomer_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute energy components from two lists of monomers
+Uses default options, places mon_a in outer loop
+monomer list to outer loop</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mon_a</strong> (<em>list of</em><em> (or </em><em>single</em><em>) </em><em>qcel Molecules</em>) – </p></li>
+<li><p><strong>mon_b</strong> (<em>list of</em><em> (or </em><em>single</em><em>) </em><em>qcel Molecules</em>) – </p></li>
+<li><p><strong>return_pairs</strong> (<em>bool to control returning of full atom-pairwise decomposition</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.driver.save_atomic_properties">
+<span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">save_atomic_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#save_atomic_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.save_atomic_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves atomic properties to a .npy file in a specified location.
+The name of the file is determined by the name of the original
+qcelemental Molecule object, with the suffix -h.npy, -vw.npy, or
+-mtp.npy for a given atomic property.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> – System object with one or more atomic property fields already computed.</p></li>
+<li><p><strong>path</strong> – Path to the destination where atomic property files are to be stored.
+Note that this path needs to exist, and it cannot be used to specify a filename.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.driver.set_nthread">
+<span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">set_nthread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nthread</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#set_nthread"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.set_nthread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the number of threads used by the entire CLIFF module.
+Increasing threads can only impact any threaded numpy routines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nthread</strong> – Number of threads.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-cliff.fit">
+<span id="fitting-functions"></span><h2>Fitting Functions<a class="headerlink" href="#module-cliff.fit" title="Permalink to this headline">¶</a></h2>
+<p>train.py
+Component-based Learned Intermolecular Force Field</p>
+<p>Functions for fitting global parameters</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.fit.fit_global_parameters">
+<span class="sig-prename descclassname"><span class="pre">cliff.fit.</span></span><span class="sig-name descname"><span class="pre">fit_global_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bfgs'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/fit.html#fit_global_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.fit.fit_global_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits global parameters used in CLIFF</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pathname</strong> – Path to the dimer xyz files. The comment (second) line in the xyz needs to specify
+the number of atoms in the first monomer.</p></li>
+<li><p><strong>ref_dict</strong> – Dictionary containing the reference energies for fitting. The keys to the dictionary
+need to be the extension-less dimer filenames, and the value is a numpy array of
+energies: [total, elst, exch. indu].</p></li>
+<li><p><strong>initial_guess</strong> – Numpy array of initial guess parameters (69 total). See the <cite>get_energy</cite> function
+for how initial parameters should be ordered. Default is 1.0 for all parameters</p></li>
+<li><p><strong>gamma</strong> – Gamma parameter between 0 and 1.0 that controls the degree to which the total
+energy influences fitting.</p></li>
+<li><p><strong>method</strong> – Algorithm used for minimization. See scipy.minimize documentation for all options</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.fit.get_energy">
+<span class="sig-prename descclassname"><span class="pre">cliff.fit.</span></span><span class="sig-name descname"><span class="pre">get_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pathname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/fit.html#get_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.fit.get_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-cliff.train">
+<span id="training-functions"></span><h2>Training functions<a class="headerlink" href="#module-cliff.train" title="Permalink to this headline">¶</a></h2>
+<p>train.py
+Component-based Learned Intermolecular Force Field</p>
+<p>Contains functions for training ML models for atomic
+properties</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.train.get_mols">
+<span class="sig-prename descclassname"><span class="pre">cliff.train.</span></span><span class="sig-name descname"><span class="pre">get_mols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/train.html#get_mols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.train.get_mols" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.train.run_multipole_krr">
+<span class="sig-prename descclassname"><span class="pre">cliff.train.</span></span><span class="sig-name descname"><span class="pre">run_multipole_krr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_xyzs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ele</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparams</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/train.html#run_multipole_krr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.train.run_multipole_krr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.train.train_atomic_volume_krr">
+<span class="sig-prename descclassname"><span class="pre">cliff.train.</span></span><span class="sig-name descname"><span class="pre">train_atomic_volume_krr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac_training</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/train.html#train_atomic_volume_krr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.train.train_atomic_volume_krr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.train.train_hirshfeld_krr">
+<span class="sig-prename descclassname"><span class="pre">cliff.train.</span></span><span class="sig-name descname"><span class="pre">train_hirshfeld_krr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ele</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/train.html#train_hirshfeld_krr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.train.train_hirshfeld_krr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.train.train_multipole_krr">
+<span class="sig-prename descclassname"><span class="pre">cliff.train.</span></span><span class="sig-name descname"><span class="pre">train_multipole_krr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac_training</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/train.html#train_multipole_krr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.train.train_multipole_krr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run training/prediction with frac_training ratio</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="cliff.helpers.html" class="btn btn-neutral float-right" title="cliff.helpers package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="running_cliff.html" class="btn btn-neutral float-left" title="Running CLIFF" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, Jeffrey B. Schriber.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

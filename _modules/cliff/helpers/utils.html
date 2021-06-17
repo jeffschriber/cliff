@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>cliff.helpers.utils &mdash; CLIFF 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> CLIFF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../running_cliff.html">Running CLIFF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cliff.html">CLIFF API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">CLIFF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>cliff.helpers.utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for cliff.helpers.utils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">cliff.helpers.constants</span> <span class="k">as</span> <span class="nn">constants</span>
+<span class="kn">import</span> <span class="nn">cliff.helpers.cell</span> <span class="k">as</span> <span class="nn">Cell</span>
+
+
+<span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<div class="viewcode-block" id="file_finder"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.file_finder">[docs]</a><span class="k">def</span> <span class="nf">file_finder</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">ref</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">jobdir</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compiles xyz files for multiple computations</span>
+<span class="sd">    </span>
+<span class="sd">    dirs points to directories, one for each computation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">fname</span>
+    <span class="c1"># check current directory if none is passed</span>
+    <span class="k">if</span> <span class="n">jobdir</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">jobdir</span> <span class="o">=</span> <span class="s1">&#39;./&#39;</span>
+
+    <span class="n">master_xyzs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">monbs</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">jobdir</span> <span class="o">+</span> <span class="s1">&#39;/*.xyz&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">monb</span> <span class="ow">in</span> <span class="n">monbs</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="n">monb</span> <span class="o">==</span> <span class="n">ref</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">filelist</span> <span class="o">=</span> <span class="p">[</span><span class="n">ref</span><span class="p">,</span><span class="n">monb</span><span class="p">]</span>
+            <span class="n">master_xyzs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filelist</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Gather directories in jobdir</span>
+        <span class="n">jobdirs</span> <span class="o">=</span> <span class="p">[</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">jobdir</span><span class="p">,</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">jobdir</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">jobdir</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span> <span class="p">]</span>
+        
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">jobdirs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot find job directories!&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;    Found </span><span class="si">{}</span><span class="s2"> job directories&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jobdirs</span><span class="p">)))</span>        
+            
+        <span class="n">filesum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">jd</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">jobdirs</span><span class="p">):</span>
+            <span class="n">filelist</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">jd</span> <span class="o">+</span> <span class="s1">&#39;/*.xyz&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filelist</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Job </span><span class="si">{}</span><span class="s2"> does not contain any files!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+            <span class="n">filelist</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">filelist</span><span class="p">)</span>
+            <span class="n">filesum</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filelist</span><span class="p">)</span>
+            <span class="n">master_xyzs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filelist</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">filesum</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot find xyz files!&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;    Found </span><span class="si">{}</span><span class="s2"> xyz files&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filesum</span><span class="p">))</span>        
+
+
+    <span class="k">return</span> <span class="n">master_xyzs</span></div>
+
+<span class="c1"># Set logger</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.log&#39;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+
+<div class="viewcode-block" id="read_file"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.read_file">[docs]</a><span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="n">infile</span><span class="p">):</span>
+    <span class="s1">&#39;Read file and return content&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cannot open file </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">infile</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># Remove all empty header lines</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">s</span></div>
+
+
+<div class="viewcode-block" id="set_logger_level"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.set_logger_level">[docs]</a><span class="k">def</span> <span class="nf">set_logger_level</span><span class="p">(</span><span class="n">level</span><span class="p">):</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="build_coulomb_matrix"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.build_coulomb_matrix">[docs]</a><span class="k">def</span> <span class="nf">build_coulomb_matrix</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">atom_types</span><span class="p">,</span>
+    <span class="n">central_atom_id</span><span class="p">,</span> <span class="n">max_neighbors</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Build Coulomb matrix ordered by distance to central_atom_id&#39;&#39;&#39;</span>
+    <span class="c1"># First sort list of atoms; then build distance matrix; then</span>
+    <span class="c1"># invert elements; then multiply by numerator (atomic numbers)</span>
+    <span class="c1"># Return upper triangular part of the (N,N) array</span>
+    <span class="c1">#</span>
+    <span class="c1"># First compute distance of all atoms to central_atom_id</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">cart_ord</span><span class="p">,</span> <span class="n">atom_typ_ord</span><span class="p">,</span> <span class="n">reorder</span> <span class="o">=</span> <span class="n">reorder_atoms</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">atom_types</span><span class="p">,</span>
+        <span class="n">central_atom_id</span><span class="p">,</span> <span class="n">max_neighbors</span><span class="p">)</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">extract_atomic_numbers</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span><span class="n">atom_typ_ord</span><span class="p">)</span>
+    <span class="n">Z</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">max_neighbors</span><span class="p">)</span>
+    <span class="c1"># Compute distance matrix</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">max_neighbors</span><span class="p">,</span><span class="n">max_neighbors</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">max_neighbors</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">diff2</span> <span class="o">=</span> <span class="n">cart_ord</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">cart_ord</span><span class="p">[:,</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">diff2</span> <span class="o">**=</span> <span class="mi">2</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">+=</span> <span class="n">diff2</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">max_neighbors</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">max_neighbors</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">Z</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">Z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">2.4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">direction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Optional orientation dot product</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">max_neighbors</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">max_neighbors</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span>
+                        <span class="n">cart_ord</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">-</span><span class="n">cart_ord</span><span class="p">[</span><span class="n">j</span><span class="p">,:],</span><span class="n">direction</span><span class="p">))</span>
+    <span class="n">d</span><span class="p">[</span><span class="n">N</span><span class="p">:,:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">d</span><span class="p">[:,</span><span class="n">N</span><span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="c1"># Trying to reduce Coul Mat</span>
+    <span class="c1"># d[3:,3:] = 0.0</span>
+    <span class="k">return</span> <span class="n">d</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">triu_indices</span><span class="p">(</span><span class="n">max_neighbors</span><span class="p">)],</span><span class="n">reorder</span></div>
+
+
+<div class="viewcode-block" id="reorder_atoms"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.reorder_atoms">[docs]</a><span class="k">def</span> <span class="nf">reorder_atoms</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">atom_types</span><span class="p">,</span> <span class="n">central_atom_id</span><span class="p">,</span> <span class="n">max_neighbors</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Reorder list of atoms from the central atom and by its distance&#39;&#39;&#39;</span>
+    <span class="n">distMain</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([(</span><span class="n">coords</span><span class="p">[</span><span class="n">central_atom_id</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[:,</span><span class="n">j</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)])</span>
+
+    <span class="n">distMain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">distMain</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">reorder</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">distMain</span><span class="p">)</span>
+    <span class="c1">#reorder = [0,1,2]</span>
+    <span class="c1"># keep canonical ordering if distances are equivalent</span>
+
+
+    <span class="n">cart_ord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">max_neighbors</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">),</span><span class="n">max_neighbors</span><span class="p">)):</span>
+        <span class="n">cart_ord</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="n">reorder</span><span class="p">[</span><span class="n">i</span><span class="p">],:]</span>
+    <span class="n">atom_typ_ord</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)):</span>
+        <span class="n">atom_typ_ord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_types</span><span class="p">[</span><span class="n">reorder</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="n">cart_ord</span><span class="p">,</span> <span class="n">atom_typ_ord</span><span class="p">,</span> <span class="n">reorder</span></div>
+
+
+<div class="viewcode-block" id="neighboring_vectors"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.neighboring_vectors">[docs]</a><span class="k">def</span> <span class="nf">neighboring_vectors</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">atom_types</span><span class="p">,</span> <span class="n">central_atom_id</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Returns neighboring pairwise vectors starting from central atom up</span>
+<span class="sd">    to 3. If it&#39;s less than 3, complete by orthogonal vectors.&#39;&#39;&#39;</span>
+    <span class="n">cart_ord</span><span class="p">,</span> <span class="n">atom_typ_ord</span><span class="p">,</span> <span class="n">reorder</span> <span class="o">=</span> <span class="n">reorder_atoms</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">atom_types</span><span class="p">,</span>
+                                                    <span class="n">central_atom_id</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">ngb</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cart_ord</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+    <span class="n">ngb_vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">atom_types</span><span class="p">[</span><span class="n">central_atom_id</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="s2">&quot;O&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ngb_vecs</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)):</span>
+            <span class="n">ngb_vecs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cart_ord</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">cart_ord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Rearrange atoms if we have two H atoms first</span>
+        <span class="c1"># if len(atom_types) &gt; 3 \</span>
+        <span class="c1">#    and atom_typ_ord[1] == &quot;H&quot; \</span>
+        <span class="c1">#    and atom_typ_ord[2] == &quot;H&quot;:</span>
+        <span class="c1">#     # Exchange #3 with #1</span>
+        <span class="c1">#     cart_ord[1], cart_ord[3] = cart_ord[3], cart_ord[1]</span>
+        <span class="c1"># Z-vector</span>
+        <span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">cart_ord</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">cart_ord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cart_ord</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">cart_ord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cart_ord</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">cart_ord</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">ngb_vecs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">vec_all_dir</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ngb_vecs</span><span class="p">[:,</span><span class="n">j</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">1e-3</span><span class="p">:</span>
+            <span class="n">vec_all_dir</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ngb_vecs</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ngb_vecs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mf">1e-6</span><span class="p">:</span>
+            <span class="n">ngb_vecs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ngb_vecs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">ngb_vecs</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ngb_vecs</span><span class="p">,</span> <span class="n">vec_all_dir</span></div>
+
+<div class="viewcode-block" id="extract_atomic_numbers"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.extract_atomic_numbers">[docs]</a><span class="k">def</span> <span class="nf">extract_atomic_numbers</span><span class="p">(</span><span class="n">cartesian</span><span class="p">,</span><span class="n">atom_types</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Extract atomic number from name of atom type&#39;&#39;&#39;</span>
+    <span class="c1"># Parse atom type, then read from dictionary</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cartesian</span><span class="p">)</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;[0-9+-]&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">atom_types</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">ele</span>  <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;[A-Z][^A-Z]*&#39;</span><span class="p">,</span><span class="n">name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Can&#39;t find element </span><span class="si">%s</span><span class="s2"> in dictionary.&quot;</span> <span class="o">%</span> <span class="n">ele</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Can&#39;t find element </span><span class="si">%s</span><span class="s2"> in dictionary.&quot;</span> <span class="o">%</span> <span class="n">ele</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Z</span></div>
+
+<div class="viewcode-block" id="spher_to_cart"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.spher_to_cart">[docs]</a><span class="k">def</span> <span class="nf">spher_to_cart</span><span class="p">(</span><span class="n">quad</span><span class="p">,</span> <span class="n">stone_convention</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="s1">&#39;convert spherical to cartesian multipoles&#39;</span>
+    <span class="n">cart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">stone_convention</span><span class="p">:</span>
+        <span class="n">cart</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">quad</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cart</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cart</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="n">quad</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cart</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cart</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="n">quad</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">cart</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cart</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="n">quad</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">cart</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="n">quad</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">cart</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">+</span><span class="mf">0.5</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="n">quad</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cart</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">quad</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cart</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cart</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="mf">.5</span><span class="o">*</span><span class="n">quad</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cart</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cart</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="mf">.5</span><span class="o">*</span><span class="n">quad</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">cart</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cart</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="mf">.5</span><span class="o">*</span><span class="n">quad</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">cart</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">.5</span><span class="o">*</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="n">quad</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">quad</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">cart</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span>      <span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="n">quad</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">cart</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">cart</span></div>
+
+<div class="viewcode-block" id="cart_to_sphere"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.cart_to_sphere">[docs]</a><span class="k">def</span> <span class="nf">cart_to_sphere</span><span class="p">(</span><span class="n">cart</span><span class="p">):</span>
+    <span class="s1">&#39;Convert cartesian to spherical multipoles&#39;</span>
+    <span class="n">spher</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="c1"># use Stone convention</span>
+    <span class="n">spher</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">cart</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">spher</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="n">cart</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">spher</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="n">cart</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">spher</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="p">(</span><span class="n">cart</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">cart</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">spher</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">sqrt_3</span><span class="o">*</span><span class="n">cart</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">spher</span></div>
+
+<div class="viewcode-block" id="slater_mbis"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.slater_mbis">[docs]</a><span class="k">def</span> <span class="nf">slater_mbis</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">coord_i</span><span class="p">,</span> <span class="n">N_i</span><span class="p">,</span> <span class="n">v_i</span><span class="p">,</span> <span class="n">U_i</span><span class="p">,</span> <span class="n">coord_j</span><span class="p">,</span> <span class="n">N_j</span><span class="p">,</span> <span class="n">v_j</span><span class="p">,</span> <span class="n">U_j</span><span class="p">):</span>  
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns overlap of two atoms scaled by global parameters</span>
+
+<span class="sd">    @params:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Get interatomic distance</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">pbc_distance</span><span class="p">(</span><span class="n">coord_i</span><span class="p">,</span> <span class="n">coord_j</span><span class="p">)</span>
+    <span class="n">rij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+    <span class="c1"># Call function externally to enable jit</span>
+    <span class="k">return</span> <span class="n">slater_mbis_funcform</span><span class="p">(</span><span class="n">rij</span><span class="p">,</span> <span class="n">N_i</span><span class="p">,</span> <span class="n">v_i</span><span class="p">,</span> <span class="n">N_j</span><span class="p">,</span> <span class="n">v_j</span><span class="p">)</span> </div>
+    <span class="c1">#return U_i * U_j * slater_mbis_funcform(rij, N_i, v_i, N_j, v_j) </span>
+    <span class="c1">#return U_i * U_j * slater_mbis_funcform(rij, v_i, v_j) </span>
+
+<span class="c1">#def slater_mbis_funcform(rij,vi, vj):</span>
+<span class="c1">#    Bij = np.sqrt(1.0/(vi*vj))</span>
+<span class="c1">#</span>
+<span class="c1">#    return ((1./3)*Bij*Bij*rij*rij + Bij*rij + 1) * np.exp(-Bij*rij) </span>
+
+<div class="viewcode-block" id="build_r"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.build_r">[docs]</a><span class="k">def</span> <span class="nf">build_r</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">cell</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">c1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">c2</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">c1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">c2</span><span class="p">):</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">pbc_distance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="slater_ovp_mat"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.slater_ovp_mat">[docs]</a><span class="k">def</span> <span class="nf">slater_ovp_mat</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">v1</span><span class="p">,</span><span class="n">v2</span><span class="p">):</span>
+
+    <span class="c1"># simpler method:</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">v1</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">v2</span><span class="p">)))</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">v2</span><span class="p">))</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span><span class="o">*</span><span class="n">B</span><span class="o">*</span><span class="n">B</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">B</span><span class="o">*</span><span class="n">r</span>
+    <span class="n">out</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">B</span><span class="o">*</span><span class="n">r</span><span class="p">)</span>
+    
+ <span class="c1">#   out = np.ones((len(v1),len(v2)))</span>
+ <span class="c1">#   for i in range(len(v1)): </span>
+ <span class="c1">#       for j in range(len(v2)): </span>
+ <span class="c1">#           out[i][j] = slater_mbis_funcform(r[i][j],p1[i],v1[i],p2[j],v2[j])</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="slater_mbis_funcform"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.utils.slater_mbis_funcform">[docs]</a><span class="k">def</span> <span class="nf">slater_mbis_funcform</span><span class="p">(</span><span class="n">rij</span><span class="p">,</span> <span class="n">N_i</span><span class="p">,</span> <span class="n">v_i</span><span class="p">,</span> <span class="n">N_j</span><span class="p">,</span> <span class="n">v_j</span><span class="p">):</span>
+    <span class="n">v_i2</span><span class="p">,</span> <span class="n">v_j2</span> <span class="o">=</span> <span class="n">v_i</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">v_j</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">v_i</span><span class="o">-</span><span class="n">v_j</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-4</span><span class="p">:</span> <span class="c1"># Original IPML uses 1e-3</span>
+        <span class="c1"># regular formula</span>
+        <span class="n">g0ab</span> <span class="o">=</span> <span class="o">-</span><span class="mi">4</span><span class="o">*</span><span class="n">v_i2</span><span class="o">*</span><span class="n">v_j2</span><span class="o">/</span><span class="p">(</span><span class="n">v_i2</span><span class="o">-</span><span class="n">v_j2</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span>
+        <span class="n">g1ab</span> <span class="o">=</span> <span class="n">v_i</span><span class="o">/</span><span class="p">(</span><span class="n">v_i2</span><span class="o">-</span><span class="n">v_j2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">g0ba</span> <span class="o">=</span> <span class="o">-</span><span class="mi">4</span><span class="o">*</span><span class="n">v_j2</span><span class="o">*</span><span class="n">v_i2</span><span class="o">/</span><span class="p">(</span><span class="n">v_j2</span><span class="o">-</span><span class="n">v_i2</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span>
+        <span class="n">g1ba</span> <span class="o">=</span> <span class="n">v_j</span><span class="o">/</span><span class="p">(</span><span class="n">v_j2</span><span class="o">-</span><span class="n">v_i2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="k">return</span> <span class="n">N_i</span><span class="o">*</span><span class="n">N_j</span><span class="o">/</span><span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rij</span><span class="p">)</span> <span class="o">*</span> \
+                            <span class="p">((</span><span class="n">g0ab</span><span class="o">+</span><span class="n">g1ab</span><span class="o">*</span><span class="n">rij</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">rij</span><span class="o">/</span><span class="n">v_i</span><span class="p">)</span> \
+                            <span class="o">+</span> <span class="p">(</span><span class="n">g0ba</span><span class="o">+</span><span class="n">g1ba</span><span class="o">*</span><span class="n">rij</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">rij</span><span class="o">/</span><span class="n">v_j</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">v_i</span> <span class="o">+</span> <span class="n">v_j</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">rij</span><span class="o">/</span><span class="n">v</span>
+        <span class="n">rv2</span><span class="p">,</span> <span class="n">rv3</span><span class="p">,</span> <span class="n">rv4</span> <span class="o">=</span> <span class="n">rv</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">rv</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="n">rv</span><span class="o">**</span><span class="mi">4</span>
+        <span class="n">exprv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">rv</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">N_i</span><span class="o">*</span><span class="n">N_j</span> <span class="o">*</span> \
+            <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mi">192</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">v</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">3</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="n">rv</span><span class="o">+</span><span class="n">rv2</span><span class="p">)</span> <span class="o">*</span> <span class="n">exprv</span> \
+            <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">v_j</span><span class="o">-</span><span class="n">v_i</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">384</span><span class="o">*</span><span class="n">v</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">9</span><span class="o">-</span><span class="mi">9</span><span class="o">*</span><span class="n">rv</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">rv2</span><span class="o">+</span><span class="n">rv3</span><span class="p">)</span> <span class="o">*</span> <span class="n">exprv</span> \
+            <span class="o">+</span> <span class="p">(</span><span class="n">v_j</span><span class="o">-</span><span class="n">v_i</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">3840</span><span class="o">*</span><span class="n">v</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">90</span><span class="o">+</span><span class="mi">90</span><span class="o">*</span><span class="n">rv</span><span class="o">+</span><span class="mi">5</span><span class="o">*</span><span class="n">rv2</span><span class="o">-</span><span class="mi">25</span><span class="o">*</span><span class="n">rv3</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="n">rv4</span><span class="p">)</span> <span class="o">*</span> <span class="n">exprv</span><span class="p">)</span></div>
+
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, Jeffrey B. Schriber.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,494 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>cliff.helpers.system &mdash; CLIFF 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> CLIFF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../running_cliff.html">Running CLIFF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cliff.html">CLIFF API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">CLIFF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>cliff.helpers.system</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for cliff.helpers.system</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">qcelemental</span> <span class="k">as</span> <span class="nn">qcel</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cliff.helpers.utils</span> <span class="k">as</span> <span class="nn">utils</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">cliff.helpers.constants</span> <span class="k">as</span> <span class="nn">constants</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">qml</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+
+
+<div class="viewcode-block" id="System"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.system.System">[docs]</a><span class="k">class</span> <span class="nc">System</span><span class="p">:</span>
+    <span class="s1">&#39;Common system class for molecular system&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">xyz</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">master_elements</span>   <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="s1">&#39;N&#39;</span><span class="p">,</span><span class="s1">&#39;O&#39;</span><span class="p">,</span><span class="s1">&#39;H&#39;</span><span class="p">,</span><span class="s1">&#39;S&#39;</span><span class="p">,</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span><span class="s1">&#39;F&#39;</span><span class="p">,</span><span class="s1">&#39;Br&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">master_atom_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span><span class="s1">&#39;F&#39;</span><span class="p">,</span><span class="s1">&#39;S1&#39;</span><span class="p">,</span><span class="s1">&#39;S2&#39;</span><span class="p">,</span><span class="s1">&#39;HS&#39;</span><span class="p">,</span><span class="s1">&#39;HC&#39;</span><span class="p">,</span><span class="s1">&#39;HN&#39;</span><span class="p">,</span><span class="s1">&#39;HO&#39;</span><span class="p">,</span><span class="s1">&#39;C4&#39;</span><span class="p">,</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span><span class="s1">&#39;C2&#39;</span><span class="p">,</span><span class="s1">&#39;N3&#39;</span><span class="p">,</span><span class="s1">&#39;N2&#39;</span><span class="p">,</span><span class="s1">&#39;N1&#39;</span><span class="p">,</span><span class="s1">&#39;O1&#39;</span><span class="p">,</span><span class="s1">&#39;O2&#39;</span><span class="p">,</span><span class="s1">&#39;Br&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="p">[</span><span class="n">xyz</span><span class="p">]</span>
+        <span class="c1"># Coordinates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Number of atoms in the molecule</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># Chemical elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Z</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_reorder</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># slatm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slatm</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Predict ratios</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirshfeld_ratios</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Atomic valence widths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valence_widths</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Core charge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chg_core</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># multipoles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipoles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Expansion coefficients of multipoles along pairwise vectors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mtp_expansion</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Basis set for expansion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Principal axes for MTPs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">principal_axes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Pairwise vectors and rotation matrices for atomic environment descriptor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pairwise_vec</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pairwise_norm</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Atom types</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># List of bonds to each atom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bonded_atoms</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">xyz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_xyz</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_reorder</span> <span class="o">=</span> <span class="p">[]</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">mtp_to_disk</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">multipole_save_to_disk</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mtp_save_path</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">multipole_save_path</span>
+
+<div class="viewcode-block" id="System.set_mtp_save_path"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.system.System.set_mtp_save_path">[docs]</a>    <span class="k">def</span> <span class="nf">set_mtp_save_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mtp_save_path</span> <span class="o">=</span> <span class="n">path</span></div>
+
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Combine two systems&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">elements</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">num_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">num_atoms</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span><span class="n">sys</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">s</span><span class="o">.</span><span class="n">num_atoms</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">atom_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">atom_types</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">sys</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No molecule name!&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="System.load_xyz"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.system.System.load_xyz">[docs]</a>    <span class="k">def</span> <span class="nf">load_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="n">extract_file</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">extract_file</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">extract_file</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">i</span><span class="o">&gt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">i</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># check element types:</span>
+        <span class="k">for</span> <span class="n">ele</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ele</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">master_elements</span><span class="p">:</span> 
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;    Found element </span><span class="si">%s</span><span class="s2">, but not parameterized!&quot;</span> <span class="o">%</span> <span class="n">ele</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;    Found element </span><span class="si">%s</span><span class="s2">, but not parameterized!&quot;</span> <span class="o">%</span> <span class="n">ele</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)):</span>
+            <span class="n">ele</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">ele</span> <span class="o">==</span> <span class="s2">&quot;CL&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Cl&quot;</span>
+            <span class="k">if</span> <span class="n">ele</span> <span class="o">==</span> <span class="s2">&quot;BR&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Br&quot;</span>
+        <span class="n">iterable</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="n">j</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">extract_file</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">i</span><span class="o">&gt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">i</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">iterable</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">extract_file</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">i</span><span class="o">&gt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">())</span><span class="o">&gt;</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_types</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loaded molecule </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> atoms.&#39;</span> \
+            <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Elements </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="System.load_qcel_mol"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.system.System.load_qcel_mol">[docs]</a>    <span class="k">def</span> <span class="nf">load_qcel_mol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mol</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">geometry</span><span class="o">*</span><span class="n">qcel</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">conversion_factor</span><span class="p">(</span><span class="s2">&quot;bohr&quot;</span><span class="p">,</span> <span class="s2">&quot;angstrom&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">symbols</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">constants</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span> <span class="k">for</span> <span class="n">ele</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">])</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_types</span><span class="p">()</span> </div>
+
+<div class="viewcode-block" id="System.build_coulomb_matrices"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.system.System.build_coulomb_matrices">[docs]</a>    <span class="k">def</span> <span class="nf">build_coulomb_matrices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_neighbors</span><span class="p">,</span> <span class="n">atom</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coulomb_mat</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_reorder</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1">#for at in range(len(self.elements)):</span>
+            <span class="c1"># Only do one atom at a time</span>
+        <span class="c1">#if self.elements[at] == atom or (atom is None):</span>
+        <span class="n">coul_mat</span><span class="p">,</span> <span class="n">reorder_atoms</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">build_coulomb_matrix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span> <span class="n">atom</span><span class="p">,</span> <span class="n">max_neighbors</span><span class="p">,</span> <span class="n">direction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coulomb_mat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coul_mat</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_reorder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reorder_atoms</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="System.build_slatm"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.system.System.build_slatm">[docs]</a>    <span class="k">def</span> <span class="nf">build_slatm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mbtypes</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">xyz</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1">#self.slatm = []</span>
+        <span class="c1">## Need xyz</span>
+        <span class="c1">#if len(self.xyz) == 0:</span>
+        <span class="c1">#    if xyz is not None:</span>
+        <span class="c1">#        mol = qml.Compound(xyz)</span>
+        <span class="c1">#    else:</span>
+        <span class="c1">#        raise ValueError(&quot;Missing xyz file&quot;)</span>
+        <span class="c1">#else:</span>
+        <span class="c1">#    mol = qml.Compound(self.xyz[0])</span>
+        <span class="c1">#mol.generate_slatm(mbtypes, rcut=cutoff,local=True)</span>
+        <span class="c1">#self.slatm = mol.representation</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">slatm</span> <span class="o">=</span> <span class="n">qml</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">generate_slatm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span><span class="n">mbtypes</span><span class="p">,</span><span class="n">rcut</span><span class="o">=</span><span class="n">cutoff</span><span class="p">,</span><span class="n">local</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="System.initialize_multipoles"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.system.System.initialize_multipoles">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_multipoles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Initialize multipoles to 0&#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipoles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span><span class="p">,</span><span class="mi">9</span><span class="p">))</span>
+        <span class="c1"># mtp_expansion has size 1+3+9=13 for ranks 0,1,2.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mtp_expansion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span><span class="p">,</span><span class="mi">13</span><span class="p">))</span>
+        <span class="c1"># MTPs based on derivatives. 1+3+6</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipoles_grads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="System.expand_multipoles"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.system.System.expand_multipoles">[docs]</a>    <span class="k">def</span> <span class="nf">expand_multipoles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Expand coefficients along basis set to compute multipoles</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipoles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span><span class="p">,</span><span class="mi">9</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">multipoles</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mtp_expansion</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># dipole</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mtp_expansion</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">:</span>
+                <span class="n">dip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mtp_expansion</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">multipoles</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="o">+</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">dip</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="c1"># quadrupole</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mtp_expansion</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">4</span><span class="p">:])</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">:</span>
+                <span class="n">quadloc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mtp_expansion</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">4</span><span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+                <span class="n">quad</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">cart_to_sphere</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mtp_expansion</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">4</span><span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))),</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                <span class="c1"># quadloc = utils.spher_to_cart(self.mtp_expansion[i][4:])</span>
+                <span class="c1"># quad = utils.cart_to_spher(np.dot(np.dot(</span>
+                <span class="c1">#         np.linalg.inv(self.basis[i]), quadloc),</span>
+                <span class="c1">#         self.basis[i]), stone_convention=True)</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">multipoles</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">4</span><span class="o">+</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">quad</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="c1"># print mtps to ref files</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mtp_to_disk</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_mtp</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="System.save_mtp"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.system.System.save_mtp">[docs]</a>    <span class="k">def</span> <span class="nf">save_mtp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.xyz&#39;</span><span class="p">)</span>
+        <span class="n">reffile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mtp_save_path</span> <span class="o">+</span> <span class="n">xyz</span> <span class="o">+</span> <span class="s1">&#39;-mtp.txt&#39;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">reffile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mtp_file</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">mtps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">multipoles</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">mtp</span> <span class="ow">in</span> <span class="n">mtps</span><span class="p">:</span>
+                    <span class="n">mtp_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">mtp</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">mtp_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="System.compute_basis"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.system.System.compute_basis">[docs]</a>    <span class="k">def</span> <span class="nf">compute_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Basis for multipole expansion</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">vec_all_dir</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span><span class="p">):</span>
+            <span class="n">bas</span><span class="p">,</span> <span class="n">vec</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">neighboring_vectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bas</span><span class="p">)</span>
+            <span class="n">vec_all_dir</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vec_all_dir</span></div>
+
+<div class="viewcode-block" id="System.identify_atom_types"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.system.System.identify_atom_types">[docs]</a>    <span class="k">def</span> <span class="nf">identify_atom_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="s2">&quot;Identifies the atom type and bonds of every atom in the molecule&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bonded_atoms</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">at_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_atoms</span><span class="p">):</span>
+            <span class="n">at_ele</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">at_id</span><span class="p">]</span>
+            <span class="n">at_crd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">at_id</span><span class="p">])</span>
+
+            <span class="n">at_type</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">bonded</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">at</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">):</span>
+                <span class="n">at_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">i_crd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">thrsld</span> <span class="o">=</span> <span class="mf">2.0</span>
+
+                <span class="k">if</span> <span class="n">at_ele</span> <span class="o">==</span> <span class="s1">&#39;H&#39;</span> <span class="ow">or</span> <span class="n">at_i</span> <span class="o">==</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span>
+                    <span class="n">thrsld</span> <span class="o">=</span> <span class="mf">1.5</span>
+            
+                <span class="k">if</span> <span class="n">at_ele</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span> <span class="ow">or</span> <span class="n">at_i</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
+                    <span class="n">thrsld</span> <span class="o">=</span> <span class="mf">2.2</span>
+
+                <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">at_crd</span><span class="p">,</span><span class="n">i_crd</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="n">thrsld</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">at_id</span><span class="p">:</span>
+                    <span class="n">bonded</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">at_i</span><span class="p">,</span><span class="n">at</span><span class="p">,</span><span class="n">dist</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bonded_atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bonded</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">at_ele</span> <span class="o">==</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span>
+                <span class="c1"># only let H bond to one ele, pick the shortest</span>
+                <span class="n">bonded</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">bonded</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> 
+                <span class="n">at_type</span> <span class="o">=</span> <span class="s1">&#39;H&#39;</span><span class="o">+</span><span class="n">bonded</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">at_ele</span> <span class="o">==</span> <span class="s1">&#39;O&#39;</span><span class="p">:</span>
+                <span class="n">at_type</span> <span class="o">=</span> <span class="s1">&#39;O&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bonded</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">at_ele</span> <span class="o">==</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span>
+                <span class="n">at_type</span> <span class="o">=</span> <span class="s1">&#39;N&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bonded</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">at_ele</span> <span class="o">==</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span>
+                <span class="n">at_type</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bonded</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">at_ele</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bonded</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">at_type</span> <span class="o">=</span> <span class="s1">&#39;S2&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">at_type</span> <span class="o">=</span> <span class="s1">&#39;S&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bonded</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">at_ele</span> <span class="o">==</span> <span class="s1">&#39;Cl&#39;</span> <span class="ow">or</span> <span class="n">at_ele</span> <span class="o">==</span> <span class="s1">&#39;CL&#39;</span><span class="p">:</span>
+                <span class="n">at_type</span> <span class="o">=</span> <span class="s1">&#39;Cl&#39;</span>
+            <span class="k">elif</span> <span class="n">at_ele</span> <span class="o">==</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span>
+                <span class="n">at_type</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+            <span class="k">elif</span> <span class="n">at_ele</span> <span class="o">==</span> <span class="s1">&#39;BR&#39;</span> <span class="ow">or</span> <span class="n">at_ele</span> <span class="o">==</span> <span class="s1">&#39;Br&#39;</span><span class="p">:</span>
+                <span class="n">at_type</span> <span class="o">=</span> <span class="s1">&#39;Br&#39;</span>
+
+            <span class="k">if</span> <span class="n">at_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">master_atom_types</span> <span class="ow">and</span> <span class="n">logger</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;    Atom type </span><span class="si">%s</span><span class="s2"> detected, but is not parameterized!&quot;</span> <span class="o">%</span> <span class="n">at_type</span><span class="p">)</span> 
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;    Atom type </span><span class="si">%s</span><span class="s2"> detected, but is not parameterized!&quot;</span> <span class="o">%</span> <span class="n">at_type</span><span class="p">)</span> 
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">atom_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">at_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="System.load_mtp_from_hipart"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.system.System.load_mtp_from_hipart">[docs]</a>    <span class="k">def</span> <span class="nf">load_mtp_from_hipart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="n">rotate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load multipoles from hipart output text file&quot;&quot;&quot;</span>
+        <span class="n">extract_file</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipoles</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">extract_file</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">]),</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">extract_file</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">6</span><span class="p">]),</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">extract_file</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">7</span><span class="p">]),</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">extract_file</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">5</span><span class="p">]),</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">extract_file</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">8</span><span class="p">]),</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">extract_file</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">9</span><span class="p">]),</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">extract_file</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">10</span><span class="p">]),</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">extract_file</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">11</span><span class="p">]),</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">extract_file</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">12</span><span class="p">])])</span>
+                            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">extract_file</span><span class="p">))]</span>
+        <span class="k">if</span> <span class="n">rotate</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compute_principal_axes</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">multipoles</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">rotate_mtps_back</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">multipoles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">principal_axes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, Jeffrey B. Schriber.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

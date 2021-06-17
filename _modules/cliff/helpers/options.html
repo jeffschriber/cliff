@@ -1,0 +1,750 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>cliff.helpers.options &mdash; CLIFF 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> CLIFF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../running_cliff.html">Running CLIFF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cliff.html">CLIFF API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">CLIFF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>cliff.helpers.options</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for cliff.helpers.options</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">cliff.helpers.utils</span> <span class="k">as</span> <span class="nn">util</span>
+<span class="kn">import</span> <span class="nn">cliff.helpers.constants</span> <span class="k">as</span> <span class="nn">constants</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<div class="viewcode-block" id="Options"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options">[docs]</a><span class="k">class</span> <span class="nc">Options</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to parse and store options</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="o">=</span><span class="s2">&quot;config.ini&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Config parser</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Config</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+        <span class="c1"># Load config file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+        <span class="c1"># Set logger</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;output&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="n">fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.log&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+
+
+        <span class="c1"># Logger level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger_level</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger_level</span><span class="p">)</span>
+        <span class="n">util</span><span class="o">.</span><span class="n">set_logger_level</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger_level</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_mode</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># The options and default values</span>
+
+        <span class="n">models_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+        <span class="n">models_path</span> <span class="o">+=</span> <span class="s2">&quot;/../models/large/&quot;</span>
+        <span class="c1"># Hirshfeld train/learn options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_training</span> <span class="o">=</span> <span class="n">models_path</span> <span class="o">+</span> <span class="s2">&quot;hirsh/&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_krr_kernel</span> <span class="o">=</span> <span class="s1">&#39;laplacian&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_krr_sigma</span> <span class="o">=</span> <span class="mf">1000.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_krr_lambda</span> <span class="o">=</span> <span class="mf">1e-9</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_filepath</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_file_read</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_cutoff</span> <span class="o">=</span> <span class="mf">4.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_save_to_disk</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_save_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    
+
+        <span class="c1"># Atomic Density options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_training</span> <span class="o">=</span> <span class="n">models_path</span> <span class="o">+</span> <span class="s2">&quot;adens/&quot;</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_cutoff</span> <span class="o">=</span> <span class="mf">4.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_krr_kernel</span> <span class="o">=</span> <span class="s1">&#39;laplacian&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_krr_sigma</span> <span class="o">=</span> <span class="mf">1000.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_krr_lambda</span> <span class="o">=</span> <span class="mf">1e-9</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_ref_adens</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_refpath</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_save_to_disk</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_save_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># Defaults for multipoles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_training</span> <span class="o">=</span> <span class="n">models_path</span> <span class="o">+</span> <span class="s2">&quot;mtp/&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_ml_method</span> <span class="o">=</span> <span class="s2">&quot;KRR&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_kernel</span> <span class="o">=</span> <span class="s1">&#39;laplacian&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_krr_sigma</span> <span class="o">=</span> <span class="mf">10.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_krr_lambda</span> <span class="o">=</span> <span class="mf">1e-3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_correct_charge</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_ref_mtp</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_ref_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_save_to_disk</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_save_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_rcut</span> <span class="o">=</span> <span class="mf">4.5</span>
+
+        <span class="c1"># Defaults for electrostatics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elst_type</span> <span class="o">=</span> <span class="s2">&quot;damped_mtp&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elst_damping_exponents</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">elst_cp_exp</span> 
+
+        <span class="c1"># Defaults for Induction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indu_sr_params</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">indu_sr_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indu_smearing_coeff</span> <span class="o">=</span> <span class="mf">0.38539063</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indu_omega</span> <span class="o">=</span> <span class="mf">0.75</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">indu_conv</span> <span class="o">=</span> <span class="mf">1e-5</span>
+
+        <span class="c1"># Defaults for Exchange</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exch_int_params</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">exch_int_params</span> 
+
+        <span class="c1"># Defaults for dispersion/polarizability</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">disp_method</span>    <span class="o">=</span> <span class="s1">&#39;TT&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disp_coeffs</span>    <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">disp_coeffs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pol_scs_cutoff</span> <span class="o">=</span> <span class="mf">5.01451</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">disp_beta</span>      <span class="o">=</span> <span class="mf">2.40871</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disp_radius</span>    <span class="o">=</span> <span class="mf">0.57785</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pol_exponent</span>   <span class="o">=</span> <span class="mf">0.177346</span>
+        <span class="c1">#self.pol_scs_cutoff = 3.93473 </span>
+        <span class="c1">#self.disp_beta      = 2.40871</span>
+        <span class="c1">#self.disp_radius    = 0.58605</span>
+        <span class="c1">#self.pol_exponent   = 0.177346</span>
+
+
+        <span class="c1"># load the options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_hirsh_options</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_atomic_density_options</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_multipole_options</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_elst_options</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_indu_options</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_exch_options</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_disp_options</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Options.load_hirsh_options"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.load_hirsh_options">[docs]</a>    <span class="k">def</span> <span class="nf">load_hirsh_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="c1">#test</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;output&quot;</span><span class="p">,</span> <span class="s2">&quot;test_mode&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_mode</span> <span class="o">=</span> <span class="kc">True</span> 
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_mode</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="c1"># log level</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger_level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getint</span><span class="p">(</span><span class="s2">&quot;output&quot;</span><span class="p">,</span> <span class="s2">&quot;log_level&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1">### Options for computing Hirshfeld ratios</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_training</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hirshfeld&quot;</span><span class="p">,</span><span class="s2">&quot;training&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Return type of kernel</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_krr_kernel</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hirshfeld&quot;</span><span class="p">,</span><span class="s2">&quot;krr_kernel&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Return sigma parameter for #machinelearning</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_krr_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;hirshfeld&quot;</span><span class="p">,</span><span class="s2">&quot;krr_sigma&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Return sigma parameter for machinelearning</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_krr_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;hirshfeld&quot;</span><span class="p">,</span><span class="s2">&quot;krr_lambda&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># cutoff for ml descriptor</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_cutoff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;hirshfeld&quot;</span><span class="p">,</span><span class="s2">&quot;cutoff&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># no default</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hirshfeld&quot;</span><span class="p">,</span><span class="s2">&quot;ref_path&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># no default</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hirshfeld&quot;</span><span class="p">,</span><span class="s2">&quot;ref_hirsh&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_file_read</span> <span class="o">=</span> <span class="kc">True</span> 
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_file_read</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hirshfeld&quot;</span><span class="p">,</span><span class="s2">&quot;save_to_disk&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_save_to_disk</span> <span class="o">=</span> <span class="kc">True</span> 
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_save_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hirshfeld&quot;</span><span class="p">,</span><span class="s2">&quot;ref_path&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Options.set_logger_level"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_logger_level">[docs]</a>    <span class="k">def</span> <span class="nf">set_logger_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger_level</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_hirshfeld_training"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_hirshfeld_training">[docs]</a>    <span class="k">def</span> <span class="nf">set_hirshfeld_training</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_training</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_hirshfeld_max_neighbors"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_hirshfeld_max_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">set_hirshfeld_max_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_max_neighbors</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_hirshfeld_krr_kernel"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_hirshfeld_krr_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">set_hirshfeld_krr_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_krr_kernel</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_hirshfeld_krr_sigma"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_hirshfeld_krr_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">set_hirshfeld_krr_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_krr_sigma</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_hirshfeld_krr_lambda"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_hirshfeld_krr_lambda">[docs]</a>    <span class="k">def</span> <span class="nf">set_hirshfeld_krr_lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_krr_lambda</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_hirshfeld_file_read"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_hirshfeld_file_read">[docs]</a>    <span class="k">def</span> <span class="nf">set_hirshfeld_file_read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_file_read</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_hirshfeld_filepath"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_hirshfeld_filepath">[docs]</a>    <span class="k">def</span> <span class="nf">set_hirshfeld_filepath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_filepath</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_hirshfeld_cutoff"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_hirshfeld_cutoff">[docs]</a>    <span class="k">def</span> <span class="nf">set_hirshfeld_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_cutoff</span> <span class="o">=</span> <span class="n">val</span></div>
+<div class="viewcode-block" id="Options.set_hirshfeld_ref_hirsh"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_hirshfeld_ref_hirsh">[docs]</a>    <span class="k">def</span> <span class="nf">set_hirshfeld_ref_hirsh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_file_read</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_hirsh_save_to_disk"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_hirsh_save_to_disk">[docs]</a>    <span class="k">def</span> <span class="nf">set_hirsh_save_to_disk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_save_to_disk</span> <span class="o">=</span> <span class="n">val</span></div>
+<div class="viewcode-block" id="Options.set_hirsh_save_path"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_hirsh_save_path">[docs]</a>    <span class="k">def</span> <span class="nf">set_hirsh_save_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hirsh_save_path</span> <span class="o">=</span> <span class="n">val</span></div>
+
+    <span class="c1">### Options for atomic density computations </span>
+<div class="viewcode-block" id="Options.load_atomic_density_options"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.load_atomic_density_options">[docs]</a>    <span class="k">def</span> <span class="nf">load_atomic_density_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_training</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;atomicdensity&quot;</span><span class="p">,</span><span class="s2">&quot;training&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_cutoff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;atomicdensity&quot;</span><span class="p">,</span><span class="s2">&quot;cutoff&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_krr_kernel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;atomicdensity&quot;</span><span class="p">,</span><span class="s2">&quot;krr_kernel&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_krr_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;atomicdensity&quot;</span><span class="p">,</span><span class="s2">&quot;krr_sigma&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_krr_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;atomicdensity&quot;</span><span class="p">,</span><span class="s2">&quot;krr_lambda&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;atomicdensity&quot;</span><span class="p">,</span><span class="s2">&quot;ref_adens&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_ref_adens</span> <span class="o">=</span> <span class="kc">True</span> 
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_refpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;atomicdensity&quot;</span><span class="p">,</span><span class="s2">&quot;ref_path&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;atomicdensity&quot;</span><span class="p">,</span><span class="s2">&quot;save_to_disk&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_save_to_disk</span> <span class="o">=</span> <span class="kc">True</span> 
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_save_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;atomicdensity&quot;</span><span class="p">,</span><span class="s2">&quot;ref_path&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="Options.set_atomicdensity_training"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_atomicdensity_training">[docs]</a>    <span class="k">def</span> <span class="nf">set_atomicdensity_training</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_training</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_atomicdensity_cutoff"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_atomicdensity_cutoff">[docs]</a>    <span class="k">def</span> <span class="nf">set_atomicdensity_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_cutoff</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_atomicdensity_krr_kernel"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_atomicdensity_krr_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">set_atomicdensity_krr_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_krr_kernel</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_atomicdensity_krr_sigma"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_atomicdensity_krr_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">set_atomicdensity_krr_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_krr_sigma</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_atomicdensity_krr_lambda"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_atomicdensity_krr_lambda">[docs]</a>    <span class="k">def</span> <span class="nf">set_atomicdensity_krr_lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_krr_lambda</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_atomicdensity_ref_adens"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_atomicdensity_ref_adens">[docs]</a>    <span class="k">def</span> <span class="nf">set_atomicdensity_ref_adens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_ref_adens</span> <span class="o">=</span> <span class="n">val</span> </div>
+
+<div class="viewcode-block" id="Options.set_atomicdensity_refpath"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_atomicdensity_refpath">[docs]</a>    <span class="k">def</span> <span class="nf">set_atomicdensity_refpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_refpath</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_atomicdensity_save_to_disk"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_atomicdensity_save_to_disk">[docs]</a>    <span class="k">def</span> <span class="nf">set_atomicdensity_save_to_disk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_save_to_disk</span> <span class="o">=</span> <span class="n">val</span></div>
+<div class="viewcode-block" id="Options.set_atomicdensity_save_path"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_atomicdensity_save_path">[docs]</a>    <span class="k">def</span> <span class="nf">set_atomicdensity_save_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomicdensity_save_path</span> <span class="o">=</span> <span class="n">val</span></div>
+
+
+    <span class="c1">### Options for multipoles</span>
+
+<div class="viewcode-block" id="Options.load_multipole_options"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.load_multipole_options">[docs]</a>    <span class="k">def</span> <span class="nf">load_multipole_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">multipole_max_neighbors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getint</span><span class="p">(</span><span class="s2">&quot;multipoles&quot;</span><span class="p">,</span><span class="s2">&quot;max_neighbors&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">multipole_ml_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;multipoles&quot;</span><span class="p">,</span><span class="s2">&quot;ml_method&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">multipole_training</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;multipoles&quot;</span><span class="p">,</span><span class="s2">&quot;training&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">multipole_kernel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;multipoles&quot;</span><span class="p">,</span><span class="s2">&quot;kernel&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">multipole_krr_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;multipoles&quot;</span><span class="p">,</span><span class="s2">&quot;krr_sigma&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">multipole_krr_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;multipoles&quot;</span><span class="p">,</span><span class="s2">&quot;krr_lambda&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">multipole_rcut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;multipoles&quot;</span><span class="p">,</span><span class="s2">&quot;rcut&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;multipoles&quot;</span><span class="p">,</span><span class="s2">&quot;correct_charge&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;True&quot;</span><span class="p">,</span><span class="s2">&quot;true&quot;</span><span class="p">,</span><span class="s2">&quot;t&quot;</span><span class="p">,</span><span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">multipole_correct_charge</span> <span class="o">=</span> <span class="kc">True</span> 
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">multipole_correct_charge</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;multipoles&quot;</span><span class="p">,</span><span class="s2">&quot;ref_mtp&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;True&quot;</span><span class="p">,</span><span class="s2">&quot;true&quot;</span><span class="p">,</span><span class="s2">&quot;t&quot;</span><span class="p">,</span><span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">multipole_ref_mtp</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">multipole_ref_mtp</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span> 
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">multipole_ref_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;multipoles&quot;</span><span class="p">,</span><span class="s2">&quot;ref_path&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;multipoles&quot;</span><span class="p">,</span><span class="s2">&quot;save_to_disk&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;True&quot;</span><span class="p">,</span><span class="s2">&quot;true&quot;</span><span class="p">,</span><span class="s2">&quot;t&quot;</span><span class="p">,</span><span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">multipole_save_to_disk</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">multipole_save_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;multipoles&quot;</span><span class="p">,</span><span class="s2">&quot;ref_path&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Options.set_multipole_training"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_multipole_training">[docs]</a>    <span class="k">def</span> <span class="nf">set_multipole_training</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_training</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_multipole_ml_method"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_multipole_ml_method">[docs]</a>    <span class="k">def</span> <span class="nf">set_multipole_ml_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_ml_method</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_multipole_kernel"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_multipole_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">set_multipole_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_kernel</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_multipole_krr_sigma"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_multipole_krr_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">set_multipole_krr_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_krr_sigma</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_multipole_krr_lambda"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_multipole_krr_lambda">[docs]</a>    <span class="k">def</span> <span class="nf">set_multipole_krr_lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_krr_lambda</span> <span class="o">=</span> <span class="n">val</span></div>
+    
+<div class="viewcode-block" id="Options.set_multipole_correct_charge"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_multipole_correct_charge">[docs]</a>    <span class="k">def</span> <span class="nf">set_multipole_correct_charge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_correct_charge</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_multipole_ref_mtp"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_multipole_ref_mtp">[docs]</a>    <span class="k">def</span> <span class="nf">set_multipole_ref_mtp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_ref_mtp</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_multipole_ref_path"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_multipole_ref_path">[docs]</a>    <span class="k">def</span> <span class="nf">set_multipole_ref_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_ref_path</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_mtp_to_disk"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_mtp_to_disk">[docs]</a>    <span class="k">def</span> <span class="nf">set_mtp_to_disk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_save_to_disk</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_multipole_save_path"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_multipole_save_path">[docs]</a>    <span class="k">def</span> <span class="nf">set_multipole_save_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_save_path</span> <span class="o">=</span> <span class="n">val</span></div>
+<div class="viewcode-block" id="Options.set_multipole_rcut"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_multipole_rcut">[docs]</a>    <span class="k">def</span> <span class="nf">set_multipole_rcut</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipole_rcut</span> <span class="o">=</span> <span class="n">val</span></div>
+
+    <span class="c1">### Options for Electrostatics</span>
+    
+<div class="viewcode-block" id="Options.load_elst_options"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.load_elst_options">[docs]</a>    <span class="k">def</span> <span class="nf">load_elst_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">elst_type</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;electrostatics&quot;</span><span class="p">,</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">at_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;S1&#39;</span><span class="p">,</span> <span class="s1">&#39;S2&#39;</span><span class="p">,</span> <span class="s1">&#39;HS&#39;</span><span class="p">,</span> <span class="s1">&#39;HC&#39;</span><span class="p">,</span> <span class="s1">&#39;HN&#39;</span><span class="p">,</span> <span class="s1">&#39;HO&#39;</span><span class="p">,</span> <span class="s1">&#39;C4&#39;</span><span class="p">,</span> <span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="s1">&#39;C2&#39;</span><span class="p">,</span>  <span class="s1">&#39;N3&#39;</span><span class="p">,</span> <span class="s1">&#39;N2&#39;</span><span class="p">,</span> <span class="s1">&#39;N1&#39;</span><span class="p">,</span> <span class="s1">&#39;O1&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span><span class="s1">&#39;Br&#39;</span><span class="p">]</span>  
+            <span class="c1"># Grab exponents from config if provided</span>
+            <span class="k">for</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">at_types</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">at</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;electrostatics&quot;</span><span class="p">,</span> <span class="s2">&quot;exp[&quot;</span><span class="o">+</span><span class="n">at</span><span class="o">+</span><span class="s2">&quot;]&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">elst_damping_exponents</span> <span class="o">=</span> <span class="n">ret</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Options.set_elst_type"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_elst_type">[docs]</a>    <span class="k">def</span> <span class="nf">set_elst_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elst_type</span> <span class="o">=</span> <span class="n">val</span></div>
+    
+<div class="viewcode-block" id="Options.set_damping_exponents"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_damping_exponents">[docs]</a>    <span class="k">def</span> <span class="nf">set_damping_exponents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elst_damping_exponents</span> <span class="o">=</span> <span class="n">val</span></div>
+
+    <span class="c1">### Options for Induction</span>
+<div class="viewcode-block" id="Options.load_indu_options"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.load_indu_options">[docs]</a>    <span class="k">def</span> <span class="nf">load_indu_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">at_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;S1&#39;</span><span class="p">,</span> <span class="s1">&#39;S2&#39;</span><span class="p">,</span> <span class="s1">&#39;HS&#39;</span><span class="p">,</span> <span class="s1">&#39;HC&#39;</span><span class="p">,</span> <span class="s1">&#39;HN&#39;</span><span class="p">,</span> <span class="s1">&#39;HO&#39;</span><span class="p">,</span> <span class="s1">&#39;C4&#39;</span><span class="p">,</span> <span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="s1">&#39;C2&#39;</span><span class="p">,</span>  <span class="s1">&#39;N3&#39;</span><span class="p">,</span> <span class="s1">&#39;N2&#39;</span><span class="p">,</span> <span class="s1">&#39;N1&#39;</span><span class="p">,</span> <span class="s1">&#39;O1&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;Br&#39;</span><span class="p">]</span>  
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># Grab exponents from config if provided</span>
+            <span class="k">for</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">at_types</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">at</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;induction&quot;</span><span class="p">,</span> <span class="s2">&quot;sr[&quot;</span><span class="o">+</span><span class="n">at</span><span class="o">+</span><span class="s2">&quot;]&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">indu_sr_params</span> <span class="o">=</span> <span class="n">ret</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">indu_smearing_coeff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;induction&quot;</span><span class="p">,</span><span class="s2">&quot;smearing_coeff&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">indu_omega</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;induction&quot;</span><span class="p">,</span><span class="s2">&quot;omega&quot;</span><span class="p">)</span>      
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">indu_conv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;induction&quot;</span><span class="p">,</span><span class="s2">&quot;convergence_thrshld&quot;</span><span class="p">)</span>      
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Options.set_induction_sr_params"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_induction_sr_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_induction_sr_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">indu_sr_params</span> <span class="o">=</span> <span class="n">val</span></div>
+    
+<div class="viewcode-block" id="Options.set_indu_smearing_coeff"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_indu_smearing_coeff">[docs]</a>    <span class="k">def</span> <span class="nf">set_indu_smearing_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indu_smearing_coeff</span> <span class="o">=</span> <span class="n">val</span></div>
+        
+<div class="viewcode-block" id="Options.set_induction_omega"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_induction_omega">[docs]</a>    <span class="k">def</span> <span class="nf">set_induction_omega</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indu_omega</span> <span class="o">=</span> <span class="n">val</span></div>
+    
+<div class="viewcode-block" id="Options.set_induction_conv"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_induction_conv">[docs]</a>    <span class="k">def</span> <span class="nf">set_induction_conv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indu_conv</span> <span class="o">=</span> <span class="n">val</span></div>
+
+    <span class="c1">### Options for Exchange</span>
+<div class="viewcode-block" id="Options.load_exch_options"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.load_exch_options">[docs]</a>    <span class="k">def</span> <span class="nf">load_exch_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">at_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;S1&#39;</span><span class="p">,</span> <span class="s1">&#39;S2&#39;</span><span class="p">,</span> <span class="s1">&#39;HS&#39;</span><span class="p">,</span> <span class="s1">&#39;HC&#39;</span><span class="p">,</span> <span class="s1">&#39;HN&#39;</span><span class="p">,</span> <span class="s1">&#39;HO&#39;</span><span class="p">,</span> <span class="s1">&#39;C4&#39;</span><span class="p">,</span> <span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="s1">&#39;C2&#39;</span><span class="p">,</span>  <span class="s1">&#39;N3&#39;</span><span class="p">,</span> <span class="s1">&#39;N2&#39;</span><span class="p">,</span> <span class="s1">&#39;N1&#39;</span><span class="p">,</span> <span class="s1">&#39;O1&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;Br&#39;</span><span class="p">]</span>  
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># Grab exponents from config if provided</span>
+            <span class="k">for</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">at_types</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">at</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;repulsion&quot;</span><span class="p">,</span> <span class="s2">&quot;rep[&quot;</span><span class="o">+</span><span class="n">at</span><span class="o">+</span><span class="s2">&quot;]&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exch_int_params</span> <span class="o">=</span> <span class="n">ret</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span> </div>
+
+<div class="viewcode-block" id="Options.set_exchange_int_params"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_exchange_int_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_exchange_int_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exch_int_params</span> <span class="o">=</span> <span class="n">val</span></div>
+
+    <span class="c1">### Options for Disp/polarizability</span>
+<div class="viewcode-block" id="Options.load_disp_options"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.load_disp_options">[docs]</a>    <span class="k">def</span> <span class="nf">load_disp_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pol_scs_cutoff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;polarizability&quot;</span><span class="p">,</span><span class="s2">&quot;scs_cutoff&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">disp_beta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;polarizability&quot;</span><span class="p">,</span><span class="s2">&quot;beta&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">disp_radius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;polarizability&quot;</span><span class="p">,</span><span class="s2">&quot;radius&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pol_exponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;polarizability&quot;</span><span class="p">,</span><span class="s2">&quot;exponent&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+    
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">disp_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dispersion&quot;</span><span class="p">,</span><span class="s2">&quot;method&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">at_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;S1&#39;</span><span class="p">,</span> <span class="s1">&#39;S2&#39;</span><span class="p">,</span> <span class="s1">&#39;HS&#39;</span><span class="p">,</span> <span class="s1">&#39;HC&#39;</span><span class="p">,</span> <span class="s1">&#39;HN&#39;</span><span class="p">,</span> <span class="s1">&#39;HO&#39;</span><span class="p">,</span> <span class="s1">&#39;C4&#39;</span><span class="p">,</span> <span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="s1">&#39;C2&#39;</span><span class="p">,</span>  <span class="s1">&#39;N3&#39;</span><span class="p">,</span> <span class="s1">&#39;N2&#39;</span><span class="p">,</span> <span class="s1">&#39;N1&#39;</span><span class="p">,</span> <span class="s1">&#39;O1&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;Br&#39;</span><span class="p">]</span>  
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># Grab exponents from config if provided</span>
+            <span class="k">for</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">at_types</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">at</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">getfloat</span><span class="p">(</span><span class="s2">&quot;dispersion&quot;</span><span class="p">,</span> <span class="s2">&quot;disp[&quot;</span><span class="o">+</span><span class="n">at</span><span class="o">+</span><span class="s2">&quot;]&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">disp_coeffs</span> <span class="o">=</span> <span class="n">ret</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span> </div>
+
+<div class="viewcode-block" id="Options.set_pol_scs_cutoff"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_pol_scs_cutoff">[docs]</a>    <span class="k">def</span> <span class="nf">set_pol_scs_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pol_scs_cutoff</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_disp_beta"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_disp_beta">[docs]</a>    <span class="k">def</span> <span class="nf">set_disp_beta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disp_beta</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_disp_coeffs"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_disp_coeffs">[docs]</a>    <span class="k">def</span> <span class="nf">set_disp_coeffs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disp_coeffs</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_disp_radius"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_disp_radius">[docs]</a>    <span class="k">def</span> <span class="nf">set_disp_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disp_radius</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_pol_exponent"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_pol_exponent">[docs]</a>    <span class="k">def</span> <span class="nf">set_pol_exponent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pol_exponent</span> <span class="o">=</span> <span class="n">val</span></div>
+    
+<div class="viewcode-block" id="Options.set_disp_method"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_disp_method">[docs]</a>    <span class="k">def</span> <span class="nf">set_disp_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disp_method</span> <span class="o">=</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="Options.set_name"><a class="viewcode-back" href="../../../cliff.helpers.html#cliff.helpers.options.Options.set_name">[docs]</a>    <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span></div></div>
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, Jeffrey B. Schriber.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -42,7 +42,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="API Documentation" href="api.html" />
+    <link rel="next" title="CLIFF API Documentation" href="cliff.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
@@ -97,10 +97,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#running-with-monomer-xyz-files">Running with monomer <cite>xyz</cite> files</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#running-using-the-api">Running Using the API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#notes-on-options">Notes on Options</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cliff.html">CLIFF API Documentation</a></li>
 </ul>
 
             
@@ -264,6 +265,56 @@ H <span class="m">0</span>.260455 <span class="m">4</span>.000000 -0.872893
 </div>
 </div>
 </div>
+<div class="section" id="running-using-the-api">
+<h2>Running Using the API<a class="headerlink" href="#running-using-the-api" title="Permalink to this headline">¶</a></h2>
+<p>Running CLIFF by directly calling CLIFF functions in a python script
+is the most versatile way to use the code. Analagous to the run_cliff.py
+modes, callable functions exist to run CLIFF from both monomer and dimer xyz files
+(see above section for definitions of these filetypes).</p>
+<p>For example, the following script computes interaction energies for dimer files
+in the CLIFF test suite:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cliff</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="c1"># Get a list of the dimer files</span>
+<span class="n">dimer_xyzs</span> <span class="o">=</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;cliff/tests/monomer_data/*.xyz&quot;</span><span class="p">)</span>
+<span class="c1"># Call a function to load the dimers</span>
+<span class="c1"># These dimers are QCelemental Molecule objects, with fragments specified</span>
+<span class="c1"># A list of these objects can also be made directly with QCelementa and passed to CLIFF</span>
+<span class="n">dimers</span> <span class="o">=</span> <span class="p">[</span><span class="n">cliff</span><span class="o">.</span><span class="n">load_dimer_xyz</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dimer_xyz</span><span class="p">]</span>
+
+<span class="c1"># get the energies</span>
+<span class="n">energies</span> <span class="o">=</span> <span class="n">cliff</span><span class="o">.</span><span class="n">predict_from_dimers</span><span class="p">(</span><span class="n">dimers</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that the single energy call takes a list of Molecule objects defined by QCElemental.
+In the above example, we use the provided function <cite>cliff.load_dimer_xyz</cite> to build this list of
+objects, though they can be generated manually by directly calling QCElemental.</p>
+<p>Similarly, we can compute interaction energies using monomer xyzs:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cliff</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="c1"># Get each monomer file</span>
+<span class="n">monomerA</span> <span class="o">=</span> <span class="s2">&quot;cliff/tests/monomer_data/monomerA.xyz&quot;</span>
+<span class="n">monomerB</span> <span class="o">=</span> <span class="s2">&quot;cliff/tests/monomer_data/monomerB.xyz&quot;</span>
+
+<span class="c1"># Create the qcelemental Molecule objects</span>
+<span class="n">monA</span> <span class="o">=</span> <span class="n">cliff</span><span class="o">.</span><span class="n">load_monomer_xyz</span><span class="p">(</span><span class="n">monomerA</span><span class="p">)</span>
+<span class="n">monB</span> <span class="o">=</span> <span class="n">cliff</span><span class="o">.</span><span class="n">load_monomer_xyz</span><span class="p">(</span><span class="n">monomerB</span><span class="p">)</span>
+
+<span class="c1"># get the energies</span>
+<span class="n">energies</span> <span class="o">=</span> <span class="n">cliff</span><span class="o">.</span><span class="n">predict_from_monomer_list</span><span class="p">(</span><span class="n">monA</span><span class="p">,</span><span class="n">monB</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Again, the energy call here takes two lists of QCElemental molecule files, which
+need not be generated by the xyz converter provided by CLIFF.</p>
+<p>See the CLIFF API Documentation for all available functions. Driver functions
+relate to energy computation, atomic property prediction, and other functions
+related to energy calls. The Training functions relate to API-callable
+prediction of atomic properties using KRR or NN-based machine-learning
+models. The Fitting functions provide tools to fit global parameters
+using a custom dimer database.</p>
+</div>
 <div class="section" id="notes-on-options">
 <h2>Notes on Options<a class="headerlink" href="#notes-on-options" title="Permalink to this headline">¶</a></h2>
 <p>As mentioned, options including global parameters, model locations,
@@ -283,7 +334,7 @@ in <cite>cliff/helpers/options.py</cite>.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="api.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cliff.html" class="btn btn-neutral float-right" title="CLIFF API Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
