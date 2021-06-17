@@ -22,12 +22,13 @@ To handle the dependencies in CLIFF, it is recommended to make a conda environme
 
     conda create --name cliff python=3.6
 
-Next we will install the required mathematical libraries:
+Next we will install the required libraries:
 
 .. code-block:: bash
 
     conda install numpy
     conda install scipy
+    conda install qcelemental
 
 and the pytest library for running the tests:
 
@@ -45,9 +46,20 @@ The simplest way to install QML is with `pip`,
     pip install qml --user -U
 
 Note that QML also requires a Fortran compiler which is available from conda.
+As a final piece of setup, all Kernel-Ridge Regression model files located in
+`cliff/models/large` need to be untarred.
 
 Running the Tests
 -----------------
+
+Once CLIFF and all dependencies are obtained, it is recommended to run the test suite.
+This can be done by going into the tests directory and calling pytest:
+
+.. code-block:: bash
+
+    cd cliff/tests
+    pytest
+
 
 
 
