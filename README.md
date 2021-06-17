@@ -7,6 +7,9 @@ CLIFF
 Component-based Learned Intermolecular Force Field
 
 # Quick-start guide
+
+For complete documentation, see [these CLIFFnotes](https://jeffschriber.github.io/cliff/index.html).
+
 ## Installation and Dependencies
 To handle the dependencies in CLIFF, it is recommended to make a conda environment,
 
