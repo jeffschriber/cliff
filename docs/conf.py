@@ -57,6 +57,13 @@ extensions = [
 #    'sphinx_psi_theme.ext.relbar_toc',
 ]
 
+autosummary_generate = True
+automodapi_toctreedirnm = 'api'
+#numpydoc_show_class_members = False
+#automodsumm_inherited_members = True
+autodoc_typehints = "description"
+napoleon_use_param = True
+napoleon_use_rtype = True
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -75,6 +82,12 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 html_theme = 'sphinx_rtd_theme'
 import sphinx_rtd_theme
 #html_theme = 'pyramid'
+autodoc_default_flags = ['members',
+                         'undoc-members',
+                         'inherited-members',  # disabled because there's a bug in sphinx
+                         'show-inheritance',
+                        ]
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
