@@ -5,7 +5,6 @@ import cliff.helpers.constants as constants
 import cliff.helpers.utils as utils
 from cliff.helpers.system import System
 from cliff.helpers.cell import Cell
-from cliff.atomic_properties.hirshfeld import Hirshfeld
 import logging
 
 class Repulsion:

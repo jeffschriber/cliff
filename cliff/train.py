@@ -12,12 +12,65 @@ properties
 import os
 import numpy as np
 import glob
+import qcelemental as qcel
+import apnet
+
 from cliff.helpers.options import Options
 from cliff.helpers.system import System
 from cliff.atomic_properties.hirshfeld import Hirshfeld
 from cliff.atomic_properties.atomic_density import AtomicDensity
 from cliff.atomic_properties.multipole import Multipole
 
+def train_atomic_properties(reference_properties, train_fraction, save_file):
+    """
+    Trains NN-based model for atomic properties using APNET
+
+    Parameters
+    ----------
+
+    reference_properties : :class: `str`
+        Location of .pkl file containing reference properties. The pkl file
+        contains a pandas dataframe with the following columns:
+            - 'Z' : The atom types (:class: `~numpy.ndarray` of int with shape (n,))
+            - 'R' : Cartesian coordinates (:class: `~numpy.ndarray` of float with shape (n,3)
+            - 'total_charge' : The total monomer charge (int)
+            - 'cartesian_multipoles' : Reference atomic charges, dipoles, and quadrupoles (:class: `~numpy.ndarray` of `float` with shape (n,10), in a.u.)
+            - 'volume_ratios' : Reference volume ratios (:class: `~numpy.ndarray` of `float` with shape (n,), no units)
+            - 'valence_widths' : Reference valence widths (:class: `~numpy.ndarray` of `float` with shape (n,))
+    train_fraction : :class: `float`
+        Fraction of data set in reference_properties to use for training. Default is 0.9 
+    save_file : :class: `str`
+        location and filename of ML model. Needs to end in .h5, or else code will enforce.
+    """
+    monomers, multipoles, ratios, widths = apnet.load_monomer_pickle(reference_properties)
+    
+    # randomly shuffle the monomers
+    N = len(monomers)
+    inds = np.arange(N)
+    np.random.seed(4201)
+    np.random.shuffle(inds)
+        
+    # 90% of the monomers are used for training
+    Nt = int(train_fraction * N)
+    indst = inds[:Nt]
+    monomers_t = [monomers[i] for i in indst]
+    multipoles_t = multipoles[indst]
+    ratios_t = ratios[indst]
+    widths_t = widths[indst]
+    
+    # the other 10% are used for validation
+    indsv = inds[Nt:]
+    monomers_v = [monomers[i] for i in indsv]
+    multipoles_v = multipoles[indsv]
+    ratios_v = ratios[indsv]
+    widths_v = widths[indsv]
+    
+    # train the property model and save weights to .h5 file
+    if not save_file.endswith(".h5"):
+        save_file += ".h5"
+
+    apnet.train_cliff_model(monomers_t, multipoles_t, ratios_t, widths_t, monomers_v, multipoles_v, ratios_v, widths_v, save_file)
+    
 
 def get_mols(pathname, frac, max_test=None):
 

@@ -3,7 +3,6 @@
 import numpy as np
 from cliff.helpers.system import System
 from cliff.components.electrostatics import Electrostatics, interaction_tensor
-from cliff.atomic_properties.hirshfeld import Hirshfeld
 from cliff.atomic_properties.polarizability import Polarizability
 #from cliff.helpers.cell import Cell
 from numpy import exp

@@ -8,6 +8,9 @@ in addition to related functions needed for predicting atomic properties.
 """
 
 import os
+import apnet
+
+import time
 import numpy as np
 import glob
 import qcelemental as qcel
@@ -240,7 +243,7 @@ def load_atomic_properties(mol,path):
         
     return mol
 
-def predict_from_dimers(dimers, load_path=None, return_pairs=False, infile=None, options=None):
+def predict_from_dimers(dimers, ml_type='KRR', load_path=None, return_pairs=False, infile=None, options=None):
     '''
     Compute energy components from a list of dimers.
     Uses all default options, turns off logging
@@ -265,24 +268,62 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False, infile=None,
         else:
             options = Options(config_file=infile)
 
-    if load_path is None:
-        models = load_krr_models(options) 
    
     energies = []
+    mon_a_list = []
+    mon_b_list = []
 
-    for dimer in d_list:
-
-        mon_a, mon_b = mol_to_sys(dimer, options)
-
+    s = time.time()
+    if ml_type.upper() == "KRR":
+        # get atomic properties
         if load_path is None:
-            mon_a = predict_atomic_properties(mon_a,models)
-            mon_b = predict_atomic_properties(mon_b,models)
-        else:
-            mon_a = load_atomic_properties(mon_a,load_path)  
-            mon_b = load_atomic_properties(mon_b,load_path)  
+            models = load_krr_models(options) 
+
+        for dimer in d_list:
+            mon_a, mon_b = mol_to_sys(dimer, options)
+
+            if load_path is None:
+                mon_a = predict_atomic_properties(mon_a,models)
+                mon_b = predict_atomic_properties(mon_b,models)
+            else:
+                mon_a = load_atomic_properties(mon_a,load_path)  
+                mon_b = load_atomic_properties(mon_b,load_path)  
+            mon_a_list.append(mon_a)    
+            mon_b_list.append(mon_b)    
+    elif ml_type.upper() == "NN":
+        ma_s = []
+        mb_s = []
+        for dimer in d_list:
+            ma_s.append(dimer.get_fragment(0))
+            mb_s.append(dimer.get_fragment(1))
+
+        model_path = os.path.dirname(os.path.realpath(__file__))
+        model_path += '/models/apnet/cliff_pbe0atz.h5'
+
+        s1 = time.time()
+        ma_props = apnet.predict_cliff_properties(ma_s, model_path)
+        mb_props = apnet.predict_cliff_properties(mb_s, model_path)
+        f1 = time.time()
+        print(f"apnet time: {f1-s1} s")
+
+        for nd, dimer in enumerate(d_list):        
+            mon_a, mon_b = mol_to_sys(dimer, options)
+
+            mon_a.set_properties(ma_props[nd])
+            mon_b.set_properties(mb_props[nd])
+
+            mon_a_list.append(mon_a)    
+            mon_b_list.append(mon_b)    
+
+    else:
+        raise Exception(f"ML type {ml_type} not understood!") 
+
+    f = time.time()
+    print(f"Time spent predicting atomic properties: {f-s} s")
         
+    for ma, mb in zip(mon_a_list,mon_b_list):
         try:
-            en = energy_kernel(mon_a, mon_b, options, return_pairs=return_pairs) 
+            en = energy_kernel(ma, mb, options, return_pairs=return_pairs) 
         except:
             en = "Error"
 
@@ -290,7 +331,7 @@ def predict_from_dimers(dimers, load_path=None, return_pairs=False, infile=None,
 
     return np.asarray(energies) 
     
-def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs=False,infile=None, options=None):
+def predict_from_monomer_list(monomer_a, monomer_b,ml_type='KRR', load_path=None, return_pairs=False,infile=None, options=None):
     '''
     Compute energy components from two lists of monomers
     Uses default options, places mon_a in outer loop 
@@ -321,18 +362,23 @@ def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs
         else:
             options = Options(config_file=infile)
 
-    if load_path is None:
-        models = load_krr_models(options) 
+    mon_a_sys = []
+    mon_b_sys = []
 
-    energies = []
-    for A in mon_a_list:
-        mon_a = mol_to_sys(A, options)
-        
+    if ml_type.upper() == "KRR":
+ 
         if load_path is None:
-            mon_a = predict_atomic_properties(mon_a,models)
-        else:
-            mon_a = load_atomic_properties(mon_a,load_path)  
+            models = load_krr_models(options) 
+
+        for A in mon_a_list:
+            mon_a = mol_to_sys(A, options)
             
+            if load_path is None:
+                mon_a = predict_atomic_properties(mon_a,models)
+            else:
+                mon_a = load_atomic_properties(mon_a,load_path)  
+            mon_a_sys.append(mon_a)
+                
 
         for B in mon_b_list:
             mon_b = mol_to_sys(B, options)
@@ -341,7 +387,29 @@ def predict_from_monomer_list(monomer_a, monomer_b, load_path=None, return_pairs
                 mon_b = predict_atomic_properties(mon_b,models)
             else:
                 mon_b = load_atomic_properties(mon_b,load_path)  
+            mon_b_sys.append(mon_b)
 
+    elif ml_type.upper() == "NN":
+        model_path = os.path.dirname(os.path.realpath(__file__))
+        model_path += '/models/apnet/cliff_pbe0atz.h5'
+
+        ma_props = apnet.predict_cliff_properties(mon_a_list, model_path)
+        mb_props = apnet.predict_cliff_properties(mon_b_list, model_path)
+
+        for nA, A in enumerate(mon_a_list):
+            mon_a = mol_to_sys(A, options)
+            mon_a.set_properties(ma_props[nA])
+            mon_a_sys.append(mon_a)
+            
+        for nB, B in enumerate(mon_b_list):
+            mon_b = mol_to_sys(B, options)
+            mon_b.set_properties(mb_props[nB])
+            mon_b_sys.append(mon_b)
+
+
+    energies = []
+    for mon_a in mon_a_sys:
+        for mon_b in mon_b_sys:
             try:
                 en = energy_kernel(mon_a, mon_b, options, return_pairs=return_pairs) 
             except:
