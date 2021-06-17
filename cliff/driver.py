@@ -2,10 +2,8 @@
 
 
 """
-driver.py
-Component-based Learned Intermolecular Force Field
-
-Contains all functions intended for outermost API-layer
+Driver functions contain the main functions for energy computation,
+in addition to related functions needed for predicting atomic properties.
 
 """
 
@@ -36,6 +34,11 @@ def set_nthread(nthread):
     ----------
     nthread : :class: `int`
         Number of threads.
+
+
+    Returns
+    -------
+        void
     """
 
     os.environ["OMP_NUM_THREADS"]    = str(nthread) 
@@ -51,9 +54,14 @@ def mol_to_sys(mol, options):
     Parameters
     ----------
     mol : :class: `~qcel.models.Molecule`
-        Input molecule.
+        Input QCElemental molecule.
     options : :class: `~cliff.helpers.Options`
         Options object
+
+    Returns
+    -------
+    systems : :class:`cliff.System`
+        Cliff System object 
     """
     # If mol is a dimer, return two sys
     
@@ -80,10 +88,22 @@ def mol_to_sys(mol, options):
 
 def load_dimer_xyz(xyz_file, units='angstrom'):
     '''
-    Loads xyz file, where the separation between dimers is
-    specified as the last field in the comment line
+    Loads a dimer xyz file, where the separation between dimers is
+    specified as the last field in the second line in the file.
     
-    Returns single qcel Molecule object
+    Parameters
+    ----------
+    xyz_file : :class:`str`
+        Filename of the dimer xyz file. See main docs for how to format a dimer xyz.
+    units : :class:`str`:
+        Units of the input coordinates, default to Angstrom. See QCElemental documentation
+        for all available units.
+
+    Returns
+    -------
+    dimer : :class:`~qcelemental.molecule`
+        QCElemental Molecule object. The returned Molecule object has two defined fragemens, one for
+        each monomer. 
     '''
 
     lines = open(xyz_file,'r').readlines()
@@ -107,10 +127,10 @@ def load_dimer_xyz(xyz_file, units='angstrom'):
 
 def load_monomer_xyz(xyz_file, units='angstrom'):
     '''
-    Loads single/multi xyz file of monomers
-    Total charge is last field in comment line    
+    Loads single/multi xyz file of monomers.
+    Total charge is last field in comment line.    
 
-    Returns list of qcel Molecule objects
+    Function returns list of qcel Molecule objects.
 
     Parameters
     ----------
@@ -119,13 +139,17 @@ def load_monomer_xyz(xyz_file, units='angstrom'):
         Single xyz file containing one or more monomer coordinates. Each monomer
         is in the usual xyz format, with the exception that here we reqiure the 
         second line to specify the total charge as the final field in a comma-separated list
-        with potentially other information before
-        For example, neutral water could be:
-        3
-        water, 0
-        O 0.0 0.0 0.0
-        H 0.0 1.0 0.0
-        H 0.0 0.0 1.0
+        with potentially other information before.
+    units : :class:`str`:
+        Units of the input coordinates, default to Angstrom. See QCElemental documentation
+        for all available units.
+    
+    Returns
+    -------
+        molecules : list of :class:`qcelemental.molecule` objects
+            A List of QCElemental molecule objects, each corresponding to a monomer in the input monomer xyz
+            file.  
+
     '''
     
 
@@ -163,7 +187,7 @@ def predict_atomic_properties(mol, models):
     ----------
     mol : :class: `~cliff.helpers.System`
         Input System
-    models : list of :class: `~cliff.atomic_properties.Hirshfeld` ,`~cliff.atomic_properties.AtomicDensity`, and `~cliff.atomic_properties.Multipole`
+    models : list of :class:`~cliff.atomic_properties.Hirshfeld` ,`~cliff.atomic_properties.AtomicDensity`, and `~cliff.atomic_properties.Multipole`
         List of dimension (3,) in the exact order: [Hirshfeld, AtomicDensity, Multipole].
     """
 
