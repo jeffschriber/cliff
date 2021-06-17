@@ -31,6 +31,30 @@ release = '0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    # from Sphinx
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.extlinks',
+    'sphinx.ext.graphviz',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.graphviz',
+    "sphinx_autodoc_typehints",
+    "sphinx.ext.githubpages",
+    # from Astropy
+    'sphinx_automodapi.automodapi',
+    'sphinx_automodapi.automodsumm',
+    'sphinx_automodapi.smart_resolver',
+    # from Cloud
+    'cloud_sptheme.ext.index_styling',
+    'cloud_sptheme.ext.escaped_samp_literals',
+    # from Psi4
+    'sphinx_psi_theme.ext.psidomain',
+    'sphinx_psi_theme.ext.relbar_toc',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
