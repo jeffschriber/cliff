@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-CLIFF: a component-learned intermolecular force field
-=====================================================
+CLIFF: A Component-based, Machine-Learned Intermolecular Force Field
+====================================================================
 
 CLIFF is an open-source intermolecular force field that
 uses atomic parameters from machine learning models in
@@ -16,7 +16,8 @@ the physics-based functional forms.
 
     installation
     running_cliff
-    cliff_api 
+
+    cliff
     
 
 

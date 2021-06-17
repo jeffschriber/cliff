@@ -1,0 +1,28 @@
+name: docs
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python
+  - pip
+  - numpy
+  - scipy
+  - networkx
+
+    # qc
+  - qcelemental
+
+    # docs
+  - python-graphviz
+  - sphinx >=3.5
+  - sphinx-autodoc-typehints
+  - sphinx-automodapi
+  - sphinx_rtd_theme
+
+    # testing
+  - pytest>=4.0.0
+  - pytest-cov
+  - codecov
+
+  - pip:
+    - qml
