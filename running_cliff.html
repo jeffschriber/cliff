@@ -42,7 +42,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Running CLIFF with the Python API" href="cliff_api.html" />
+    <link rel="next" title="API Documentation" href="api.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
@@ -92,12 +92,15 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Running CLIFF</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#quickstart">Quickstart</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#setting-up-config-ini">Setting up config.ini</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#output-options">Output options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-usage">Command Line Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#running-with-dimer-xyz-files">Running with dimer <cite>xyz</cite> files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-with-monomer-xyz-files">Running with monomer <cite>xyz</cite> files</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="cliff_api.html">Running CLIFF with the Python API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notes-on-options">Notes on Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 </ul>
 
             
@@ -173,21 +176,104 @@ your PATH and PYTHONPATH:</p>
 <span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span>/path/to/code/cliff:<span class="nv">$PYTHONPATH</span>
 </pre></div>
 </div>
-<div class="section" id="quickstart">
-<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="command-line-usage">
+<h2>Command Line Usage<a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
 <p>The simplest way to run CLIFF is with the command line runscript. CLIFF can also be run using a python API
 for more specialized tasks. The runscript requires all monomers to be located in separate .xyz files
 in one directory. All other options, including parameters, algorithm choices, etc. are specified in
-a config.ini file. The script can be executed by calling:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>run_cliff.py -i /path/to/config.ini -f /path/to/.xyzs
+a config.ini file, though a config.ini file is not needed nor typically recommended.</p>
+<p>The script can be executed by calling <cite>run_cliff.py</cite>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>usage: run_cliff.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>-i INPUT<span class="o">]</span> <span class="o">[</span>-d DIMER<span class="o">]</span> <span class="o">[</span>-a MONA<span class="o">]</span> <span class="o">[</span>-b MONB<span class="o">]</span> <span class="o">[</span>-n NAME<span class="o">]</span>
+                    <span class="o">[</span>-p NPROC<span class="o">]</span> <span class="o">[</span>-fr <span class="o">[</span>FRAG<span class="o">]]</span>
+CLIFF: a Component-based Learned Intermolecular Force Field
+
+optional arguments:
+  -h, --help            show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  -i INPUT, --input INPUT
+                        Location of input configuration file
+  -d DIMER, --dimer DIMER
+                        Directory of dimer xyz files, or an individual dimer
+                        xyz file
+  -a MONA, --monA MONA  Monomer A xyz file
+  -b MONB, --monB MONB  Monomer B xyz file
+  -n NAME, --name NAME  Output job name
+  -p NPROC, --nproc NPROC
+                        Number of threads <span class="k">for</span> numpy
+  -fr <span class="o">[</span>FRAG<span class="o">]</span>, --frag <span class="o">[</span>FRAG<span class="o">]</span>
+                        Do fragmentation analysis
+</pre></div>
+</div>
+<p>The command like script can be called in two contexts: one where the user specifies one or many dimer
+.xyz files, and one where the user specifies two monomer xyz files.</p>
+<div class="section" id="running-with-dimer-xyz-files">
+<h3>Running with dimer <cite>xyz</cite> files<a class="headerlink" href="#running-with-dimer-xyz-files" title="Permalink to this headline">¶</a></h3>
+<p>As shown above, a dimer computation can be invoked by passing a path to a folder
+containing one or more dimer xyz files using the <cite>-d</cite> flag:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>run_cliff.py -d path/to/dimer/xyz/files/
+</pre></div>
+</div>
+<p>A dimer xyz file specifies a single monomer. The first line is the total number of atoms in the dimer,
+the second line contains a comma-separated list of the monomer A charge, monomer B charge, and the number of atoms
+in monomer A. Crucially, the coordinates for monomer A need to be listed before those of monomer B.
+For example, a dimer xyz for two neutral water molecules may look like:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">6</span>
+<span class="m">0</span>,0,3
+O <span class="m">0</span>.000000 <span class="m">0</span>.000000  <span class="m">0</span>.000000
+H <span class="m">0</span>.758602 <span class="m">0</span>.000000  <span class="m">0</span>.504284
+H <span class="m">0</span>.260455 <span class="m">0</span>.000000 -0.872893
+O <span class="m">0</span>.000000 <span class="m">2</span>.000000  <span class="m">0</span>.000000
+H <span class="m">0</span>.758602 <span class="m">2</span>.000000  <span class="m">0</span>.504284
+H <span class="m">0</span>.260455 <span class="m">2</span>.000000 -0.872893
 </pre></div>
 </div>
 </div>
-<div class="section" id="setting-up-config-ini">
-<h2>Setting up config.ini<a class="headerlink" href="#setting-up-config-ini" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="running-with-monomer-xyz-files">
+<h3>Running with monomer <cite>xyz</cite> files<a class="headerlink" href="#running-with-monomer-xyz-files" title="Permalink to this headline">¶</a></h3>
+<p>Alternatively, CLIFF can be invoked by using monomer xyz files:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>run_cliff.py -a monomerA.xyz -b monomerB.xyz
+</pre></div>
 </div>
-<div class="section" id="output-options">
-<h2>Output options<a class="headerlink" href="#output-options" title="Permalink to this headline">¶</a></h2>
+<p>A monomer xyz file can specify one or more monomer geometries. In the above invokation,
+interaction energies between all monomers in <cite>monomerA.xyz</cite> and all monomers in <cite>monomerB.xyz</cite> are
+computed (interaction energies between mononmers defined in the same xyz are not computed).
+In specifying a monomer, the total number of atoms is needed, followed by a comma-separated
+list where the last field needs to be the monomer’s total charge (other info proir to this charge
+is allowed, a label or reference energy is often convenient).</p>
+<p>To compute interaction energies between one reference water molecule and two different water molecules,
+the monomerA.xyz file can be:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">3</span>
+reference_water,0
+O <span class="m">0</span>.000000 <span class="m">0</span>.000000  <span class="m">0</span>.000000
+H <span class="m">0</span>.758602 <span class="m">0</span>.000000  <span class="m">0</span>.504284
+H <span class="m">0</span>.260455 <span class="m">0</span>.000000 -0.872893
+</pre></div>
+</div>
+<p>and the monomerB.xyz can be, for example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">3</span>
+test_water_1,0
+O <span class="m">0</span>.000000 <span class="m">2</span>.000000  <span class="m">0</span>.000000
+H <span class="m">0</span>.758602 <span class="m">2</span>.000000  <span class="m">0</span>.504284
+H <span class="m">0</span>.260455 <span class="m">2</span>.000000 -0.872893
+
+<span class="m">3</span>
+test_water_2,0
+O <span class="m">0</span>.000000 <span class="m">4</span>.000000  <span class="m">0</span>.000000
+H <span class="m">0</span>.758602 <span class="m">4</span>.000000  <span class="m">0</span>.504284
+H <span class="m">0</span>.260455 <span class="m">4</span>.000000 -0.872893
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="notes-on-options">
+<h2>Notes on Options<a class="headerlink" href="#notes-on-options" title="Permalink to this headline">¶</a></h2>
+<p>As mentioned, options including global parameters, model locations,
+can be modified by manually specifying a <cite>config.ini</cite> file.
+However, we do not recommend using such a file, as the CLIFF
+method is optimized for use with all preset defaults,
+and any additional modifications to these defaults
+are considered expert options. For interested users, we
+point out all available options and defaults are defined
+in <cite>cliff/helpers/options.py</cite>.</p>
 </div>
 </div>
 
@@ -197,7 +283,7 @@ a config.ini file. The script can be executed by calling:</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="cliff_api.html" class="btn btn-neutral float-right" title="Running CLIFF with the Python API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

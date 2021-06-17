@@ -97,7 +97,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="running_cliff.html">Running CLIFF</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cliff_api.html">Running CLIFF with the Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 </ul>
 
             
@@ -180,9 +180,10 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create --name cliff <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.6
 </pre></div>
 </div>
-<p>Next we will install the required mathematical libraries:</p>
+<p>Next we will install the required libraries:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install numpy
 conda install scipy
+conda install qcelemental
 </pre></div>
 </div>
 <p>and the pytest library for running the tests:</p>
@@ -195,10 +196,18 @@ The simplest way to install QML is with <cite>pip</cite>,</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install qml --user -U
 </pre></div>
 </div>
-<p>Note that QML also requires a Fortran compiler which is available from conda.</p>
+<p>Note that QML also requires a Fortran compiler which is available from conda.
+As a final piece of setup, all Kernel-Ridge Regression model files located in
+<cite>cliff/models/large</cite> need to be untarred.</p>
 </div>
 <div class="section" id="running-the-tests">
 <h2>Running the Tests<a class="headerlink" href="#running-the-tests" title="Permalink to this headline">¶</a></h2>
+<p>Once CLIFF and all dependencies are obtained, it is recommended to run the test suite.
+This can be done by going into the tests directory and calling pytest:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> cliff/tests
+pytest
+</pre></div>
+</div>
 </div>
 </div>
 

@@ -16,7 +16,8 @@ the physics-based functional forms.
 
     installation
     running_cliff
-    cliff_api 
+    cliff_python
+    api
     
 
 
