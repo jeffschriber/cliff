@@ -22,9 +22,6 @@ testpath = os.path.abspath(t.__file__).split('__init__')[0]
 import qml
 from qml.representations import get_slatm_mbtypes
 
-# for NNs
-#from atomicmultipole import Molecule, MultipoleModel
-
 class Multipole:
     '''
     Multipole class. Predicts multipoles from machine learning.
@@ -170,63 +167,34 @@ class Multipole:
         _system.initialize_multipoles()
         _system.compute_basis()
 
-        if (force_predict == False) and (self.ref_mtp or (self.ref == _system.xyz[0])):
-            xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
-            #tail = '.' + xyz.split('.')[-1]
-            #xyz = xyz.replace('gold.','', 1)
-            reffile = self.ref_path + xyz + '-mtp.txt'
-            extract_file = utils.read_file(reffile)
-            _system.multipoles = [np.array([
-                            float(extract_file[i].split()[0]),
-                            float(extract_file[i].split()[1]),
-                            float(extract_file[i].split()[2]),
-                            float(extract_file[i].split()[3]),
-                            float(extract_file[i].split()[4]),
-                            float(extract_file[i].split()[5]),
-                            float(extract_file[i].split()[6]),
-                            float(extract_file[i].split()[7]),
-                            float(extract_file[i].split()[8])])
-                                for i in range(len(extract_file))]
-#            _system.multipoles = [np.array([
-#                            float(extract_file[i].split()[4]),
-#                            float(extract_file[i].split()[6]),
-#                            float(extract_file[i].split()[7]),
-#                            float(extract_file[i].split()[5]),
-#                            float(extract_file[i].split()[8]),
-#                            float(extract_file[i].split()[9]),
-#                            float(extract_file[i].split()[10]),
-#                            float(extract_file[i].split()[11]),
-#                            float(extract_file[i].split()[12])])
-#                                for i in range(4,len(extract_file))]
-        elif self.ml_method == "KRR" :
-            _system.build_slatm(self.mbtypes,self.cutoff)
-            power  = constants.ml_power[self.kernel]
-            prefac = constants.ml_prefactor[self.kernel]
-            for e in self.alpha_train.keys():
-                if self.alpha_train[e] is not None:
-                    # slowest part of the whole project
-                    pairwise_dists = cdist(_system.slatm, \
-                        self.descr_train[e], constants.ml_metric[self.kernel])
-                    kmat = np.exp(- pairwise_dists**power / (prefac*self.krr_sigma**power))
-                    pred = np.dot(kmat,self.alpha_train[e])
-                    for i in range(_system.num_atoms):
-                        if _system.elements[i] == e:
-                            _system.mtp_expansion[i] = pred[i]
-            # Revert normalization
-            # self.rev_normalize(_system)
-            # Correct to get integer charge
-            if self.correct_charge:
-                # Weigh by ML error
-                mol_mu = sum([constants.ml_chg_correct_error[ele]
-                                for ele in _system.elements])
-                totalcharge = sum([mtp[0] for mtp in _system.mtp_expansion])
-                excess_chg = totalcharge - float(charge)
-                if mol_mu > 0.:
-                    for i,mtp_i in enumerate(_system.mtp_expansion):
-                        w_i = constants.ml_chg_correct_error[_system.elements[i]]
-                        mtp_i[0] += -1.*excess_chg * (w_i/mol_mu)
-            # Compute multipoles from basis set expansion
-            _system.expand_multipoles()
+        _system.build_slatm(self.mbtypes,self.cutoff)
+        power  = constants.ml_power[self.kernel]
+        prefac = constants.ml_prefactor[self.kernel]
+        for e in self.alpha_train.keys():
+            if self.alpha_train[e] is not None:
+                # slowest part of the whole project
+                pairwise_dists = cdist(_system.slatm, \
+                    self.descr_train[e], constants.ml_metric[self.kernel])
+                kmat = np.exp(- pairwise_dists**power / (prefac*self.krr_sigma**power))
+                pred = np.dot(kmat,self.alpha_train[e])
+                for i in range(_system.num_atoms):
+                    if _system.elements[i] == e:
+                        _system.mtp_expansion[i] = pred[i]
+        # Revert normalization
+        # self.rev_normalize(_system)
+        # Correct to get integer charge
+        if self.correct_charge:
+            # Weigh by ML error
+            mol_mu = sum([constants.ml_chg_correct_error[ele]
+                            for ele in _system.elements])
+            totalcharge = sum([mtp[0] for mtp in _system.mtp_expansion])
+            excess_chg = totalcharge - float(charge)
+            if mol_mu > 0.:
+                for i,mtp_i in enumerate(_system.mtp_expansion):
+                    w_i = constants.ml_chg_correct_error[_system.elements[i]]
+                    mtp_i[0] += -1.*excess_chg * (w_i/mol_mu)
+        # Compute multipoles from basis set expansion
+        _system.expand_multipoles()
 
 
         self.logger.debug("Predicted multipole expansion for %s" % ( _system.xyz[0]))

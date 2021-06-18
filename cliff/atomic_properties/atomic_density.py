@@ -55,9 +55,6 @@ class AtomicDensity:
         if options.test_mode:
             self.refpath = testpath + self.refpath
 
-    def set_save_path(self, path):
-        self.save_path = path
-
     def load_ml(self):
         self.logger.info(
             "    Loading atomic-density training from %s" % self.training_dir)
@@ -113,55 +110,23 @@ class AtomicDensity:
         '''Predict coefficients given  descriptors.'''
         t1 = time.time()
 
-        if (force_predict == False) and (self.use_ref_density or (self.ref == _system.xyz[0])):
-            xyz = _system.xyz[0].split('/')[-1].strip('.xyz')
-            reffile = self.save_path + xyz + '-atmdns.txt'
-            vws = []
+        _system.valence_widths = np.zeros(_system.num_atoms)
+        _system.build_slatm(self.mbtypes, self.cutoff) # pass xyz here?
 
-            with open(reffile, 'r') as f:
-                for line in f:
-                    line = line.split()
-                    vws.append(float(line[0]))
-                
-            _system.valence_widths = vws
+        prefactor = constants.ml_prefactor[self.kernel]
+        power = constants.ml_power[self.kernel]
 
-        else:
-            # loop over elements
-            #for ele in self.alpha_train.keys(): 
-            #    if self.alpha_train[ele] is not None:
+        for ele in self.alpha_train.keys():
+            if self.alpha_train[ele] is not None:
 
-            # allocate the result
-            _system.valence_widths = np.zeros(_system.num_atoms)
-            
-            _system.build_slatm(self.mbtypes, self.cutoff) # pass xyz here?
+                pairwise_dists = cdist(_system.slatm, self.descr_train[ele], constants.ml_metric[self.kernel])
+                kmat = np.exp(- pairwise_dists / (prefactor*self.krr_sigma**power) )
+                pred = np.dot(kmat,self.alpha_train[ele])
 
-            prefactor = constants.ml_prefactor[self.kernel]
-            power = constants.ml_power[self.kernel]
+                for i in range(_system.num_atoms):
+                    if _system.elements[i] == ele:
+                        _system.valence_widths[i] = pred.T[i]
 
-            for ele in self.alpha_train.keys():
-                if self.alpha_train[ele] is not None:
-
-                    pairwise_dists = cdist(_system.slatm, self.descr_train[ele], constants.ml_metric[self.kernel])
-                    #kmat = np.exp(- pairwise_dists / self.krr_sigma )
-                    kmat = np.exp(- pairwise_dists / (prefactor*self.krr_sigma**power) )
-                    pred = np.dot(kmat,self.alpha_train[ele])
-
-                    for i in range(_system.num_atoms):
-                        if _system.elements[i] == ele:
-                            #_system.populations[i] = pred.T[0][i]
-                            #_system.valence_widths[i] = pred.T[1][i]
-                            _system.valence_widths[i] = pred.T[i]
-
-            if self.save_to_disk:
-                self.save(_system)
-        return None
-
-    def save(self, system):
-        xyz = system.xyz[0].split('/')[-1].strip('.xyz')
-        reffile = self.save_path + xyz + '-atmdns.txt'
-        with open(reffile,'w') as ref:
-            for vw in system.valence_widths:
-                ref.write("%10.8f \n" % vw)
         return None
 
     def add_mol_to_training(self, new_system, valwidths, atom=None):
