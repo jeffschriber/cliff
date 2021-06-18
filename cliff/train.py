@@ -13,7 +13,13 @@ import os
 import numpy as np
 import glob
 import qcelemental as qcel
-import apnet
+
+using_apnet = True
+try:
+    import apnet
+except:
+    using_apnet = False
+
 
 from cliff.helpers.options import Options
 from cliff.helpers.system import System
@@ -42,34 +48,37 @@ def train_atomic_properties(reference_properties, train_fraction, save_file):
     save_file : :class: `str`
         location and filename of ML model. Needs to end in .h5, or else code will enforce.
     """
-    monomers, multipoles, ratios, widths = apnet.load_monomer_pickle(reference_properties)
-    
-    # randomly shuffle the monomers
-    N = len(monomers)
-    inds = np.arange(N)
-    np.random.seed(4201)
-    np.random.shuffle(inds)
+    if using_apnet:
+        monomers, multipoles, ratios, widths = apnet.load_monomer_pickle(reference_properties)
         
-    # 90% of the monomers are used for training
-    Nt = int(train_fraction * N)
-    indst = inds[:Nt]
-    monomers_t = [monomers[i] for i in indst]
-    multipoles_t = multipoles[indst]
-    ratios_t = ratios[indst]
-    widths_t = widths[indst]
-    
-    # the other 10% are used for validation
-    indsv = inds[Nt:]
-    monomers_v = [monomers[i] for i in indsv]
-    multipoles_v = multipoles[indsv]
-    ratios_v = ratios[indsv]
-    widths_v = widths[indsv]
-    
-    # train the property model and save weights to .h5 file
-    if not save_file.endswith(".h5"):
-        save_file += ".h5"
+        # randomly shuffle the monomers
+        N = len(monomers)
+        inds = np.arange(N)
+        np.random.seed(4201)
+        np.random.shuffle(inds)
+            
+        # 90% of the monomers are used for training
+        Nt = int(train_fraction * N)
+        indst = inds[:Nt]
+        monomers_t = [monomers[i] for i in indst]
+        multipoles_t = multipoles[indst]
+        ratios_t = ratios[indst]
+        widths_t = widths[indst]
+        
+        # the other 10% are used for validation
+        indsv = inds[Nt:]
+        monomers_v = [monomers[i] for i in indsv]
+        multipoles_v = multipoles[indsv]
+        ratios_v = ratios[indsv]
+        widths_v = widths[indsv]
+        
+        # train the property model and save weights to .h5 file
+        if not save_file.endswith(".h5"):
+            save_file += ".h5"
 
-    apnet.train_cliff_model(monomers_t, multipoles_t, ratios_t, widths_t, monomers_v, multipoles_v, ratios_v, widths_v, save_file)
+        apnet.train_cliff_model(monomers_t, multipoles_t, ratios_t, widths_t, monomers_v, multipoles_v, ratios_v, widths_v, save_file)
+    else:
+        raise Exception("Calling train_atomic_properties but APNET not found!")
     
 
 def get_mols(pathname, frac, max_test=None):

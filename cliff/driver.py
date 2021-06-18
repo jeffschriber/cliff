@@ -8,7 +8,13 @@ in addition to related functions needed for predicting atomic properties.
 """
 
 import os
-import apnet
+
+
+using_apnet = True 
+try:
+    import apnet
+except:
+    using_apnet = False
 
 import time
 import numpy as np
@@ -290,7 +296,7 @@ def predict_from_dimers(dimers, ml_type='KRR', load_path=None, return_pairs=Fals
                 mon_b = load_atomic_properties(mon_b,load_path)  
             mon_a_list.append(mon_a)    
             mon_b_list.append(mon_b)    
-    elif ml_type.upper() == "NN":
+    elif (ml_type.upper() == "NN") and using_apnet:
         ma_s = []
         mb_s = []
         for dimer in d_list:
@@ -314,7 +320,8 @@ def predict_from_dimers(dimers, ml_type='KRR', load_path=None, return_pairs=Fals
 
             mon_a_list.append(mon_a)    
             mon_b_list.append(mon_b)    
-
+    elif (ml_type.upper() == "NN") and not using_apnet:
+        raise Exception(f"ML type {ml_type} requested, but APNET not found!")
     else:
         raise Exception(f"ML type {ml_type} not understood!") 
 
@@ -389,7 +396,7 @@ def predict_from_monomer_list(monomer_a, monomer_b,ml_type='KRR', load_path=None
                 mon_b = load_atomic_properties(mon_b,load_path)  
             mon_b_sys.append(mon_b)
 
-    elif ml_type.upper() == "NN":
+    elif (ml_type.upper() == "NN") and (using_apnet):
         model_path = os.path.dirname(os.path.realpath(__file__))
         model_path += '/models/apnet/cliff_pbe0atz.h5'
 
@@ -405,6 +412,10 @@ def predict_from_monomer_list(monomer_a, monomer_b,ml_type='KRR', load_path=None
             mon_b = mol_to_sys(B, options)
             mon_b.set_properties(mb_props[nB])
             mon_b_sys.append(mon_b)
+    elif (ml_type.upper() == "NN") and not using_apnet:
+        raise Exception(f"ML type {ml_type} requested, but APNET not found!")
+    else:
+        raise Exception(f"ML type {ml_type} not understood!") 
 
 
     energies = []
