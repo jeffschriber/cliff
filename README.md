@@ -5,7 +5,7 @@ CLIFF
 [![codecov](https://codecov.io/gh/jeffschriber/CLIFF/branch/master/graph/badge.svg?token=vYYLLXHWhK)](https://codecov.io/gh/jeffschriber/CLIFF)
 [![docs latest](https://img.shields.io/badge/docs-latest-5077AB.svg?logo=read%20the%20docs)](https://jeffschriber.github.io/cliff/)
 
-Component-based Learned Intermolecular Force Field
+The Component-Based Machine-Learned Intermolecular Force Field
 
 # Quick-start guide
 
