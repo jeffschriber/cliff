@@ -171,12 +171,74 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">qcelemental</span> <span class="k">as</span> <span class="nn">qcel</span>
+
+<span class="n">using_apnet</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">apnet</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">using_apnet</span> <span class="o">=</span> <span class="kc">False</span>
+
+
 <span class="kn">from</span> <span class="nn">cliff.helpers.options</span> <span class="kn">import</span> <span class="n">Options</span>
 <span class="kn">from</span> <span class="nn">cliff.helpers.system</span> <span class="kn">import</span> <span class="n">System</span>
 <span class="kn">from</span> <span class="nn">cliff.atomic_properties.hirshfeld</span> <span class="kn">import</span> <span class="n">Hirshfeld</span>
 <span class="kn">from</span> <span class="nn">cliff.atomic_properties.atomic_density</span> <span class="kn">import</span> <span class="n">AtomicDensity</span>
 <span class="kn">from</span> <span class="nn">cliff.atomic_properties.multipole</span> <span class="kn">import</span> <span class="n">Multipole</span>
 
+<div class="viewcode-block" id="train_atomic_properties"><a class="viewcode-back" href="../../cliff.html#cliff.train.train_atomic_properties">[docs]</a><span class="k">def</span> <span class="nf">train_atomic_properties</span><span class="p">(</span><span class="n">reference_properties</span><span class="p">,</span> <span class="n">train_fraction</span><span class="p">,</span> <span class="n">save_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Trains NN-based model for atomic properties using APNET</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    reference_properties : :class: `str`</span>
+<span class="sd">        Location of .pkl file containing reference properties. The pkl file</span>
+<span class="sd">        contains a pandas dataframe with the following columns:</span>
+<span class="sd">            - &#39;Z&#39; : The atom types (:class: `~numpy.ndarray` of int with shape (n,))</span>
+<span class="sd">            - &#39;R&#39; : Cartesian coordinates (:class: `~numpy.ndarray` of float with shape (n,3)</span>
+<span class="sd">            - &#39;total_charge&#39; : The total monomer charge (int)</span>
+<span class="sd">            - &#39;cartesian_multipoles&#39; : Reference atomic charges, dipoles, and quadrupoles (:class: `~numpy.ndarray` of `float` with shape (n,10), in a.u.)</span>
+<span class="sd">            - &#39;volume_ratios&#39; : Reference volume ratios (:class: `~numpy.ndarray` of `float` with shape (n,), no units)</span>
+<span class="sd">            - &#39;valence_widths&#39; : Reference valence widths (:class: `~numpy.ndarray` of `float` with shape (n,))</span>
+<span class="sd">    train_fraction : :class: `float`</span>
+<span class="sd">        Fraction of data set in reference_properties to use for training. Default is 0.9 </span>
+<span class="sd">    save_file : :class: `str`</span>
+<span class="sd">        location and filename of ML model. Needs to end in .h5, or else code will enforce.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">using_apnet</span><span class="p">:</span>
+        <span class="n">monomers</span><span class="p">,</span> <span class="n">multipoles</span><span class="p">,</span> <span class="n">ratios</span><span class="p">,</span> <span class="n">widths</span> <span class="o">=</span> <span class="n">apnet</span><span class="o">.</span><span class="n">load_monomer_pickle</span><span class="p">(</span><span class="n">reference_properties</span><span class="p">)</span>
+        
+        <span class="c1"># randomly shuffle the monomers</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">monomers</span><span class="p">)</span>
+        <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">4201</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">inds</span><span class="p">)</span>
+            
+        <span class="c1"># 90% of the monomers are used for training</span>
+        <span class="n">Nt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">train_fraction</span> <span class="o">*</span> <span class="n">N</span><span class="p">)</span>
+        <span class="n">indst</span> <span class="o">=</span> <span class="n">inds</span><span class="p">[:</span><span class="n">Nt</span><span class="p">]</span>
+        <span class="n">monomers_t</span> <span class="o">=</span> <span class="p">[</span><span class="n">monomers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indst</span><span class="p">]</span>
+        <span class="n">multipoles_t</span> <span class="o">=</span> <span class="n">multipoles</span><span class="p">[</span><span class="n">indst</span><span class="p">]</span>
+        <span class="n">ratios_t</span> <span class="o">=</span> <span class="n">ratios</span><span class="p">[</span><span class="n">indst</span><span class="p">]</span>
+        <span class="n">widths_t</span> <span class="o">=</span> <span class="n">widths</span><span class="p">[</span><span class="n">indst</span><span class="p">]</span>
+        
+        <span class="c1"># the other 10% are used for validation</span>
+        <span class="n">indsv</span> <span class="o">=</span> <span class="n">inds</span><span class="p">[</span><span class="n">Nt</span><span class="p">:]</span>
+        <span class="n">monomers_v</span> <span class="o">=</span> <span class="p">[</span><span class="n">monomers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indsv</span><span class="p">]</span>
+        <span class="n">multipoles_v</span> <span class="o">=</span> <span class="n">multipoles</span><span class="p">[</span><span class="n">indsv</span><span class="p">]</span>
+        <span class="n">ratios_v</span> <span class="o">=</span> <span class="n">ratios</span><span class="p">[</span><span class="n">indsv</span><span class="p">]</span>
+        <span class="n">widths_v</span> <span class="o">=</span> <span class="n">widths</span><span class="p">[</span><span class="n">indsv</span><span class="p">]</span>
+        
+        <span class="c1"># train the property model and save weights to .h5 file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">save_file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.h5&quot;</span><span class="p">):</span>
+            <span class="n">save_file</span> <span class="o">+=</span> <span class="s2">&quot;.h5&quot;</span>
+
+        <span class="n">apnet</span><span class="o">.</span><span class="n">train_cliff_model</span><span class="p">(</span><span class="n">monomers_t</span><span class="p">,</span> <span class="n">multipoles_t</span><span class="p">,</span> <span class="n">ratios_t</span><span class="p">,</span> <span class="n">widths_t</span><span class="p">,</span> <span class="n">monomers_v</span><span class="p">,</span> <span class="n">multipoles_v</span><span class="p">,</span> <span class="n">ratios_v</span><span class="p">,</span> <span class="n">widths_v</span><span class="p">,</span> <span class="n">save_file</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Calling train_atomic_properties but APNET not found!&quot;</span><span class="p">)</span></div>
+    
 
 <div class="viewcode-block" id="get_mols"><a class="viewcode-back" href="../../cliff.html#cliff.train.get_mols">[docs]</a><span class="k">def</span> <span class="nf">get_mols</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="n">frac</span><span class="p">,</span> <span class="n">max_test</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 

@@ -37,7 +37,8 @@ and the pytest library for running the tests:
 
     conda install pytest
 
-For now, we use the external library QML to handle the computation of descriptors
+There exist two sources of ML models for prediction atomic properties.
+A KRR-based one (from the article) uses the external library QML to handle the computation of descriptors
 for machine learning models. Documentation of QML can be found at https://www.qmlcode.org/.
 The simplest way to install QML is with `pip`, 
 
@@ -48,6 +49,11 @@ The simplest way to install QML is with `pip`,
 Note that QML also requires a Fortran compiler which is available from conda.
 As a final piece of setup, all Kernel-Ridge Regression model files located in
 `cliff/models/large` need to be untarred.
+
+Alternatively, the properties can be obtained from APNET, available
+at https://github.com/zachglick/apnet. Note that this is a private
+repository, so you must have permission to use it. Correspondingly,
+APNET-derived atomic properties is an experimental feature, so be cautious.
 
 Running the Tests
 -----------------
