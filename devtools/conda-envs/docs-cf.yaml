@@ -26,3 +26,4 @@ dependencies:
 
   - pip:
     - qml
+    - git+https://github.com/zachglick/apnet.git
