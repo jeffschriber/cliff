@@ -332,11 +332,11 @@ def predict_from_dimers(dimers, ml_type='KRR', load_path=None, return_pairs=Fals
         try:
             en = energy_kernel(ma, mb, options, return_pairs=return_pairs) 
         except:
-            en = "Error"
+            en = None
 
         energies.append(en)
 
-    return np.asarray(energies) 
+    return energies
     
 def predict_from_monomer_list(monomer_a, monomer_b,ml_type='KRR', load_path=None, return_pairs=False,infile=None, options=None):
     '''
@@ -424,7 +424,7 @@ def predict_from_monomer_list(monomer_a, monomer_b,ml_type='KRR', load_path=None
             try:
                 en = energy_kernel(mon_a, mon_b, options, return_pairs=return_pairs) 
             except:
-                en = "Error"
+                en = None
 
             energies.append(en)
 
