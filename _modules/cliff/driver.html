@@ -444,17 +444,21 @@
         <span class="k">if</span> <span class="n">load_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">models</span> <span class="o">=</span> <span class="n">load_krr_models</span><span class="p">(</span><span class="n">options</span><span class="p">)</span> 
 
+        <span class="c1"># get the monomers</span>
         <span class="k">for</span> <span class="n">dimer</span> <span class="ow">in</span> <span class="n">d_list</span><span class="p">:</span>
-            <span class="n">mon_a</span><span class="p">,</span> <span class="n">mon_b</span> <span class="o">=</span> <span class="n">mol_to_sys</span><span class="p">(</span><span class="n">dimer</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">load_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">mon_a</span> <span class="o">=</span> <span class="n">predict_atomic_properties</span><span class="p">(</span><span class="n">mon_a</span><span class="p">,</span><span class="n">models</span><span class="p">)</span>
-                <span class="n">mon_b</span> <span class="o">=</span> <span class="n">predict_atomic_properties</span><span class="p">(</span><span class="n">mon_b</span><span class="p">,</span><span class="n">models</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">mon_a</span> <span class="o">=</span> <span class="n">load_atomic_properties</span><span class="p">(</span><span class="n">mon_a</span><span class="p">,</span><span class="n">load_path</span><span class="p">)</span>  
-                <span class="n">mon_b</span> <span class="o">=</span> <span class="n">load_atomic_properties</span><span class="p">(</span><span class="n">mon_b</span><span class="p">,</span><span class="n">load_path</span><span class="p">)</span>  
-            <span class="n">mon_a_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mon_a</span><span class="p">)</span>    
-            <span class="n">mon_b_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mon_b</span><span class="p">)</span>    
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mon_a</span><span class="p">,</span> <span class="n">mon_b</span> <span class="o">=</span> <span class="n">mol_to_sys</span><span class="p">(</span><span class="n">dimer</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">load_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">mon_a</span> <span class="o">=</span> <span class="n">predict_atomic_properties</span><span class="p">(</span><span class="n">mon_a</span><span class="p">,</span><span class="n">models</span><span class="p">)</span>
+                    <span class="n">mon_b</span> <span class="o">=</span> <span class="n">predict_atomic_properties</span><span class="p">(</span><span class="n">mon_b</span><span class="p">,</span><span class="n">models</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mon_a</span> <span class="o">=</span> <span class="n">load_atomic_properties</span><span class="p">(</span><span class="n">mon_a</span><span class="p">,</span><span class="n">load_path</span><span class="p">)</span>  
+                    <span class="n">mon_b</span> <span class="o">=</span> <span class="n">load_atomic_properties</span><span class="p">(</span><span class="n">mon_b</span><span class="p">,</span><span class="n">load_path</span><span class="p">)</span>  
+                <span class="n">mon_a_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mon_a</span><span class="p">)</span>    
+                <span class="n">mon_b_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mon_b</span><span class="p">)</span>    
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">mon_a_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>    
+                <span class="n">mon_b_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>    
     <span class="k">elif</span> <span class="p">(</span><span class="n">ml_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;NN&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">using_apnet</span><span class="p">:</span>
         <span class="n">ma_s</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">mb_s</span> <span class="o">=</span> <span class="p">[]</span>
@@ -537,23 +541,29 @@
             <span class="n">models</span> <span class="o">=</span> <span class="n">load_krr_models</span><span class="p">(</span><span class="n">options</span><span class="p">)</span> 
 
         <span class="k">for</span> <span class="n">A</span> <span class="ow">in</span> <span class="n">mon_a_list</span><span class="p">:</span>
-            <span class="n">mon_a</span> <span class="o">=</span> <span class="n">mol_to_sys</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
-            
-            <span class="k">if</span> <span class="n">load_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">mon_a</span> <span class="o">=</span> <span class="n">predict_atomic_properties</span><span class="p">(</span><span class="n">mon_a</span><span class="p">,</span><span class="n">models</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">mon_a</span> <span class="o">=</span> <span class="n">load_atomic_properties</span><span class="p">(</span><span class="n">mon_a</span><span class="p">,</span><span class="n">load_path</span><span class="p">)</span>  
-            <span class="n">mon_a_sys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mon_a</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mon_a</span> <span class="o">=</span> <span class="n">mol_to_sys</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">load_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">mon_a</span> <span class="o">=</span> <span class="n">predict_atomic_properties</span><span class="p">(</span><span class="n">mon_a</span><span class="p">,</span><span class="n">models</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mon_a</span> <span class="o">=</span> <span class="n">load_atomic_properties</span><span class="p">(</span><span class="n">mon_a</span><span class="p">,</span><span class="n">load_path</span><span class="p">)</span>  
+                <span class="n">mon_a_sys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mon_a</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">mon_a_sys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
                 
 
         <span class="k">for</span> <span class="n">B</span> <span class="ow">in</span> <span class="n">mon_b_list</span><span class="p">:</span>
-            <span class="n">mon_b</span> <span class="o">=</span> <span class="n">mol_to_sys</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mon_b</span> <span class="o">=</span> <span class="n">mol_to_sys</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">load_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">mon_b</span> <span class="o">=</span> <span class="n">predict_atomic_properties</span><span class="p">(</span><span class="n">mon_b</span><span class="p">,</span><span class="n">models</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">mon_b</span> <span class="o">=</span> <span class="n">load_atomic_properties</span><span class="p">(</span><span class="n">mon_b</span><span class="p">,</span><span class="n">load_path</span><span class="p">)</span>  
-            <span class="n">mon_b_sys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mon_b</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">load_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">mon_b</span> <span class="o">=</span> <span class="n">predict_atomic_properties</span><span class="p">(</span><span class="n">mon_b</span><span class="p">,</span><span class="n">models</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mon_b</span> <span class="o">=</span> <span class="n">load_atomic_properties</span><span class="p">(</span><span class="n">mon_b</span><span class="p">,</span><span class="n">load_path</span><span class="p">)</span>  
+                <span class="n">mon_b_sys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mon_b</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">mon_b_sys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="p">(</span><span class="n">ml_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;NN&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">using_apnet</span><span class="p">):</span>
         <span class="n">model_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
