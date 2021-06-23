@@ -44,6 +44,24 @@ def test_cliff_dimers():
         assert abs(ref[2] - en[3]) < 1e-5        
         assert abs(ref[3] - en[4]) < 1e-5        
 
+def test_fail():
+        
+    with open(testpath + 'config.ini', 'w') as inf:
+        info = "[multipoles]\n"
+        info += "training = " + testpath + "/../models/small/mtp"
+        inf.write(info)
+
+    dimers = [cliff.load_dimer_xyz(testpath + "/dimer_data/S66-1.xyz")]
+    monomerA = cliff.load_dimer_xyz(testpath + "/monomer_data/monomerA.xyz")
+    dimers.append(monomerA)
+
+    energies = cliff.predict_from_dimers(dimers, infile=testpath + '/config.ini')
+
+    assert abs(energies[0][0] - -1.2229473) < 1e-5
+    assert energies[1] is None
+
+
+
 def test_cliff_monomers():
 
     with open(testpath + 'config.ini', 'w') as inf:
