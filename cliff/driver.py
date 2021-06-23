@@ -285,17 +285,21 @@ def predict_from_dimers(dimers, ml_type='KRR', load_path=None, return_pairs=Fals
         if load_path is None:
             models = load_krr_models(options) 
 
+        # get the monomers
         for dimer in d_list:
-            mon_a, mon_b = mol_to_sys(dimer, options)
-
-            if load_path is None:
-                mon_a = predict_atomic_properties(mon_a,models)
-                mon_b = predict_atomic_properties(mon_b,models)
-            else:
-                mon_a = load_atomic_properties(mon_a,load_path)  
-                mon_b = load_atomic_properties(mon_b,load_path)  
-            mon_a_list.append(mon_a)    
-            mon_b_list.append(mon_b)    
+            try:
+                mon_a, mon_b = mol_to_sys(dimer, options)
+                if load_path is None:
+                    mon_a = predict_atomic_properties(mon_a,models)
+                    mon_b = predict_atomic_properties(mon_b,models)
+                else:
+                    mon_a = load_atomic_properties(mon_a,load_path)  
+                    mon_b = load_atomic_properties(mon_b,load_path)  
+                mon_a_list.append(mon_a)    
+                mon_b_list.append(mon_b)    
+            except:
+                mon_a_list.append(None)    
+                mon_b_list.append(None)    
     elif (ml_type.upper() == "NN") and using_apnet:
         ma_s = []
         mb_s = []
@@ -378,23 +382,29 @@ def predict_from_monomer_list(monomer_a, monomer_b,ml_type='KRR', load_path=None
             models = load_krr_models(options) 
 
         for A in mon_a_list:
-            mon_a = mol_to_sys(A, options)
-            
-            if load_path is None:
-                mon_a = predict_atomic_properties(mon_a,models)
-            else:
-                mon_a = load_atomic_properties(mon_a,load_path)  
-            mon_a_sys.append(mon_a)
+            try:
+                mon_a = mol_to_sys(A, options)
+                
+                if load_path is None:
+                    mon_a = predict_atomic_properties(mon_a,models)
+                else:
+                    mon_a = load_atomic_properties(mon_a,load_path)  
+                mon_a_sys.append(mon_a)
+            except:
+                mon_a_sys.append(None)
                 
 
         for B in mon_b_list:
-            mon_b = mol_to_sys(B, options)
+            try:
+                mon_b = mol_to_sys(B, options)
 
-            if load_path is None:
-                mon_b = predict_atomic_properties(mon_b,models)
-            else:
-                mon_b = load_atomic_properties(mon_b,load_path)  
-            mon_b_sys.append(mon_b)
+                if load_path is None:
+                    mon_b = predict_atomic_properties(mon_b,models)
+                else:
+                    mon_b = load_atomic_properties(mon_b,load_path)  
+                mon_b_sys.append(mon_b)
+            except:
+                mon_b_sys.append(None)
 
     elif (ml_type.upper() == "NN") and (using_apnet):
         model_path = os.path.dirname(os.path.realpath(__file__))
