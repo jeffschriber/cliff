@@ -88,7 +88,7 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running_cliff.html">Running CLIFF</a></li>
@@ -186,6 +186,11 @@
 <span id="driver-functions"></span><h2>Driver Functions<a class="headerlink" href="#module-cliff.driver" title="Permalink to this headline">¶</a></h2>
 <p>Driver functions contain the main functions for energy computation,
 in addition to related functions needed for predicting atomic properties.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.driver.electrostatic_energy">
+<span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">electrostatic_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ml_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'KRR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#electrostatic_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.electrostatic_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="cliff.driver.energy_kernel">
 <span class="sig-prename descclassname"><span class="pre">cliff.driver.</span></span><span class="sig-name descname"><span class="pre">energy_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mon_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mon_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/driver.html#energy_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.driver.energy_kernel" title="Permalink to this definition">¶</a></dt>
@@ -366,6 +371,28 @@ Increasing threads can only impact any threaded numpy routines.</p>
 Component-based Learned Intermolecular Force Field</p>
 <p>Functions for fitting global parameters</p>
 <dl class="py function">
+<dt class="sig sig-object py" id="cliff.fit.fit_elst_global_parameters">
+<span class="sig-prename descclassname"><span class="pre">cliff.fit.</span></span><span class="sig-name descname"><span class="pre">fit_elst_global_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bfgs'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/fit.html#fit_elst_global_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.fit.fit_elst_global_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit exponents used in electrostatics model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pathname</strong> – Path to the dimer xyz files. The comment (second) line in the xyz needs to specify
+the number of atoms in the first monomer.</p></li>
+<li><p><strong>ref_dict</strong> – Dictionary containing the reference energies for fitting. The keys to the dictionary
+need to be the dimer filenames, and the value is a numpy array of
+energies: [total, elst, exch, indu].</p></li>
+<li><p><strong>initial_guess</strong> – Numpy array of initial guess parameters (69 total). See the <cite>get_energy</cite> function
+for how initial parameters should be ordered. Default is 1.0 for all parameters</p></li>
+<li><p><strong>gamma</strong> – Gamma parameter between 0 and 1.0 that controls the degree to which the total
+energy influences fitting.</p></li>
+<li><p><strong>method</strong> – Algorithm used for minimization. See scipy.minimize documentation for all options</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="cliff.fit.fit_global_parameters">
 <span class="sig-prename descclassname"><span class="pre">cliff.fit.</span></span><span class="sig-name descname"><span class="pre">fit_global_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bfgs'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/fit.html#fit_global_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.fit.fit_global_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fits global parameters used in CLIFF</p>
@@ -376,7 +403,7 @@ Component-based Learned Intermolecular Force Field</p>
 the number of atoms in the first monomer.</p></li>
 <li><p><strong>ref_dict</strong> – Dictionary containing the reference energies for fitting. The keys to the dictionary
 need to be the extension-less dimer filenames, and the value is a numpy array of
-energies: [total, elst, exch. indu].</p></li>
+energies: [total, elst, exch, indu, disp].</p></li>
 <li><p><strong>initial_guess</strong> – Numpy array of initial guess parameters (69 total). See the <cite>get_energy</cite> function
 for how initial parameters should be ordered. Default is 1.0 for all parameters</p></li>
 <li><p><strong>gamma</strong> – Gamma parameter between 0 and 1.0 that controls the degree to which the total
@@ -386,6 +413,11 @@ energy influences fitting.</p></li>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cliff.fit.get_elst_energy">
+<span class="sig-prename descclassname"><span class="pre">cliff.fit.</span></span><span class="sig-name descname"><span class="pre">get_elst_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pathname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cliff/fit.html#get_elst_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cliff.fit.get_elst_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cliff.fit.get_energy">
