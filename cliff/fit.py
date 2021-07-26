@@ -18,6 +18,46 @@ import pprint
 import cliff
 from cliff.helpers.options import Options
 
+def get_elst_energy(params, pathname, ref):
+    elst_param_dict = {
+    'Cl' : abs(params[0] )  , 
+    'F'  : abs(params[1] )  , 
+    'S1' : abs(params[2] )  , 
+    'S2' : abs(params[3] )  , 
+    'HS' : abs(params[4] )  , 
+    'HC' : abs(params[5] )  ,
+    'HN' : abs(params[6] )  , 
+    'HO' : abs(params[7] )  , 
+    'C4' : abs(params[8] )  , 
+    'C3' : abs(params[9] )  , 
+    'C2' : abs(params[10])   , 
+    'N3' : abs(params[11])   ,
+    'N2' : abs(params[12])   , 
+    'N1' : abs(params[13])   , 
+    'O1' : abs(params[14])   , 
+    'O2' : abs(params[15]) ,
+    'Br' : abs(params[16])}  
+
+    print(elst_param_dict)
+    #set globals
+    options = Options('config.ini')
+    options.set_damping_exponents(elst_param_dict)
+
+    dimer_xyz = sorted(glob.glob(pathname + "/*.xyz"))
+    dimers = [cliff.load_dimer_xyz(f) for f in dimer_xyz]
+
+
+    elst_r  = ref[:,1]
+    en = cliff.electrostatic_energy(dimers,ml_type='NN', options=options)
+
+    res = elst_r - en
+
+    rmse = np.sqrt(np.average(np.square(res)))
+
+    print(rmse)
+    print("")
+
+    return rmse
 
 def get_energy(params, pathname, gamma, ref):
 
@@ -177,7 +217,7 @@ def fit_global_parameters(pathname, ref_dict, initial_guess=None,gamma=0.4, meth
     ref_dict : :class: `dict`
         Dictionary containing the reference energies for fitting. The keys to the dictionary
         need to be the extension-less dimer filenames, and the value is a numpy array of
-        energies: [total, elst, exch. indu].
+        energies: [total, elst, exch, indu, disp].
     initial_guess : :class: `~numpy.ndarray`
         Numpy array of initial guess parameters (69 total). See the `get_energy` function
         for how initial parameters should be ordered. Default is 1.0 for all parameters
@@ -205,5 +245,50 @@ def fit_global_parameters(pathname, ref_dict, initial_guess=None,gamma=0.4, meth
         ref.append(ref_dict[key])
     ref = np.asarray(ref)
     res = opt.minimize(get_energy, initial_guess, method=method, args=(pathname, gamma,ref))
+    print(res)
+    return res
+
+def fit_elst_global_parameters(pathname, ref_dict, initial_guess=None, method='bfgs'):
+    """
+    Fit exponents used in electrostatics model
+
+    Parameters
+    ----------
+
+    pathname : :class: `str`
+        Path to the dimer xyz files. The comment (second) line in the xyz needs to specify
+        the number of atoms in the first monomer.
+    ref_dict : :class: `dict`
+        Dictionary containing the reference energies for fitting. The keys to the dictionary
+        need to be the dimer filenames, and the value is a numpy array of
+        energies: [total, elst, exch, indu].
+    initial_guess : :class: `~numpy.ndarray`
+        Numpy array of initial guess parameters (69 total). See the `get_energy` function
+        for how initial parameters should be ordered. Default is 1.0 for all parameters
+    gamma : :class: `float`
+        Gamma parameter between 0 and 1.0 that controls the degree to which the total 
+        energy influences fitting.
+    method: :class: `str`
+        Algorithm used for minimization. See scipy.minimize documentation for all options
+    
+    """
+
+    atoms = ['Cl', 'F', 'Br', 'S1', 'S2', 'HS', 'HC', 'HN', 'HO', 'C4', 'C3', 'C2', 'N3', 'N2', 'N1', 'O1', 'O2']
+    
+    if initial_guess is not None:
+        initial_guess = initial_guess.flatten()
+        if len(initial_guess) != 17:
+            raise Exception("Initial guess has the wrong dimension")
+    else:
+        initial_guess = np.ones(17)
+
+    ref = []
+    dimer_xyz = sorted(glob.glob(pathname + "/*.xyz"))
+    for dimer in dimer_xyz:
+        #key = dimer.split('/')[-1].split('.xyz')[0]
+        key = dimer
+        ref.append(ref_dict[key])
+    ref = np.asarray(ref)
+    res = opt.minimize(get_elst_energy, initial_guess, method=method, args=(pathname, ref))
     print(res)
     return res

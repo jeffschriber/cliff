@@ -490,4 +490,86 @@ def load_krr_models(options):
 
     return [hirsh,adens,mtp]
 
+def electrostatic_energy(dimers, ml_type='KRR', load_path=None, return_pairs=False,infile=None, options=None):
+    #defines cell parameters for grid computations
+
+    if isinstance(dimers,list):
+        d_list = dimers
+    else:
+        d_list = [dimers]     
+
+
+    # load options (all defaults) and get the KRR models
+    if options is None:
+        if infile is None:
+            options = Options()
+        else:
+            options = Options(config_file=infile)
+
+   
+    energies = []
+    mon_a_list = []
+    mon_b_list = []
+
+    s = time.time()
+    if ml_type.upper() == "KRR":
+        # get atomic properties
+        if load_path is None:
+            models = load_krr_models(options) 
+
+        for dimer in d_list:
+            mon_a, mon_b = mol_to_sys(dimer, options)
+
+            if load_path is None:
+                mon_a = predict_atomic_properties(mon_a,models)
+                mon_b = predict_atomic_properties(mon_b,models)
+            else:
+                mon_a = load_atomic_properties(mon_a,load_path)  
+                mon_b = load_atomic_properties(mon_b,load_path)  
+            mon_a_list.append(mon_a)    
+            mon_b_list.append(mon_b)    
+    elif ml_type.upper() == "NN":
+        ma_s = []
+        mb_s = []
+        for dimer in d_list:
+            ma_s.append(dimer.get_fragment(0))
+            mb_s.append(dimer.get_fragment(1))
+
+        model_path = os.path.dirname(os.path.realpath(__file__))
+        model_path += '/models/apnet/cliff_pbe0atz.h5'
+
+        s1 = time.time()
+        ma_props = apnet.predict_cliff_properties(ma_s, model_path)
+        mb_props = apnet.predict_cliff_properties(mb_s, model_path)
+        f1 = time.time()
+        print(f"apnet time: {f1-s1} s")
+
+        for nd, dimer in enumerate(d_list):        
+            mon_a, mon_b = mol_to_sys(dimer, options)
+
+            mon_a.set_properties(ma_props[nd])
+            mon_b.set_properties(mb_props[nd])
+
+            mon_a_list.append(mon_a)    
+            mon_b_list.append(mon_b)    
+    else:
+        raise Exception(f"ML type {ml_type} not understood!") 
+
+    f = time.time()
+    print(f"Time spent predicting atomic properties: {f-s} s")
+
+    cell = Cell.lattice_parameters(100., 100., 100.)
+        
+    for ma, mb in zip(mon_a_list,mon_b_list):
+        try:
+            mtp = Electrostatics(options,ma, cell)
+            mtp.add_system(mb)
+            en = mtp.mtp_energy()
+        except:
+            en = "Error"
+
+        energies.append(en)
+
+    return np.asarray(energies) 
+
 
