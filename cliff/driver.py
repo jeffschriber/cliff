@@ -508,6 +508,119 @@ def electrostatic_energy(dimers, ml_type='KRR', load_path=None, return_pairs=Fal
 
    
     energies = []
+    mon_a_list, mon_b_list = fill_monomer_lists(d_list, options, ml_type,load_path )    
+
+    cell = Cell.lattice_parameters(100., 100., 100.)
+        
+    for ma, mb in zip(mon_a_list,mon_b_list):
+        mtp = Electrostatics(options,ma, cell)
+        mtp.add_system(mb)
+        en = mtp.mtp_energy()
+     #   try:
+     #       mtp = Electrostatics(options,ma, cell)
+     #       mtp.add_system(mb)
+     #       en = mtp.mtp_energy()
+     #   except:
+     #       en = "Error"
+
+        energies.append(en)
+
+    return np.asarray(energies) 
+
+def exchange_energy(dimers, ml_type='KRR', load_path=None, return_pairs=False,infile=None, options=None):
+    #defines cell parameters for grid computations
+
+    if isinstance(dimers,list):
+        d_list = dimers
+    else:
+        d_list = [dimers]     
+
+
+    # load options (all defaults) and get the KRR models
+    if options is None:
+        if infile is None:
+            options = Options()
+        else:
+            options = Options(config_file=infile)
+
+   
+    energies = []
+    mon_a_list, mon_b_list = fill_monomer_lists(d_list, options, ml_type,load_path )    
+
+    cell = Cell.lattice_parameters(100., 100., 100.)
+        
+    for ma, mb in zip(mon_a_list,mon_b_list):
+        rep = Repulsion(options, ma, cell)
+        rep.add_system(mb)
+        en = rep.compute_repulsion()
+     #   try:
+     #       mtp = Electrostatics(options,ma, cell)
+     #       mtp.add_system(mb)
+     #       en = mtp.mtp_energy()
+     #   except:
+     #       en = "Error"
+
+        energies.append(en)
+
+    return np.asarray(energies) 
+
+def induction_energy(dimers, ml_type='KRR', load_path=None, return_pairs=False,infile=None, options=None):
+    #defines cell parameters for grid computations
+
+    if isinstance(dimers,list):
+        d_list = dimers
+    else:
+        d_list = [dimers]     
+
+
+    # load options (all defaults) and get the KRR models
+    if options is None:
+        if infile is None:
+            options = Options()
+        else:
+            options = Options(config_file=infile)
+
+   
+    energies = []
+    mon_a_list, mon_b_list = fill_monomer_lists(d_list, options, ml_type,load_path )    
+
+    cell = Cell.lattice_parameters(100., 100., 100.)
+        
+    for ma, mb in zip(mon_a_list,mon_b_list):
+        ind = InductionCalc(options,ma, cell)
+        ind.add_system(mb)
+        en = ind.polarization_energy()
+        energies.append(en)
+
+    return np.asarray(energies) 
+
+def dispersion_energy(dimers, ml_type='KRR', load_path=None, return_pairs=False,infile=None, options=None):
+    #defines cell parameters for grid computations
+
+    if isinstance(dimers,list):
+        d_list = dimers
+    else:
+        d_list = [dimers]     
+
+    # load options (all defaults) and get the KRR models
+    if options is None:
+        if infile is None:
+            options = Options()
+        else:
+            options = Options(config_file=infile)
+   
+    energies = []
+    mon_a_list, mon_b_list = fill_monomer_lists(d_list, options, ml_type,load_path )    
+    cell = Cell.lattice_parameters(100., 100., 100.)
+    for ma, mb in zip(mon_a_list,mon_b_list):
+        disp = Dispersion(options, ma, cell) 
+        disp.add_system(mb)
+        en = disp.compute_dispersion()  
+        energies.append(en)
+    return np.asarray(energies) 
+
+def fill_monomer_lists(d_list, options, ml_type, load_path):
+
     mon_a_list = []
     mon_b_list = []
 
@@ -557,19 +670,4 @@ def electrostatic_energy(dimers, ml_type='KRR', load_path=None, return_pairs=Fal
 
     f = time.time()
     print(f"Time spent predicting atomic properties: {f-s} s")
-
-    cell = Cell.lattice_parameters(100., 100., 100.)
-        
-    for ma, mb in zip(mon_a_list,mon_b_list):
-        try:
-            mtp = Electrostatics(options,ma, cell)
-            mtp.add_system(mb)
-            en = mtp.mtp_energy()
-        except:
-            en = "Error"
-
-        energies.append(en)
-
-    return np.asarray(energies) 
-
-
+    return mon_a_list, mon_b_list
