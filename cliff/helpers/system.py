@@ -8,8 +8,8 @@ import cliff.helpers.constants as constants
 import os
 import copy
 import re
-import qml
 import configparser
+import qml
 
 
 class System:
@@ -248,6 +248,7 @@ class System:
                 # only let H bond to one ele, pick the shortest
                 bonded = sorted(bonded, key = lambda x: x[2]) 
                 at_type = 'H'+bonded[0][0]
+
             elif at_ele == 'O':
                 at_type = 'O'+str(len(bonded))
             elif at_ele == 'N':

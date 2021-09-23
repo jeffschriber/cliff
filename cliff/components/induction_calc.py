@@ -40,18 +40,14 @@ class InductionCalc(Electrostatics):
         self.decompose = True
         self.at_ind = np.zeros((0,0))
 
+
     def add_system(self, sys):
         Electrostatics.add_system(self, sys)
         return None
 
     def polarization_energy(self, smearing_coeff=None, stone_convention=False):
         """Compute induction energy"""
-        self.convert_mtps_to_cartesian(stone_convention)
-        # Populate Hirshfeld ratios of combined systems
-        # self.hirshfelds = ...
-        # Setup list of atoms to sum over
         nsys = len(self.systems)
-        
         atom_coord = []    
         atom_ele = []    
         atom_typ = []    
@@ -59,6 +55,8 @@ class InductionCalc(Electrostatics):
         atom_alpha_iso = []
         ind_params = []
         induced_dip = []
+
+        self.get_mtp_coefficients(stone_convention=False)
         
         for sys in self.systems:
             atom_coord.append([crd*constants.a2b for crd in sys.coords])

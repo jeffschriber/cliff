@@ -49,7 +49,7 @@ class Electrostatics:
 
         return None
 
-    def convert_mtps_to_cartesian(self, stone_convention):
+    def get_mtp_coefficients(self, stone_convention):
         'Convert spherical MTPs to cartesian'
         num_atoms = [sys.num_atoms for sys in self.systems]
         atom_ele = []
@@ -66,19 +66,20 @@ class Electrostatics:
 
             for i in range(sys.num_atoms):
                 self.mtps_cart[s1][i][0] = sys.multipoles[i][0] - constants.atomic_number[atom_ele[s1][i]] 
-                self.mtps_cart[s1][i][1] = sys.multipoles[i][1]
-                self.mtps_cart[s1][i][2] = sys.multipoles[i][2]
-                self.mtps_cart[s1][i][3] = sys.multipoles[i][3]
-                # Convert spherical quadrupole
-                cart_quad = utils.spher_to_cart(
-                                sys.multipoles[i][4:9], stone_convention)
-                # xx, xy, xz, yx, yy, yz, zx, zy, zz
-                self.mtps_cart[s1][i][4:13] = cart_quad.reshape((1,9))
 
-       # self.mtps_cart_elec[:] = self.mtps_cart
-
-       # for n, atom in enumerate(atom_ele):
-       #     self.mtps_cart_elec[n][0] -= constants.atomic_number[atom]
+                # temporary fix to work with both cart (from NN) and sphere (from KRR)
+                if len(sys.multipoles[i]) == 13:   
+                    for n in range(1,13):
+                        self.mtps_cart[s1][i][n] = sys.multipoles[i][n]
+                elif len(sys.multipoles[i]) == 9:
+                    self.mtps_cart[s1][i][1] = sys.multipoles[i][1]
+                    self.mtps_cart[s1][i][2] = sys.multipoles[i][2]
+                    self.mtps_cart[s1][i][3] = sys.multipoles[i][3]
+                   # Convert spherical quadrupole
+                    cart_quad = utils.spher_to_cart(
+                                    sys.multipoles[i][4:9], stone_convention)
+                   # xx, xy, xz, yx, yy, yz, zx, zy, zz
+                    self.mtps_cart[s1][i][4:13] = cart_quad.reshape((1,9))
 
         return None
 
@@ -86,7 +87,7 @@ class Electrostatics:
         'Convert multipole interactions'
 
         nsys = len(self.systems)
-        self.convert_mtps_to_cartesian(stone_convention)
+        self.get_mtp_coefficients(stone_convention)
         # Setup list of atoms to sum over
         atom_coord = []
         atom_ele = []
