@@ -1,74 +1,35 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Running CLIFF &mdash; CLIFF 0.1 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="CLIFF API Documentation" href="cliff.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> CLIFF
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -76,18 +37,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
@@ -104,81 +54,40 @@
 <li class="toctree-l1"><a class="reference internal" href="cliff.html">CLIFF API Documentation</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">CLIFF</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
       <li>Running CLIFF</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/running_cliff.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="running-cliff">
-<span id="sec-running-cliff"></span><h1>Running CLIFF<a class="headerlink" href="#running-cliff" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="running-cliff">
+<span id="sec-running-cliff"></span><h1>Running CLIFF<a class="headerlink" href="#running-cliff" title="Permalink to this headline"></a></h1>
 <p>To run CLIFF either with the main script or through the API, be sure to have the main directory added to
 your PATH and PYTHONPATH:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span>/path/to/code/cliff/cliff:<span class="nv">$PATH</span>
 <span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span>/path/to/code/cliff:<span class="nv">$PYTHONPATH</span>
 </pre></div>
 </div>
-<div class="section" id="command-line-usage">
-<h2>Command Line Usage<a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
+<section id="command-line-usage">
+<h2>Command Line Usage<a class="headerlink" href="#command-line-usage" title="Permalink to this headline"></a></h2>
 <p>The simplest way to run CLIFF is with the command line runscript. CLIFF can also be run using a python API
 for more specialized tasks. The runscript requires all monomers to be located in separate .xyz files
 in one directory. All other options, including parameters, algorithm choices, etc. are specified in
@@ -206,8 +115,8 @@ optional arguments:
 </div>
 <p>The command like script can be called in two contexts: one where the user specifies one or many dimer
 .xyz files, and one where the user specifies two monomer xyz files.</p>
-<div class="section" id="running-with-dimer-xyz-files">
-<h3>Running with dimer <cite>xyz</cite> files<a class="headerlink" href="#running-with-dimer-xyz-files" title="Permalink to this headline">¶</a></h3>
+<section id="running-with-dimer-xyz-files">
+<h3>Running with dimer <cite>xyz</cite> files<a class="headerlink" href="#running-with-dimer-xyz-files" title="Permalink to this headline"></a></h3>
 <p>As shown above, a dimer computation can be invoked by passing a path to a folder
 containing one or more dimer xyz files using the <cite>-d</cite> flag:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>run_cliff.py -d path/to/dimer/xyz/files/
@@ -227,9 +136,9 @@ H <span class="m">0</span>.758602 <span class="m">2</span>.000000  <span class="
 H <span class="m">0</span>.260455 <span class="m">2</span>.000000 -0.872893
 </pre></div>
 </div>
-</div>
-<div class="section" id="running-with-monomer-xyz-files">
-<h3>Running with monomer <cite>xyz</cite> files<a class="headerlink" href="#running-with-monomer-xyz-files" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="running-with-monomer-xyz-files">
+<h3>Running with monomer <cite>xyz</cite> files<a class="headerlink" href="#running-with-monomer-xyz-files" title="Permalink to this headline"></a></h3>
 <p>Alternatively, CLIFF can be invoked by using monomer xyz files:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>run_cliff.py -a monomerA.xyz -b monomerB.xyz
 </pre></div>
@@ -263,10 +172,10 @@ H <span class="m">0</span>.758602 <span class="m">4</span>.000000  <span class="
 H <span class="m">0</span>.260455 <span class="m">4</span>.000000 -0.872893
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="running-using-the-api">
-<h2>Running Using the API<a class="headerlink" href="#running-using-the-api" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="running-using-the-api">
+<h2>Running Using the API<a class="headerlink" href="#running-using-the-api" title="Permalink to this headline"></a></h2>
 <p>Running CLIFF by directly calling CLIFF functions in a python script
 is the most versatile way to use the code. Analagous to the run_cliff.py
 modes, callable functions exist to run CLIFF from both monomer and dimer xyz files
@@ -314,9 +223,9 @@ related to energy calls. The Training functions relate to API-callable
 prediction of atomic properties using KRR or NN-based machine-learning
 models. The Fitting functions provide tools to fit global parameters
 using a custom dimer database.</p>
-</div>
-<div class="section" id="notes-on-options">
-<h2>Notes on Options<a class="headerlink" href="#notes-on-options" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="notes-on-options">
+<h2>Notes on Options<a class="headerlink" href="#notes-on-options" title="Permalink to this headline"></a></h2>
 <p>As mentioned, options including global parameters, model locations,
 can be modified by manually specifying a <cite>config.ini</cite> file.
 However, we do not recommend using such a file, as the CLIFF
@@ -325,55 +234,38 @@ and any additional modifications to these defaults
 are considered expert options. For interested users, we
 point out all available options and defaults are defined
 in <cite>cliff/helpers/options.py</cite>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="cliff.html" class="btn btn-neutral float-right" title="CLIFF API Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cliff.html" class="btn btn-neutral float-right" title="CLIFF API Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020, Jeffrey B. Schriber.
-
-    </p>
+    <p>&#169; Copyright 2020, Jeffrey B. Schriber.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -1,72 +1,32 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>cliff.fit &mdash; CLIFF 0.1 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> CLIFF
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -74,18 +34,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
@@ -93,69 +42,30 @@
 <li class="toctree-l1"><a class="reference internal" href="../../cliff.html">CLIFF API Documentation</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">CLIFF</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-        
       <li>cliff.fit</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for cliff.fit</h1><div class="highlight"><pre>
 <span></span><span class="ch">#! /usr/bin/env python</span>
 
@@ -211,6 +121,129 @@
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">elst_r</span> <span class="o">-</span> <span class="n">en</span>
 
+    <span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">res</span><span class="p">)))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">rmse</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">rmse</span></div>
+
+<div class="viewcode-block" id="get_exch_energy"><a class="viewcode-back" href="../../cliff.html#cliff.fit.get_exch_energy">[docs]</a><span class="k">def</span> <span class="nf">get_exch_energy</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">pathname</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
+    <span class="n">exch_param_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Cl&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;F&#39;</span>  <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;S1&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;S2&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;HS&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;HC&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span>
+    <span class="s1">&#39;HN&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;HO&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;C4&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;C3&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;C2&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>   <span class="p">,</span> 
+    <span class="s1">&#39;N3&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">11</span><span class="p">])</span>   <span class="p">,</span>
+    <span class="s1">&#39;N2&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">12</span><span class="p">])</span>   <span class="p">,</span> 
+    <span class="s1">&#39;N1&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">13</span><span class="p">])</span>   <span class="p">,</span> 
+    <span class="s1">&#39;O1&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">14</span><span class="p">])</span>   <span class="p">,</span> 
+    <span class="s1">&#39;O2&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">15</span><span class="p">])</span> <span class="p">,</span>
+    <span class="s1">&#39;Br&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">16</span><span class="p">])}</span>  
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">exch_param_dict</span><span class="p">)</span>
+    <span class="c1">#set globals</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">Options</span><span class="p">(</span><span class="s1">&#39;config.ini&#39;</span><span class="p">)</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">set_exchange_int_params</span><span class="p">(</span><span class="n">exch_param_dict</span><span class="p">)</span>
+
+    <span class="n">dimer_xyz</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">pathname</span> <span class="o">+</span> <span class="s2">&quot;/*.xyz&quot;</span><span class="p">))</span>
+    <span class="n">dimers</span> <span class="o">=</span> <span class="p">[</span><span class="n">cliff</span><span class="o">.</span><span class="n">load_dimer_xyz</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dimer_xyz</span><span class="p">]</span>
+
+    <span class="n">exch_r</span>  <span class="o">=</span> <span class="n">ref</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">en</span> <span class="o">=</span> <span class="n">cliff</span><span class="o">.</span><span class="n">exchange_energy</span><span class="p">(</span><span class="n">dimers</span><span class="p">,</span><span class="n">ml_type</span><span class="o">=</span><span class="s1">&#39;NN&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">exch_r</span> <span class="o">-</span> <span class="n">en</span>
+
+    <span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">res</span><span class="p">)))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">rmse</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">rmse</span></div>
+
+<div class="viewcode-block" id="get_indu_energy"><a class="viewcode-back" href="../../cliff.html#cliff.fit.get_indu_energy">[docs]</a><span class="k">def</span> <span class="nf">get_indu_energy</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">pathname</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
+    <span class="n">indu_param_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Cl&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;F&#39;</span>  <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;S1&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;S2&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;HS&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;HC&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span>
+    <span class="s1">&#39;HN&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;HO&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;C4&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;C3&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;C2&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>   <span class="p">,</span> 
+    <span class="s1">&#39;N3&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">11</span><span class="p">])</span>   <span class="p">,</span>
+    <span class="s1">&#39;N2&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">12</span><span class="p">])</span>   <span class="p">,</span> 
+    <span class="s1">&#39;N1&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">13</span><span class="p">])</span>   <span class="p">,</span> 
+    <span class="s1">&#39;O1&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">14</span><span class="p">])</span>   <span class="p">,</span> 
+    <span class="s1">&#39;O2&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">15</span><span class="p">])</span> <span class="p">,</span>
+    <span class="s1">&#39;Br&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">16</span><span class="p">])}</span>  
+
+    <span class="n">smearing_coeff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">17</span><span class="p">])</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">indu_param_dict</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">smearing_coeff</span><span class="p">)</span>
+    <span class="c1">#set globals</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">Options</span><span class="p">(</span><span class="s1">&#39;config.ini&#39;</span><span class="p">)</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">set_induction_sr_params</span><span class="p">(</span><span class="n">indu_param_dict</span><span class="p">)</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">set_indu_smearing_coeff</span><span class="p">(</span><span class="n">smearing_coeff</span><span class="p">)</span>
+
+    <span class="n">dimer_xyz</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">pathname</span> <span class="o">+</span> <span class="s2">&quot;/*.xyz&quot;</span><span class="p">))</span>
+    <span class="n">dimers</span> <span class="o">=</span> <span class="p">[</span><span class="n">cliff</span><span class="o">.</span><span class="n">load_dimer_xyz</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dimer_xyz</span><span class="p">]</span>
+
+    <span class="n">ind_r</span>  <span class="o">=</span> <span class="n">ref</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">en</span> <span class="o">=</span> <span class="n">cliff</span><span class="o">.</span><span class="n">induction_energy</span><span class="p">(</span><span class="n">dimers</span><span class="p">,</span><span class="n">ml_type</span><span class="o">=</span><span class="s1">&#39;NN&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">ind_r</span> <span class="o">-</span> <span class="n">en</span>
+
+    <span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">res</span><span class="p">)))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">rmse</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">rmse</span></div>
+
+<div class="viewcode-block" id="get_disp_energy"><a class="viewcode-back" href="../../cliff.html#cliff.fit.get_disp_energy">[docs]</a><span class="k">def</span> <span class="nf">get_disp_energy</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">pathname</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
+    <span class="n">disp_param_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Cl&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;F&#39;</span>  <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;S1&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;S2&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;HS&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;HC&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span>
+    <span class="s1">&#39;HN&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;HO&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;C4&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;C3&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="p">)</span>  <span class="p">,</span> 
+    <span class="s1">&#39;C2&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>   <span class="p">,</span> 
+    <span class="s1">&#39;N3&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">11</span><span class="p">])</span>   <span class="p">,</span>
+    <span class="s1">&#39;N2&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">12</span><span class="p">])</span>   <span class="p">,</span> 
+    <span class="s1">&#39;N1&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">13</span><span class="p">])</span>   <span class="p">,</span> 
+    <span class="s1">&#39;O1&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">14</span><span class="p">])</span>   <span class="p">,</span> 
+    <span class="s1">&#39;O2&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">15</span><span class="p">])</span> <span class="p">,</span>
+    <span class="s1">&#39;Br&#39;</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">16</span><span class="p">])}</span>  
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">disp_param_dict</span><span class="p">)</span>
+    <span class="c1">#set globals</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">Options</span><span class="p">(</span><span class="s1">&#39;config.ini&#39;</span><span class="p">)</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">set_disp_coeffs</span><span class="p">(</span><span class="n">disp_param_dict</span><span class="p">)</span>
+
+    <span class="n">dimer_xyz</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">pathname</span> <span class="o">+</span> <span class="s2">&quot;/*.xyz&quot;</span><span class="p">))</span>
+    <span class="n">dimers</span> <span class="o">=</span> <span class="p">[</span><span class="n">cliff</span><span class="o">.</span><span class="n">load_dimer_xyz</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dimer_xyz</span><span class="p">]</span>
+
+    <span class="n">ind_r</span>  <span class="o">=</span> <span class="n">ref</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">en</span> <span class="o">=</span> <span class="n">cliff</span><span class="o">.</span><span class="n">dispersion_energy</span><span class="p">(</span><span class="n">dimers</span><span class="p">,</span><span class="n">ml_type</span><span class="o">=</span><span class="s1">&#39;NN&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">ind_r</span> <span class="o">-</span> <span class="n">en</span>
     <span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">res</span><span class="p">)))</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="n">rmse</span><span class="p">)</span>
@@ -451,49 +484,162 @@
     <span class="n">res</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">get_elst_energy</span><span class="p">,</span> <span class="n">initial_guess</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="n">ref</span><span class="p">))</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="fit_exch_global_parameters"><a class="viewcode-back" href="../../cliff.html#cliff.fit.fit_exch_global_parameters">[docs]</a><span class="k">def</span> <span class="nf">fit_exch_global_parameters</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="n">ref_dict</span><span class="p">,</span> <span class="n">initial_guess</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bfgs&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit exchange coefficients</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    pathname : :class: `str`</span>
+<span class="sd">        Path to the dimer xyz files. The comment (second) line in the xyz needs to specify</span>
+<span class="sd">        the number of atoms in the first monomer.</span>
+<span class="sd">    ref_dict : :class: `dict`</span>
+<span class="sd">        Dictionary containing the reference energies for fitting. The keys to the dictionary</span>
+<span class="sd">        need to be the dimer filenames, and the value is a numpy array of</span>
+<span class="sd">        energies: [total, elst, exch, indu].</span>
+<span class="sd">    initial_guess : :class: `~numpy.ndarray`</span>
+<span class="sd">        Numpy array of initial guess parameters (69 total). See the `get_energy` function</span>
+<span class="sd">        for how initial parameters should be ordered. Default is 1.0 for all parameters</span>
+<span class="sd">    gamma : :class: `float`</span>
+<span class="sd">        Gamma parameter between 0 and 1.0 that controls the degree to which the total </span>
+<span class="sd">        energy influences fitting.</span>
+<span class="sd">    method: :class: `str`</span>
+<span class="sd">        Algorithm used for minimization. See scipy.minimize documentation for all options</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">initial_guess</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">initial_guess</span> <span class="o">=</span> <span class="n">initial_guess</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_guess</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">17</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Initial guess has the wrong dimension&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">initial_guess</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">17</span><span class="p">)</span>
+
+    <span class="n">ref</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">dimer_xyz</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">pathname</span> <span class="o">+</span> <span class="s2">&quot;/*.xyz&quot;</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">dimer</span> <span class="ow">in</span> <span class="n">dimer_xyz</span><span class="p">:</span>
+        <span class="c1">#key = dimer.split(&#39;/&#39;)[-1].split(&#39;.xyz&#39;)[0]</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">dimer</span>
+        <span class="n">ref</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">get_exch_energy</span><span class="p">,</span> <span class="n">initial_guess</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="n">ref</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="fit_indu_global_parameters"><a class="viewcode-back" href="../../cliff.html#cliff.fit.fit_indu_global_parameters">[docs]</a><span class="k">def</span> <span class="nf">fit_indu_global_parameters</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="n">ref_dict</span><span class="p">,</span> <span class="n">initial_guess</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bfgs&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit induction coefficients</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    pathname : :class: `str`</span>
+<span class="sd">        Path to the dimer xyz files. The comment (second) line in the xyz needs to specify</span>
+<span class="sd">        the number of atoms in the first monomer.</span>
+<span class="sd">    ref_dict : :class: `dict`</span>
+<span class="sd">        Dictionary containing the reference energies for fitting. The keys to the dictionary</span>
+<span class="sd">        need to be the dimer filenames, and the value is a numpy array of</span>
+<span class="sd">        energies: [total, elst, exch, indu].</span>
+<span class="sd">    initial_guess : :class: `~numpy.ndarray`</span>
+<span class="sd">        Numpy array of initial guess parameters (69 total). See the `get_energy` function</span>
+<span class="sd">        for how initial parameters should be ordered. Default is 1.0 for all parameters</span>
+<span class="sd">    gamma : :class: `float`</span>
+<span class="sd">        Gamma parameter between 0 and 1.0 that controls the degree to which the total </span>
+<span class="sd">        energy influences fitting.</span>
+<span class="sd">    method: :class: `str`</span>
+<span class="sd">        Algorithm used for minimization. See scipy.minimize documentation for all options</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">initial_guess</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">initial_guess</span> <span class="o">=</span> <span class="n">initial_guess</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_guess</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">18</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Initial guess has the wrong dimension&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">initial_guess</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">18</span><span class="p">)</span>
+
+    <span class="n">ref</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">dimer_xyz</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">pathname</span> <span class="o">+</span> <span class="s2">&quot;/*.xyz&quot;</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">dimer</span> <span class="ow">in</span> <span class="n">dimer_xyz</span><span class="p">:</span>
+        <span class="c1">#key = dimer.split(&#39;/&#39;)[-1].split(&#39;.xyz&#39;)[0]</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">dimer</span>
+        <span class="n">ref</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">get_indu_energy</span><span class="p">,</span> <span class="n">initial_guess</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="n">ref</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="fit_disp_global_parameters"><a class="viewcode-back" href="../../cliff.html#cliff.fit.fit_disp_global_parameters">[docs]</a><span class="k">def</span> <span class="nf">fit_disp_global_parameters</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="n">ref_dict</span><span class="p">,</span> <span class="n">initial_guess</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bfgs&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit dispersion coefficients</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    pathname : :class: `str`</span>
+<span class="sd">        Path to the dimer xyz files. The comment (second) line in the xyz needs to specify</span>
+<span class="sd">        the number of atoms in the first monomer.</span>
+<span class="sd">    ref_dict : :class: `dict`</span>
+<span class="sd">        Dictionary containing the reference energies for fitting. The keys to the dictionary</span>
+<span class="sd">        need to be the dimer filenames, and the value is a numpy array of</span>
+<span class="sd">        energies: [total, elst, exch, indu].</span>
+<span class="sd">    initial_guess : :class: `~numpy.ndarray`</span>
+<span class="sd">        Numpy array of initial guess parameters (69 total). See the `get_energy` function</span>
+<span class="sd">        for how initial parameters should be ordered. Default is 1.0 for all parameters</span>
+<span class="sd">    gamma : :class: `float`</span>
+<span class="sd">        Gamma parameter between 0 and 1.0 that controls the degree to which the total </span>
+<span class="sd">        energy influences fitting.</span>
+<span class="sd">    method: :class: `str`</span>
+<span class="sd">        Algorithm used for minimization. See scipy.minimize documentation for all options</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">initial_guess</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">initial_guess</span> <span class="o">=</span> <span class="n">initial_guess</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_guess</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">17</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Initial guess has the wrong dimension&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">initial_guess</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">17</span><span class="p">)</span>
+
+    <span class="n">ref</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">dimer_xyz</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">pathname</span> <span class="o">+</span> <span class="s2">&quot;/*.xyz&quot;</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">dimer</span> <span class="ow">in</span> <span class="n">dimer_xyz</span><span class="p">:</span>
+        <span class="c1">#key = dimer.split(&#39;/&#39;)[-1].split(&#39;.xyz&#39;)[0]</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">dimer</span>
+        <span class="n">ref</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">get_disp_energy</span><span class="p">,</span> <span class="n">initial_guess</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="n">ref</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020, Jeffrey B. Schriber.
-
-    </p>
+    <p>&#169; Copyright 2020, Jeffrey B. Schriber.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
