@@ -15,6 +15,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -79,7 +80,7 @@
            <div itemprop="articleBody">
              
   <section id="running-cliff">
-<span id="sec-running-cliff"></span><h1>Running CLIFF<a class="headerlink" href="#running-cliff" title="Permalink to this headline"></a></h1>
+<span id="sec-running-cliff"></span><h1>Running CLIFF<a class="headerlink" href="#running-cliff" title="Permalink to this heading"></a></h1>
 <p>To run CLIFF either with the main script or through the API, be sure to have the main directory added to
 your PATH and PYTHONPATH:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span>/path/to/code/cliff/cliff:<span class="nv">$PATH</span>
@@ -87,7 +88,7 @@ your PATH and PYTHONPATH:</p>
 </pre></div>
 </div>
 <section id="command-line-usage">
-<h2>Command Line Usage<a class="headerlink" href="#command-line-usage" title="Permalink to this headline"></a></h2>
+<h2>Command Line Usage<a class="headerlink" href="#command-line-usage" title="Permalink to this heading"></a></h2>
 <p>The simplest way to run CLIFF is with the command line runscript. CLIFF can also be run using a python API
 for more specialized tasks. The runscript requires all monomers to be located in separate .xyz files
 in one directory. All other options, including parameters, algorithm choices, etc. are specified in
@@ -116,7 +117,7 @@ optional arguments:
 <p>The command like script can be called in two contexts: one where the user specifies one or many dimer
 .xyz files, and one where the user specifies two monomer xyz files.</p>
 <section id="running-with-dimer-xyz-files">
-<h3>Running with dimer <cite>xyz</cite> files<a class="headerlink" href="#running-with-dimer-xyz-files" title="Permalink to this headline"></a></h3>
+<h3>Running with dimer <cite>xyz</cite> files<a class="headerlink" href="#running-with-dimer-xyz-files" title="Permalink to this heading"></a></h3>
 <p>As shown above, a dimer computation can be invoked by passing a path to a folder
 containing one or more dimer xyz files using the <cite>-d</cite> flag:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>run_cliff.py -d path/to/dimer/xyz/files/
@@ -138,7 +139,7 @@ H <span class="m">0</span>.260455 <span class="m">2</span>.000000 -0.872893
 </div>
 </section>
 <section id="running-with-monomer-xyz-files">
-<h3>Running with monomer <cite>xyz</cite> files<a class="headerlink" href="#running-with-monomer-xyz-files" title="Permalink to this headline"></a></h3>
+<h3>Running with monomer <cite>xyz</cite> files<a class="headerlink" href="#running-with-monomer-xyz-files" title="Permalink to this heading"></a></h3>
 <p>Alternatively, CLIFF can be invoked by using monomer xyz files:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>run_cliff.py -a monomerA.xyz -b monomerB.xyz
 </pre></div>
@@ -175,7 +176,7 @@ H <span class="m">0</span>.260455 <span class="m">4</span>.000000 -0.872893
 </section>
 </section>
 <section id="running-using-the-api">
-<h2>Running Using the API<a class="headerlink" href="#running-using-the-api" title="Permalink to this headline"></a></h2>
+<h2>Running Using the API<a class="headerlink" href="#running-using-the-api" title="Permalink to this heading"></a></h2>
 <p>Running CLIFF by directly calling CLIFF functions in a python script
 is the most versatile way to use the code. Analagous to the run_cliff.py
 modes, callable functions exist to run CLIFF from both monomer and dimer xyz files
@@ -225,7 +226,7 @@ models. The Fitting functions provide tools to fit global parameters
 using a custom dimer database.</p>
 </section>
 <section id="notes-on-options">
-<h2>Notes on Options<a class="headerlink" href="#notes-on-options" title="Permalink to this headline"></a></h2>
+<h2>Notes on Options<a class="headerlink" href="#notes-on-options" title="Permalink to this heading"></a></h2>
 <p>As mentioned, options including global parameters, model locations,
 can be modified by manually specifying a <cite>config.ini</cite> file.
 However, we do not recommend using such a file, as the CLIFF
