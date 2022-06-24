@@ -14,7 +14,7 @@ For complete documentation, see [these CLIFFnotes](https://jeffschriber.github.i
 ## Installation and Dependencies
 To handle the dependencies in CLIFF, it is recommended to make a conda environment,
 
-    conda create --name cliff python=3.6
+    conda create --name cliff python=3.8
 
 Next we will install the required libraries:
 
